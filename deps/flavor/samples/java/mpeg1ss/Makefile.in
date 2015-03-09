@@ -1,0 +1,103 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+# Danny Hong <danny@ee.columbia.edu>
+
+# Parameters
+prefix  = @prefix@
+bindir  = $(prefix)/bin
+jlibdir = $(prefix)/lib/java
+fldir   = $(prefix)/samples/fl
+datadir = $(prefix)/samples/data
+
+SRC     = .
+
+CLASSES = \
+	Main.class \
+	AudioPacket.class \
+	Global.class \
+	MPEG1Systems.class \
+	NonPrivate2Packet.class \
+	Pack.class \
+	Packet.class \
+	PacketHeader.class \
+	PaddingPacket.class \
+	Private1Packet.class \
+	Private2Packet.class \
+	Reserved0Packet.class \
+	Reserved1Packet.class \
+	Reserved2Packet.class \
+	Reserved3Packet.class \
+	Reserved4Packet.class \
+	Reserved5Packet.class \
+	Reserved6Packet.class \
+	Reserved7Packet.class \
+	Reserved8Packet.class \
+	Reserved9Packet.class \
+	Reserved10Packet.class \
+	Reserved11Packet.class \
+	Reserved12Packet.class \
+	Reserved13Packet.class \
+	Reserved14Packet.class \
+	Reserved15Packet.class \
+	ReservedPacket.class \
+	SystemHeader.class \
+	VideoPacket.class
+
+JAVAFILES = \
+	AudioPacket.java \
+	Global.java \
+	MPEG1Systems.java \
+	NonPrivate2Packet.java \
+	Pack.java \
+	Packet.java \
+	PacketHeader.java \
+	PaddingPacket.java \
+	Private1Packet.java \
+	Private2Packet.java \
+	Reserved0Packet.java \
+	Reserved1Packet.java \
+	Reserved2Packet.java \
+	Reserved3Packet.java \
+	Reserved4Packet.java \
+	Reserved5Packet.java \
+	Reserved6Packet.java \
+	Reserved7Packet.java \
+	Reserved8Packet.java \
+	Reserved9Packet.java \
+	Reserved10Packet.java \
+	Reserved11Packet.java \
+	Reserved12Packet.java \
+	Reserved13Packet.java \
+	Reserved14Packet.java \
+	Reserved15Packet.java \
+	ReservedPacket.java \
+	SystemHeader.java \
+	VideoPacket.java
+
+TARGET = mpeg1ss
+
+
+all: 
+	$(bindir)/flavorc -gj -x $(fldir)/$(TARGET).fl
+	javac -classpath .:$(jlibdir) -d $(SRC) Main.java $(JAVAFILES)
+
+clean:
+	rm -rf $(CLASSES) $(JAVAFILES) *.bs *.xml $(TARGET)
+
+run:
+	java -classpath .:$(jlibdir) $(TARGET).Main $(datadir)/bu.mpg
+
+
+
+
+

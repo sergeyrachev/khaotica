@@ -1,0 +1,21 @@
+
+class Flags
+{
+	bit(1) FTEXT;
+	bit(1) FHCRC;
+	bit(1) FEXTRA;
+	bit(1) FNAME;
+	bit(1) FCOMMENT;
+	skipbts(3); // The three bits are reserved
+}
+
+class Header
+{
+    unsigned int(16) id = 0x1F8B    // gzip identifier
+    unsigned int(8)	cm;
+    Flags FLG;
+    unsigned int(32) mtime;
+    unsigned int(8)	xfl;            // 2: slow compression, 4: fast compression
+    unsigned int(8)	os;             // 0: FAT, 1: Amiga, 2: VMS, 3: Unix, 4: VM, 5: Atari, 6: HPFS
+                                    // 7: Mac, 8: ZSyst, 9: CPM, 10: TOP20, 11: NTFS, 12: QDOS, 13: Acorn
+}

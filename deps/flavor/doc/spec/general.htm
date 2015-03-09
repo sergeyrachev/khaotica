@@ -1,0 +1,108 @@
+<html>
+
+<head>
+<title>General</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3><strong>1. General</strong></h3>
+
+
+<h4><a name="literals">1.1 Literals</a></h4>
+
+<p>
+All traditional C++ and Java literals are supported by Flavor. This includes integers, 
+floating-point numbers and character constants (e.g., '<code>a</code>').  Additionally, Flavor 
+defines a special binary number notation using the prefix <code>0b</code>.  In addition to 
+specifying the actual value, binary literals (bit strings) also convey their length.  For
+example, one can write <code>0b011</code> to denote the number 3 represented using 3 bits.  For
+readability, a bit string can include periods every four digits, e.g., <code>0b0010.01</code>.  
+Hexadecimal or octal constants used in the context of a bitstring also convey their length in 
+addition to their value.  Whenever the length of a bitstring literal is irrelevant, it is 
+treated as a regular integer literal.
+</p>
+
+<p>
+Strings are also supported by Flavor.  They are converted to arrays of characters, with or 
+without a trailing '<code>\0</code>' (null).  Users can control this using the <code>-s</code> 
+<a href="../manual/options.htm#nullstring">command line option</a> or the corresponding 
+nullstrings/nonullstrings <a href="../manual/pragma.htm">pragma statement</a>.
+</p>
+
+
+<h4><a name="comments">1.2 Comments</a></h4>
+
+<p>
+Both multi-line (/**/) and single-line (//) comments are allowed.  Multi-line comment delimiters 
+cannot be nested.
+</p>
+
+
+<h4><a name="names">1.3 Names</a></h4>
+
+<p>
+Variable names follow the C++ and Java conventions (i.e., variable names must start with a letter 
+or an underscore).  The keywords that are used in C++ and Java are considered reserved in Flavor.
+</p>
+
+
+<h4><a name="types">1.4 Built-In Types</a></h4>
+
+<p>
+Flavor supports the common subset of C++ and Java built-in or fundamental types.  This includes 
+<code>char</code>, <code>int</code>, <code>float</code>, and <code>double</code> along with all
+appropriate modifiers (<code>short</code>, <code>long</code>, <code>signed</code>, 
+<code>unsigned</code>). In addition, Flavor defines a new type called <code>bit</code> and a set
+of new modifiers (<code>big</code> and <code>little</code>).
+</p>
+
+<p>
+The type <code>bit</code> is to accommodate bits tring variables (e.g. "<code>bit(3) value = 
+0b101;</code>").
+</p>
+
+<p>
+The modifiers, <code>big</code> and <code>little</code> can be used to indicate the byte ordering 
+of the numbers in bitstream.  The <code>big</code> modifier is used to represent the numbers 
+using big-endian byte ordering (the most significan byte first) and the <code>little</code> 
+modifier is used for the numbers represented using the little-endian or reverse byte ordering. 
+By default, big-endian byte ordering is assumed.
+</p>
+
+<p>
+Arrays of the built-in types are also supprted.  Arrays of Flavor have special behavior due to 
+its declarative nature.  Arrays can be declared as parsable and also partially - partial arrays. 
+For detailed syntax and semantics of arrays please refer to <a href="arrays.htm">Arrays and 
+Partial Arrays</a>.
+</p>
+
+<p>
+Flavor does not support pointers, references, casts, or C++ operators related to pointers.  It 
+also does not support structures or enumerations.
+</p>
+
+
+<h4><a name="usertype">1.5 User-Defined Types</a></h4>
+
+<p>
+Flavor allows the declaration of new types in the form of classes (see <a href="classes.htm">
+Classes</a>).
+</p>
+
+<p>
+From Version 4.0 of the translator, <code>map</code> is supported.  Maps are used to define constant- 
+or variable-length mappings between bitstream values and object variables (See <a href="maps.htm">
+Maps</a> for more information).
+</p>
+
+
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

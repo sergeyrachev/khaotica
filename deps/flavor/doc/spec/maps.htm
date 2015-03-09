@@ -1,0 +1,168 @@
+<html>
+
+<head>
+<title>Maps</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3><strong>7. Maps</strong></h3>
+
+<p><em>Maps are supported from Version 4.0 of the translator.</em></p>
+
+<table border="0" width="100%" class="Syntax">
+  <tr>
+    <td class="SyntaxHeading" width="100%" bgcolor="#000000"><code></code>
+    <font color="#FFFFFF"><strong><span class="SyntaxHeading">Syntax Summary</span></strong></font><code></code>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%"><pre><code>map <em>name</em>(<em>type</em>) { // map declaration
+    <em>bit string</em>, <em>value</em>,
+    [<em>bit string</em>,<em> value, ...</em>]
+}
+
+<em>type</em>(<em>name</em>) <em>var</em>; // map use</code></pre>
+    </td>
+  </tr>
+</table>
+
+
+<h4><a name="simple">7.1 Simple Maps</a></h4>
+
+<p>
+Maps are used to define constant- or variable-length mappings between bitstream values and object
+variables.
+</p>
+
+<p>
+The <code>map</code> keyword indicates the definition of a map named <em><code>name</code></em>. 
+The map converts bit string values to values of type <em><code>type</code></em>. The type 
+indication can be a fundamental type, a class type, or an array.  The contents of the map are a 
+series of pairs of a bit string and the value (of type <em><code>type</code></em>) to which this
+bit string corresponds.  If the value is a complex one (array or class), it must be enclosed in
+curly braces (<code>{}</code>). The bit strings can have the same or different lengths. No bit string 
+is allowed to be a prefix of another bit string, to ensure unique decodability of the mapping.
+</p>
+
+<p>
+Map definitions can only occur in global scope. As a result, an array declaration will have to
+have a constant size (no non-constant variables are visible at this level).
+</p>
+
+<p>
+The following is a simple example of a map definition.
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>map A(int) {
+    0b1,   1,
+    0b01,  2,
+    0b001, 3,
+    0b000, 4
+}</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+After the map is properly defined, we can now declare parsable variables that use it by 
+indicating the name of the map where we would put the parse size expression. The type of the
+map and the variable must be identical. The general syntax is:
+</p>
+
+<table border="0" width="100%" class="Syntax">
+  <tr>
+    <td width="100%"><pre><code><em>type</em>(<em>map_name</em>)<em>var</em>;</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+For example:</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>int(A) var;</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+The semantics of this declaration is as follows.  The bitstream is examined so that one of the 
+map's bit strings matches the current input.  For the matched bit string, the declared variable 
+(here <code>var</code>), is assigned the value that corresponds to that bit string in the map's 
+declaration.  For example, if the next two bits in the bitstream is "01", then <code>var</code> 
+will be assigned the value 2.
+</p>
+
+<p>
+As we can see, the use of a map is essentially identical to the declaration of regular parsable
+variables; all the details are hidden away in the map declaration.
+</p>
+
+<p>
+The following is an example in which the map type is a complex one.
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>class YUVblocks {
+    unsigned int Yblocks;
+    unsigned int Ublocks;
+    unsigned int Vblocks;
+}
+
+// number of blocks per component
+map BPC (YUVblocks) {
+    0b00, {4, 1, 1},
+    0b01, {4, 2, 2},
+    0b10, {4, 4, 4}
+}
+
+YUVblocks chroma_format(BPC) var;</code></pre>
+    </td>
+  </tr>
+</table>
+
+
+<h4><a name="extended">7.2 Extended Maps</a></h4>
+
+<p>
+When variable-length coding is used, codeword lengths tend to get very large when their number 
+increases.  It is then typical to specify &quot;escape codes,&quot; signifying that the actual 
+value will be subsequently represented using a fixed-length code.  To accommodate these as well
+as more sophisticated constructs, Flavor allows the use of parsable type indications in map 
+values. This means that we can write:
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>map A(int) {
+    0b1,    1,
+    0b01,   2,
+    0b001, int(5)
+}</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+This indicates that, when the bit string <code>0b001</code> is encountered in the bitstream, the 
+actual return value for the map will be obtained by parsing 5 more bits. The parse size for the 
+extension can itself be a map, thus allowing the cascading of maps in sophisticated ways. 
+Escape codes can be specified once for each map at the end of the list of bit string and value pairs.
+</p>
+
+
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+
+</html>

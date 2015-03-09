@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ImportGroup Label="PropertySheets" />
+  <PropertyGroup Label="UserMacros">
+    <BOOST>d:\Development\C++\boost_1_55_0\</BOOST>
+    <LOKI>d:\Development\C++\Loki\loki-0.1.7\</LOKI>
+    <WXWIDGETS>d:\Development\C++\wxWidgets\wxWidgets29\</WXWIDGETS>
+    <OPENSSL>D:\Development\C++\OpenSSL\</OPENSSL>
+    <PLATFORMSDK>c:\Program Files\Microsoft SDKs\Windows\v7.1\</PLATFORMSDK>
+    <VLD>c:\Program Files (x86)\Visual Leak Detector\</VLD>
+    <WTL>d:\Development\C++\WTL\WTL80\</WTL>
+    <DIRECTSHOW>$(PLATFORMSDK)\Samples\multimedia\directshow\baseclasses\</DIRECTSHOW>
+    <NETCDF>d:\Development\C++\NetCDF\</NETCDF>
+    <NETCDFCXX>d:\Development\C++\netcdf-cxx4-4.2\</NETCDFCXX>
+    <SDL>d:\Development\C++\SDL2-2.0.3\</SDL>
+    <MSINTTYPES>d:\Development\C++\msinttypes-r26\</MSINTTYPES>
+    <FFMPEG64>d:\Development\C++\ffmpeg\ffmpeg-20140522-git-f932e5f-win64-dev\</FFMPEG64>
+    <FFMPEG32>d:\Development\C++\ffmpeg\ffmpeg-20140522-git-f932e5f-win32-dev\</FFMPEG32>
+    <SDLIMAGE>d:\Development\C++\SDL2_image-2.0.0\</SDLIMAGE>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ExecutablePath>$(PLATFORMSDK)\bin\NETFX 4.0 Tools;$(PLATFORMSDK)\bin;$(NETCDF)\bin;$(ExecutablePath)</ExecutablePath>
+    <IncludePath>$(IncludePath);$(OPENSSL)\include;$(VLD)\include;$(WTL)\include;$(DIRECTSHOW);$(PLATFORMSDK)\include;$(WXWIDGETS)\include;$(BOOST);$(LOKI)\include;$(NETCDF)\include;$(NETCDFCXX)\cxx4;$(FFMPEG32)\include;$(SDL)\include;$(MSINTTYPES);$(SDLIMAGE)\include;</IncludePath>
+    <LibraryPath>$(VLD)\lib\Win32\;$(PLATFORMSDK)\lib;$(WXWIDGETS)\lib\vc_lib;$(OPENSSL)\lib;$(BOOST)\stage_x86\lib;$(LOKI)\lib;$(NETCDF)\lib;$(NETCDFCXX)\bin\debug\win32;$(FFMPEG32)\lib;$(SDL)\lib\x86;$(SDLIMAGE)\lib\x86;$(LibraryPath)</LibraryPath>
+    <SourcePath>$(WXWIDGETS)\src\msw;$(NETCDFCXX)\cxx4;$(SourcePath)</SourcePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ItemGroup>
+    <BuildMacro Include="BOOST">
+      <Value>$(BOOST)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LOKI">
+      <Value>$(LOKI)</Value>
+    </BuildMacro>
+    <BuildMacro Include="WXWIDGETS">
+      <Value>$(WXWIDGETS)</Value>
+    </BuildMacro>
+    <BuildMacro Include="OPENSSL">
+      <Value>$(OPENSSL)</Value>
+    </BuildMacro>
+    <BuildMacro Include="PLATFORMSDK">
+      <Value>$(PLATFORMSDK)</Value>
+    </BuildMacro>
+    <BuildMacro Include="VLD">
+      <Value>$(VLD)</Value>
+    </BuildMacro>
+    <BuildMacro Include="WTL">
+      <Value>$(WTL)</Value>
+    </BuildMacro>
+    <BuildMacro Include="DIRECTSHOW">
+      <Value>$(DIRECTSHOW)</Value>
+    </BuildMacro>
+    <BuildMacro Include="NETCDF">
+      <Value>$(NETCDF)</Value>
+    </BuildMacro>
+    <BuildMacro Include="NETCDFCXX">
+      <Value>$(NETCDFCXX)</Value>
+    </BuildMacro>
+    <BuildMacro Include="SDL">
+      <Value>$(SDL)</Value>
+    </BuildMacro>
+    <BuildMacro Include="MSINTTYPES">
+      <Value>$(MSINTTYPES)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FFMPEG64">
+      <Value>$(FFMPEG64)</Value>
+    </BuildMacro>
+    <BuildMacro Include="FFMPEG32">
+      <Value>$(FFMPEG32)</Value>
+    </BuildMacro>
+    <BuildMacro Include="SDLIMAGE">
+      <Value>$(SDLIMAGE)</Value>
+    </BuildMacro>
+  </ItemGroup>
+</Project>

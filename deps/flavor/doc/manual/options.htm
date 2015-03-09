@@ -1,0 +1,446 @@
+<html>
+
+<head>
+<title>Command Line Options</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+
+<h3><strong>3. Command Line Options</strong></h3>
+
+
+<p>
+The Flavor translator accepts a number of command line options that affect its operation and the 
+interface of the generated code with a programmer's C++ or Java code. In the following we describe 
+its options in detail, and explain how they affect the generated code. Options are grouped in terms 
+of their functional behaviors. Note that command line options affect the entire Flavor source file 
+(.fl). Applying certain options/settings to specific classes, not the whole <code>.fl</code> file, 
+can be achieved using <a href="pragma.htm">pragma statements</a>.
+</p>
+
+
+<h4><a name="usage">3.1 Usage Message</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-h, -?</code></td>
+    <td width="89%"><span class="ExampleText">Print the usage message.</span></td>
+  </tr>
+</table>
+
+<p>
+Prints the usage summary, including the list of the available command line options. The translator 
+only works on one <code>.fl</code> file at a time and all options must be specified before the input 
+file name. For example:
+</p>
+
+<p><code>&nbsp;&nbsp;&nbsp; flavorc -t input.fl</code></p>
+
+<p>
+The exit value of the translator (the value returned to the operating system) is the number of 
+errors encountered during parsing and code generation. A value of 0 indicates successful operation.
+</p>
+
+
+<h4><a name="version">3.2 Version Information</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-V</code></td>
+    <td width="89%"><span class="ExampleText">Print the version information.</span></td>
+  </tr>
+</table>
+
+<p>
+Prints a message detailing the current version number and date of release of the translator. For
+example:
+</p>
+
+<p>
+<code>&nbsp;&nbsp;&nbsp; FLAVORC Version 5.0 [Beta] 4/22/2002<br>
+      &nbsp;&nbsp;&nbsp; Copyright (C) 1996-2002, Columbia University.<br>
+      &nbsp;&nbsp;&nbsp; For the latest information, visit the Flavor Web site at:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; http://flavor.sourceforge.net</code></p>
+
+<p>
+The bracketed expression, if present, after the version number indicates that the release is not
+final.
+</p>
+
+
+<h4><a name="language">3.3 Language Selection</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-gc</code></td>
+    <td width="89%"><span class="ExampleText">Generate C++ code.</span></td>
+  </tr>
+</table>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-gj</code></td>
+    <td width="89%"><span class="ExampleText">Generate Java code.</span></td>
+  </tr>
+</table>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-gx</code></td>
+    <td width="89%"><span class="ExampleText">Generate XML schema.</span></td>
+  </tr>
+</table>
+
+<p>
+In the case where <code>-gc</code> option is used, the output from the translator is placed in a 
+single pair of <code>.h</code> and <code>.cpp</code> files.  The Flavor translator produces one C++
+class for each Flavor class defined.  Each class contains, as member variables, all parsable 
+variables defined in the Flavor code, as well as any variables defined in the class scope.  In 
+addition, the code generator will produce a set of <code>get()</code> and <code>put()</code> 
+methods, which will read and write data to and from a bistream; all class members are declared 
+public.  Starting with Version 5.0, the generated code also includes a <code>putxml()</code>
+method for converting bitstreams into corresponding XML documents.
+</p>
+
+<p>
+When producing Java codes (with the <code>-gj</code> option), the translator generates a 
+<code>.java</code> file per Flavor class defined in the <code>.fl</code> file.
+</p>
+
+<p>
+Starting with Version 5.0, the translator (XFlavor) can produce an XML schema (a <code>.xsd</code> 
+file) for a given Flavor description.  For every class defined in Flavor, a corresponding <em>complex
+type</em> is defined.  The <code>-gx</code> option is used to generate the schema. 
+</p>
+
+
+<h4><a name="outputtype">3.4 Output Type Selection</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%"><code>-n</code></td>
+    <td width="89%"><span class="ExampleText">Parse only; no code will be generated.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-g</code></td>
+    <td width="89%"><span class="ExampleText">Do not generate the get() method.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-p</code></td>
+    <td width="89%"><span class="ExampleText">Do not generate the put() method.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-x</code></td>
+    <td width="89%"><span class="ExampleText">Do not generate the putxml() method.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-t</code></td>
+    <td width="89%"><span class="ExampleText">Generate tracing code.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-l</code></td>
+    <td width="89%"><span class="ExampleText">Suppress output of line number information for user 
+                                              code (verbatim sections).</span></td>
+  </tr>
+</table>
+
+<p>
+The -n option is used to compile and check the validity of the Flavor code without generating
+corresponding C++/Java code or XML schema. This option is very useful when only the syntax of the 
+Flavor code need to be checked.
+</p>
+
+<p>
+The rest of the options affect the type of code that the translator produces. By default, the
+translator will produce both a <code>put()</code> and a <code>get()</code> method without any
+tracing code. The <code>-p</code> and <code>-g</code> options can be used to selectively switch off
+the generation of their respective methods.
+</p>
+
+<p>
+Starting from Flavor Version 5.0, the translator also generates a <code>putxml()</code> method 
+for converting Flavor described bitstreams into XML documents.  Using the <code>-x</code>
+option, the generation of this method can be disabled.
+</p>
+
+<p>
+The -t option triggers insertion of tracing code in the <code>get()</code> method. Note that if no
+<code>get()</code> method is produced, this option has no effect. In this case no warning message
+will be produced by the translator, as <a href="pragma.htm">pragma statements</a> inside the Flavor
+code may selectively trigger the output of <code>get()</code> methods.
+</p>
+
+<p>
+When <a href="verbatim.htm">verbatim code</a> is used, the translator generates C++ preprocessor
+statements to indicate its position in the Flavor source code. This helps development environments 
+that automatically position the programmer's editor to the source position where the error was
+detected. This information is also used by source code debuggers to position their source window to
+the right file and line. In the case where you want compiler error messages to refer to the
+<code>flavorc</code>-generated file, or your debugger to use the <code>flavorc</code>-generated C++
+file, you can switch this line information off using the <code>-l</code> option.
+</p>
+
+
+<h4><a name="outputfile">3.5 Output File Selection</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr> 
+    <td width="11%" valign="top"><code>-oh <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the output file name for the generated C++ header 
+                                              file.</span></td>
+  </tr>
+  <tr> 
+    <td width="11%" valign="top"><code>-oc <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the output file name for the generated C++ .cpp 
+                                              file.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-oj <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the output Java package name</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-og <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the name of the Java class that will contain all 
+                                              global constants (default 'Global').</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-op <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the name of the Flavor run-time library package 
+                                              (default 'flavor').</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-ox <em>name</em></code></td>
+    <td width="89%"><span class="ExampleText">Set the output file name for the generated XML Schema
+                                              file.</span></td>
+  </tr>
+</table>
+
+<p>
+When generating C++ code, the default output file names for the for the <code>.h</code> and 
+<code>.cpp</code> files are the input file name with corresponding suffixes. For example, for the
+Flavor source file <code>sample.fl</code>, the default output files are <code>sample.h</code> and
+<code>sample.cpp</code>.
+</p>
+ 
+<p>
+In the case of producing Java code, the translator produces one <code>.java</code> file per Flavor
+class and they are packaged using the input file name, by default.  Using the <code>-oj <em>name</em></code>
+option, the desired package name can be set.  Also, if global constants are used in a Flavor file,
+a <code>Global</code> class is defined to contain them.  The name of this class can be modified using the
+<code>-og</code> option.  The generated Java code utilizes the Flavor library by importing the 
+library package.  By default, the package name is <code>flavor</code>; however, this can be modified
+by using the <code>-op</code> option.
+</p>
+
+<p>
+Additionally, when generating an XML schema, the default output file name is the input file name with 
+the suffix changed to <code>.xsd</code>.
+</p> 
+
+
+<h4><a name="array">3.6 Array Sizing</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-a <em>size</em></code></td>
+    <td width="89%"><span class="ExampleText">Set maximum array size. The default is 64.</span></td>
+  </tr>
+</table>
+
+<p>
+Although Flavor supports arrays of arbitrary sizes, the translator produces code that declares all
+arrays with a constant, statically defined size. This option sets the initial value for this size,
+with the default value of 64. The translator will automatically increase it (and issue a warning
+message) when it detects that a larger value is needed. Note that this is not always possible, so
+that care should be taken by the programmer to ensure that a large-enough size is used. The array
+size can also be set selectively for individual variables or classes using 
+<a href="pragma.htm">pragma statements</a>.
+</p>
+
+
+<h4><a name="nullstring">3.7 Null-Terminated Strings</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-s</code></td>
+    <td width="89%"><span class="ExampleText">Use null-terminated strings</span></td>
+  </tr>
+</table>
+
+<p>
+The translator converts strings to arrays, with or without a trailing '\0' (null). This option 
+causes to include the trailing null. This option can also be used by using the 
+<code>nullstrings/nonullstrings</code> <a href="pragma.htm">pragma statements</a>.
+</p>
+
+
+<h4><a name="error">3.8 Error Message Formatting</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-msvc</code></td>
+    <td width="89%"><span class="ExampleText">Generate Microsoft Visual C++-style error messages. 
+                                              This enables direct integration with the Microsoft 
+                                              Developer Studio integrated development environment.
+                                              </span></td>
+  </tr>
+</table>
+
+<p>
+For users developing code using Microsoft's Developer Studio IDE, this option triggers formatting 
+of error messages in a format compatible with the IDE. This allows direct positioning to the file
+and line that caused the error message (using the 'F4' key).
+</p>
+
+
+<h4><a name="includes">3.9 Include Directives</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-i</code></td>
+    <td width="89%"><span class="ExampleText">Don't generate include (import) directives when 
+                                              generating C++ (Java) code</span></td>
+  </tr>
+</table>
+
+<p>
+Some development environments, most notably Microsoft's MFC library, require that their header files
+are the first to be included. To allow control about header file inclusion, the <code>-i</code>
+option can be used to instruct the translator to not produce any <code>#include</code> directives in
+the C++ code (or import statements in the Java code). The programmer then must ensure that the proper
+includes are present in the <code>.h</code> and <code>.cpp</code> files using 
+<a href="verbatim.htm">verbatim code</a>. There is also corresponding <a href="pragma.htm">pragma 
+statments</a> (<code>includes/noincludes</code>) for controlling this.
+</p>
+
+
+<h4><a name="optionalchecks">3.10 Optional Checks</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-w <em>check</em></code></td>
+    <td width="89%"><span class="ExampleText">Enables optional checks</span></td>
+  </tr>
+</table>
+
+<p>
+The translator can perform a number of checks for source code structures that sometimes may be
+undesirable. Warnings for these conditions are not normally issued, since they are considered
+acceptable. Some also require additional processing that can slow down compilation. A list of the
+available checks can be obtained using the <code>-w help</code> option. The complete list of options
+is as follows:
+</p>
+
+<dl>
+<dt> &nbsp;<code>help</code>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print the list of available options</dt>
+<dt> &nbsp;<code>abstract</code>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when pure abstract classes are used</dt>      
+<dt> &nbsp;<code>cyclic</code>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when cyclic references are detected</dt>
+<dt> &nbsp;<code>includes</code>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when cyclic includes/imports are detected</dt>
+</dl>
+
+<p>
+The <code>abstract</code> test checks if there are abstract classes without any derived classes with
+IDs. In general, abstract classes act only as placeholders for one of their derived classes, and hence
+should not appear alone in a source file.
+</p>
+
+<p>
+The <code>cyclic</code> test checks if there are cyclic data structures, i.e., classes which - either
+directly or indirectly - contain instances of themselves. Such structures can cause infinite loops of
+<code>get()</code> or <code>put()</code> calls, if not properly constrained by the bitstream syntax.
+</p>
+
+<p>
+The <code>includes</code> test checks if there are cyclic includes, i.e., files which - either directly
+or indirectly through other included or imported files - include themselves. Due to the need for 
+cross-connecting Flavor files to ensure that ID spaces and <code>lengthof()</code> or <code>isidof()</code> 
+operators work correctly, such cyclic indludes are acceptable. The translator makes sure that a file is not
+processed more than once. If this is not the intended structure for a set of files, this option can be used
+to enable the translator to issue a warning message.
+</p>
+
+
+<h4><a name="rti">3.11 Run-Time Interface</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>-B <em>string</em></code></td>
+    <td width="89%"><span class="ExampleText">Use <em>string</em> as the bitstream I/O class. 
+                                              The default is <code>IBitstream</code>.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-F <em>string</em></code></td>
+    <td width="89%"><span class="ExampleText">Use <em>string</em> as a prefix for internal Flavor-generated variables. 
+                                              The default is<code> _F_</code>.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-E <em>string</em></code></td>
+    <td width="89%"><span class="ExampleText">Use function <em>string</em> to report bitstream syntax errors. 
+                                              The default is <code>flerror</code>.</span></td>
+  </tr>
+  <tr>
+    <td width="11%" valign="top"><code>-T <em>string</em></code></td>
+    <td width="89%"><span class="ExampleText">Use function <em>string</em> to create trace reports. 
+                                              The default is <code>trace</code>.</span></td>
+  </tr>
+</table>
+
+<p>
+The generated code relies on a small number of classes and functions to perform low-level bitstream
+I/O and error reporting.  These are part of the run-time library which is included in this package.
+The design of the run-time library has been done in a way that facilitates its substitution by
+alernate implementations that may better suit a programmer's application needs.  These options allow
+the customization of the code produced by the translator so that the programmer-supplied substitute
+classes or functions are called.  Note that, although the names can be modified, the interface
+exposed by these classes must comply to the one expected by <code>flavorc</code>.  More information
+on this interface can be found in the <a href="rtl.htm">Run-Time Library</a> section.
+</p>
+
+<p>
+The <code>-B</code> option sets the name of the class implementing low-level I/O.  The default 
+class, provided in the run-time library, is <code>Bitstream</code>. The <code>-E</code> option is
+used to set the name for the function to be called when bitstream syntax errors occur.  The default
+is <code>flerror</code>.  Finally, the <code>-T</code> option is used to set the name of the
+functions that should be used to create trace reports. Note that at least two such functions are
+required (one handling integer-compatible values, and one handling double-compatible values).  The
+default name is <code>trace</code>.
+</p>
+
+<p>
+Flavor also uses a small number of internal variables.  To avoid conflicts with variables defined in
+the user's code, all such variables are given a prefix.  The default is <code>_F_</code>, but it can
+be changed using the <code>-F</code> option.
+</p>
+
+
+<h4><a name="nomore">3.12 Disallow Further Options</a></h4>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="11%" valign="top"><code>--</code></td>
+    <td width="89%"><span class="ExampleText">Disallow further options</span></td>
+  </tr>
+</table>
+
+<p>
+This options is used to disallow usage of further options. This allows to use a Flavor source file
+name that starts with a dash.
+</p>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

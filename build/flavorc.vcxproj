@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{46F90934-CEEE-4B17-A6AA-4C2A5AFAEB53}</ProjectGuid>
+    <RootNamespace>flavorc</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\deps\flavor\src\flavorc\carray.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cbac.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cclass.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cexpr.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cgetput.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\check.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cid.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cmap.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\compile.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cout.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cpragma.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\ctrace.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cvar.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cverbatim.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\cxml.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\error.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\eval.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\lex.yy.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\main.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\ptree.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\symbol.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\util.c" />
+    <ClCompile Include="..\deps\flavor\src\flavorc\y.tab.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\deps\flavor\src\flavorc\carray.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cbac.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cclass.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cdef.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cexpr.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cgetput.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\check.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cid.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cmap.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\compile.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cout.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cpragma.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\ctrace.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cvar.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cverbatim.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\cxml.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\error.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\eval.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\globals.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\ptree.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\symbol.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\util.h" />
+    <ClInclude Include="..\deps\flavor\src\flavorc\y.tab.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

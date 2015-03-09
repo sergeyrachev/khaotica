@@ -1,0 +1,186 @@
+<html>
+
+<head>
+
+<title>Include/Import</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3>7. Include/Import Directives</h3>
+
+<p>
+In order to simplify the source code organization, Flavor now supports <code>%include</code> and
+<code>%import</code> directives. These are the mechanisms to combine several different source code
+files into one entity, or to share a given data structure definition across different projects.
+</p> 
+
+
+<h4><a name="include">7.1 Include Directive</a></h4>
+
+<p>
+The statement <code>%include "file"</code> will include <code>file</code> in the current position
+and will flag all of the file's content so that no code is generated. A C++ <code>%include</code> 
+statement for the <code>.h</code> file corresponding to the included Flavor file will be placed at 
+the same place in the <code>.h</code> file of the currently processed Flavor file.
+</p>
+
+<p>
+The following is an example.
+</p>
+
+<table border="0" width="100%" class="Example">
+<tr><td width="100%"><code>
+<pre>// In the file, included.fl
+const int a = 4;
+
+// In the file, main.fl
+%include &quot;included.fl&quot;
+
+class Test {
+    int(a) t;   // 'a' is included from the included.fl file
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+The file <code>main.fl</code> includes the file <code>included.fl</code>, which contains the definition
+of the constant <code>a</code>. Inclusion makes the declaration of the <code>a</code> variable available
+to the <code>main.fl</code> file. In terms of the generated output, the following outlines the placement
+of information in different files.
+</p>
+
+<table border="0" width="100%" class="Example">
+<tr><td width="100%"><code>
+<pre>// In the file, included.h
+extern const int a;
+
+// In the file, included.cpp
+#include &quot;included.h&quot;
+const int a = 4;
+
+// In the file, main.h
+#include &quot;main.h&quot;
+#include &quot;included.h&quot;
+...</pre>
+</code></td></tr>
+</table>
+
+<p>
+We see here that the main and included files each keep their corresponding implementations. The 
+generated C++ code maintains this partitioning, and makes sure that the main file includes the C++
+header file of the included Flavor file.
+</p>
+
+<p>
+The <code>%include</code> directive is useful when data structures need to be shared across modules or
+projects. It is similar in spirit to the use of the C/C++ preprocessor <code>#include</code> statement
+in the sense that it is used to make general information available at several different places in a 
+program. Its operation, however, is different as Flavor's <code>%include</code> does not involve code
+generation for the included code. In C/C++, <code>%include</code> is equivalent to copying the included
+file in the position of the <code>#include</code> statement. This behavior is offered in Flavor by the
+<code>%import</code> directive.
+</p>
+
+
+<h4><a name="import">7.2 Import Directive</a></h4>
+
+<p>
+The <code>%import</code> directive behaves similarly to the <code>%include</code> directive, except that
+full code is generated for the imported file by the translator, and no C++ <code>#include</code>
+statement is used. This behavior is identical to how a C++ preprocesor <code>#include</code> statement
+would behave in Flavor.
+</p>
+
+<p>
+Let's consider the example of the previous section, this time with an <code>%import</code> directive
+rather than an <code>%include</code> one.
+</p>
+
+<table border="0" width="100%" class="Example">
+<tr><td width="100%"><code>
+<pre>// In the file, imported.fl
+const int a = 4;
+
+// In the file, main.fl
+%import &quot;imported.fl&quot;
+
+class Test {
+    int(a) t;   // 'a' is included from the imported.fl file
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Note that the Jave <code>import</code> statement behaves more like Flavor's <code>%include</code> 
+statement, in that no code generation takes place for the imported (included) code.
+</p>
+
+
+<h4><a name="notes">7.3 Notes on Inclusion</a></h4>
+
+<p>
+The <code>%include</code> and <code>%import</code> directives can greatly simplify the structure of 
+the Flavor source code. When more than one level of inclusion or importing is present, care must be 
+taken to ensure that the programmer obtains the desired behavior.
+</p>
+
+<p>
+For a series of nested includes/imports, a file is treated as imported if and only if all the previous
+files were imported as well (rather than just be included). This means that an include inside an import
+shows up as an include in the top-most file. However, an include inside and include does not show up at
+the top file at all.
+</p>
+
+<p>
+Another issue with included or imported files is that the <code>lengthof</code> and <code>isidof</code>
+operators as well as polymorthism will break if they happen across different files. If you extend a 
+polymorphic class in a different <code>.fl</code> file from the base class, you <em>must</em> make sure
+that the <code>.fl</code> file of the derived class is included in the <code>.fl</code> file of the
+base class. This will ensure that the entire range of IDs will be accessible to both <code>.fl</code>
+files.
+</p>
+
+<p>
+Similary, <code>lengthof()</code> is not generated automatically for all variables, but is flagged for
+generation when the translator encounters it. If this flagging is not done in the current run of the 
+translator, then the needed code will <em>not</em> be generated. Again, the solution is to cross-include
+the files.
+</p>
+
+<p>
+The cross-inclusion creates looped includes. The translator detects them and avoids them. Detection is
+based on the base name of the included/imported file (the name of the file without the directory
+specification). This means that the files with the same name but in different directories cannot be
+differenciated. Also note that the comparison is case sensitive in UNIX platforms, but case 
+insensitive for Win32 platforms. Cross-inclusion carries over to the generated code. For C++ modules, 
+the translator generates <code>ifndef/endif</code> statements that avoid duplicate inclusion at the
+C++ level.
+</p>
+
+<p>
+The translator can optionally issue a warning message for looped <code>include</code>/<code>import</code> 
+directives (see the <a href="options.htm">Command Line Options</a> section). Normally they are not 
+reported because they are considered normal.
+</p>
+
+<p>
+The behavior of <code>%pragma</code> statements is also affected by <code>include</code>/<code>import</code>
+directives. The same rules of inclusion apply here as well: pragmas in an included file are not 
+effective on the parent file (they are ignored), whereas pragmas on an imported file are effective 
+on the parent file.
+</p>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

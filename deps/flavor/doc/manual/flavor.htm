@@ -1,0 +1,1215 @@
+<html>
+
+<head>
+<title>Using Flavor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+
+<h3>1. Using Flavor with C++ and Java</h3>
+
+
+<h4><a name="basicc++">1.1 The Basics: "Hello Bits" in C++</a></h4>
+
+<p>
+In the long-standing tradition of providing "Hello World" programs in regular programming 
+languages and programming environments, we will first show how to write an equivalently simple
+program using Flavor.  Instead of text output, however, we will write a program that reads a 
+file, one character at a time.  Of course, this is something where Flavor isn't really necessary,
+but it will help you get started and you can create sample data on your own very easily using a
+text editor.
+</p>
+
+<p>
+Let's first define a description for a text (ASCII) file using Flavor. Such a file is just a 
+sequence of 8-bit characters.  Consider each character as a separate object, and the following is 
+a Flavor description for such an object.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits.fl</caption>
+<tr><td width="100%"><code>
+<pre>// Both C and C++ comments are allowed
+class HelloBits {
+    char(8) c;
+}; // <-- The trailing ';' is optional</pre>
+</code></td></tr>
+</table>
+
+<p>
+This declares a class called <code>HelloBits</code>, containing a single variable <code>c</code>.  
+The variable is of type <code>char</code>, and is represented in the bitstream using 8 bits.  
+Flavor supports all C++ types and an additional type named <code>bit</code>, which is used for 
+bit strings.
+</p>
+
+<p>
+Save this in a file called <code>HelloBits.fl</code> and run the translator on it by typing: 
+<code>flavorc -gc HelloBits.fl</code>. The translator will create the <code>HelloBits.h</code> 
+and <code>HelloBits.cpp</code> files, which contain the declaration and implementation of a class 
+called <code>HelloBits</code>.  This class will have just one member variable 
+(<code>char c;</code>) and two methods: <code>get()</code> and <code>put()</code>.  These 
+methods are responsible for getting data from a file into the classs variables and taking data 
+from the variables and placing them into a file, respectively.  Starting from Version 5.0, the
+translator also generates a <code>putxml()</code> method that is used for converting a Flavor
+described bitstream into a corresponding XML document.  More information about this method is
+provided in the next <a href="xflavor.htm">section</a>.
+</p>
+
+<p>
+In order for the two methods (<code>get()</code> and <code>put()</code>) to work, however, one
+needs to provide them with information on where to write or read their data.  A trivial way to
+do that would be to just pass along to the <code>HelloBits</code> class or its methods a 
+handle to a file (e.g., a file descriptor or <code>FILE</code> pointer).  While this would 
+certainly work, it would be seriously limiting.  Consider, for example, the case where data
+is to be drawn from (or written to) a network  connection.  Clearly, the semantics of a file
+(e.g., in terms of error conditions) as well as buffering issues would be different from a 
+network connection (i.e., a socket).  Similarly, what if one wants to write a multithreaded 
+program that would read from the same source concurrently?  Attempting to provide a universal
+solution would be futile, and rather than having the translator output the required code for 
+bitstream I/O, a <em>run-time library</em> is provided.  With this separation, programmers
+have the flexibility of replacing parts of, or the entire library with their own code.
+</p>
+
+<p>
+This library consists of the definition of an interface called <code>IBitstream</code>. It 
+provides elemental functions that the translator relies upon for implementing the <code>get()</code> 
+and <code>put()</code> methods.  A reference to the <code>IBitstream</code> interface is actually 
+required in both methods.  The benefit of using such an interface is that a programmer can easily 
+derive from it to implement the specific I/O architecture desired; the library includes the 
+<code>Bitstream</code> class that is derived from the interface, and it provides basic bitstream
+I/O facilities in terms of reading/writing bits from a file.  As long as a class is derived 
+from the <code>IBitstream</code> interface, the translator will always generate correct code.  
+More information on the run-time library is provided later on.
+</p>
+
+<p>
+Here is how the <code>HelloBits</code> class is defined in the generated code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits C++ Class</caption>
+<tr><td width="100%"><code>
+<pre>class HelloBits {
+public:
+    char c;
+    public: virtual int get(IBitstream &amp;_F_bs);
+    public: virtual int put(IBitstream &amp;_F_bs);
+    public: virtual int putxml(IBitstream &amp;_F_bs, short int bAttr);
+};</pre>
+</code></td></tr>
+</table>
+
+<p>
+Looking at the generated file, there is additional information that we will examine later on, 
+but this is the basic interface between the Flavor-generated code and one's own code: variables
+that have a parse size specification (called parsable variables) become class members, and one 
+also has the translator-generated <code>get()</code> and  <code>put()</code> methods. All these
+information are declarared <code>public</code> (we will later show how this can be changed).
+The <code>putxml()</code> method is describe in the next <a href="xflavor.htm#document">section</a>.
+</p>
+
+<p>
+Let's now return to our example, and write a simple C++ program that will use the newly defined
+Flavor object. Here is a minimal program.
+</p>
+
+<table border="0" width="100%" bgcolor="#FFFF80" class="Example">
+<caption>Using HelloBits.fl in C++ Code</caption>
+<tr><td width="100%"><code>
+<pre>#include &lt;stdio.h&gt;
+
+// Always include this
+#include &lt;flavor.h&gt;
+
+// Include the flavorc-generated code
+#include "HelloBits.h"
+
+int main(int argc, char *argv[])
+{
+    // Check that we have an argument
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s data\n", argv[0]);
+        exit(1);
+    }
+
+    // Our input bitstream
+    Bitstream bs(argv[1], BS_INPUT);
+
+    // Our Text object
+    HelloBits h;
+
+    // Get the data
+    h.get(bs);
+
+    // Print them
+    printf("HelloBits.c: %c\n", h.c);
+
+    // Done
+    exit(0);
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Notice first the included run-time library header file, <code>flavor.h</code>.  This just 
+includes the associated header file defining the <code>Bitstream</code> class, derived from 
+<code>IBitstream</code>.  Second, we included the <code>flavorc</code>-generated file 
+<code>HelloBits.h</code>.  Inside the <code>main()</code> program, we first check that we have 
+an argument.  If so, we create a <code>Bitstream</code> object using the argument as the file 
+name.  Note that an additional argument is passed to the <code>Bitstream</code> constructor to 
+indicate that this will be an input bitstream; for an output bitstream we would use the flag
+<code>BS_OUTPUT</code>.  We are then ready to declare our <code>HelloBits</code> object, and 
+call its <code>get()</code> method.
+</p>
+
+<p>
+If one compiles and runs this program, it will print the very first character of the file one 
+provided as an argument. Note that in order to properly compile it, one must specify to one's 
+compiler the paths to the Flavor include directory, the Flavor library directory, and also 
+request that the Flavor library itself (<code>flavor.a</code> for UNIX/Linux or 
+<code>flavor.lib</code> for Win32) is linked to the executable.
+</p>
+
+
+<h4><a name="basicjava">1.2 "Hello Bits" in Java</a></h4>
+
+<p>
+In order to generate Java files, one needs to run the translator with the following command line
+argument: <code>flavorc -gj HelloBits.fl</code>. Here <code>-gj</code> is a command-line option
+directing the translator to generate Java files.  The translator will create the 
+<code>HelloBits.java</code> file which contains the definition of a class called 
+<code>HelloBits</code>.
+</p>
+
+<p>
+For input and output operations, the Java version of the <em>run-time library</em> is provided. 
+This library also consists of the definition of a class called <code>Bitstream</code>.  The 
+<code>Bistream</code> class implements the <code>IBitstream</code> interface that declares several
+interfaces for I/O operations.  By implementing <code>IBitstream</code>, a programmer can easily 
+replace the <code>Bitstream</code> class for their own specific I/O architecture.
+</p>
+
+<p>
+Here is how the <code>HelloBits</code> class is defined in the generated code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits Java Class</caption>
+<tr><td width="100%"><code>
+<pre>public class HelloBits {
+    char c;
+    public int get(IBitstream _F_bs) throws IOException {
+        ...
+    }
+    public int put(IBitstream _F_bs) throws IOException {
+        ...
+    }
+    public int putxml(IBitstream _F_bs, boolean bAttr) throws IOException {
+        ...
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+The code presented below is a simple Java program that will use the newly defined Flavor object.
+</p>
+
+<table border="0" width="100%" bgcolor="#FFFF80" class="Example">
+<caption>Using HelloBits.fl in Java Code</caption>
+<tr><td width="100%"><code>
+<pre>import flavor.*;
+import java.io.*;
+
+public class Main
+{
+    public static void main(String args[]) throws IOException {
+        String file_name = args[0];
+
+        // Input stream
+        Bitstream bs = new Bitstream(file_name, IBitstream.BS_INPUT);
+        HelloBits h = new HelloBits();
+        h.get(bs);
+        System.out.println("HelloBits.c: " + h.c);
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Similar to C++, we import the run-time library package <code>flavor</code>.  Inside the 
+<code>main()</code> function, we create a <code>Bitstream</code> object using the argument 
+as the file name.  Then we are ready to declare our <code>HelloBits</code> object, and 
+call its <code>get()</code> method.  As shown above, the main method throws <code>IOException</code> 
+defined in JDK.  Most of the methods in the <code>IBitstream</code> interface throws 
+<code>IOException</code> and so does the constructor of the Bitstream class.  In order 
+to handle these exceptions correctly one can wrap the <code>put()/get()</code>methods with 
+<code>try</code> statements.
+</p> 
+
+<p>
+If one compiles and runs this program, it will print the very first character of the file 
+provided as an argument.  Note that in order to properly compile it, one must specify the 
+classpath to the Flavor runtime library.
+</p>
+
+<p>
+In the rest of the section, we describe the usage of the Flavor language with C++ language
+only, however, all the semantics of the generated source code are the same for both C++ 
+and Java.
+</p>
+
+
+<h4><a name="handling">1.3 Handling Input & Output: "Hello More Bits"</a></h4>
+
+<p>
+What one would probably want to do, however, is to read the entire content of the file. There
+are several ways to approach this. One is to consider each character as a separate object; 
+another to consider the entire file as an object.
+</p>
+
+
+<h5>One Character-One Object</h5>
+
+<p>
+In the first approach, one would wrap around the <code>get()</code> method call with a 
+<code>while</code> loop. This would read data continuously until the end of the file is reached.
+But how does one know that the end has been reached? In other words, what should be the 
+terminating condition for the loop?
+</p>
+
+<p>
+Most multimedia representation formats include an end-of-data indicator. As we are dealing with
+text files here, we cannot rely on a particular end of file marker. This means that the 
+terminating condition is really the end of file encountered by the <code>Bitstream</code> class.
+This condition needs to be communicated somehow to the program.
+</p>
+
+<p>
+An important thing to note is that the translator only handles bitstream syntax-related errors
+(discussed later on). It does not know and does not need to know anything about the internals
+of the actual I/O operation. The latter is directly handled by the <code>Bitstream</code> class
+and hence can be fully customized if needed.
+</p>
+
+<p>
+In the available run-time library, there are two modes for error reporting: C++ exceptions, and
+traditional error query. The mode is determined by a compile-time option in the library 
+(<code>USE_EXCEPTION</code>, defined in <code>include/port.h</code>). The preferred mode is 
+exceptions, as it is more elegant and efficient. Unfortunately, almost all UNIX C++ compilers 
+(including gcc) do not yet support exceptions even though the C++ standard has included them for
+some time now.  As a result, exceptions are disabled in all UNIX distributions.  If your compiler
+happens to support it (e.g., the compiler in Sun Solaris), you will need to rebuild the run-time 
+library after modifying the relevant line in <code>port.h</code>.  The traditional mode involves
+querying the <code>Bitstream</code> class for its error status after the <code>get()</code> (or 
+<code>put()</code>) call returns.
+</p>
+
+<p>
+The Java version of the run-time library only supports one error reporting method: Java 
+exception.  Most of the methods defined in <code>IBitstream</code> interface throw 
+<code>IOException</code> defined in Java API specification.
+</p>
+
+<p>
+Here is the modified code from our previous example, this time reading the entire file, using 
+exceptions.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>C++ "HelloBits" Using Exceptions</caption>
+<tr><td width="100%"><code>
+<pre>HelloBits h;
+
+// Get the data
+try {
+    while (1) {
+        h.get(bs);
+        printf("HelloBits.c: %c\n", h.c);
+    }
+}
+catch (Bitstream::EndOfData e) {
+    exit(0); // End of file reached
+}
+catch (Bitstream::Error e) {
+    // Print error message
+    fprintf(stderr, "%s: Error: %s\n", argv[0], e.getmsg());
+    exit(1);
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+<code>EndOfData</code> and <code>Error</code> are classes defined in the run-time library as 
+part of <code>Bitstream</code> (see <a href="rtl.htm">Run-Time Library</a>).
+</p>
+
+<p>
+The following Java code shows how to use the Bistream class with the exception handling.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Java "HelloBits" Using Exceptions</caption>
+<tr><td width="100%"><code>
+<pre>HelloBits h = new HelloBits();
+
+// Get the data
+try {
+    while (true) {
+        h.get(bs);
+        System.out.println("HelloBits.c: " + h.c);
+    }
+}
+catch(IOException e) {
+    System.out.println("Exception: " + e.toString());
+    System.exit(0);
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Here is the same example, this time using the traditional method.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>C++ "HelloBits" Using Standard Error Reporting</caption>
+<tr><td width="100%"><code>
+<pre>HelloBits h;
+
+// Get the data
+while (1) {
+    h.get(bs);
+    if (bs.geterror() == E_NONE) {
+        printf("HelloBits.c: %c\n", h.c);
+    }
+    else if (bs.geterror() == E_END_OF_DATA)
+        exit(0); // End of file reached
+    }
+    else {
+        // Print error message
+        fprintf(stderr, "%s: Error: %s\n", argv[0], e.getmsg());
+        exit(1);
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+<code>E_NONE</code> and <code>E_END_OF_DATA</code> are defined in the <code>Bitstream.h</code>
+file (see <a href="rtl.htm">Run-Time Library</a>). The major difference is that the traditional
+approach delays error reporting. As the translator itself does not check for errors when calling
+the relevant members of the <code>Bitstream</code> class, Flavor objects may continue trying to
+read (or write) even after an error occurs. This is not a serious problem, as in most cases the
+bitstream syntax will fail, and the translator's own error reporting capabilities (discussed 
+below) will get into the action.
+</p>
+
+<p>
+The reason why the translator was designed not to use the error reports from the 
+<code>Bitstream</code> class is for efficiency. In this case, there is no need to check the
+return arguments and one less parameter to pass to the I/O functions. Hopefully very soon UNIX
+compiler implementors will catch up with the C++ specification and will support exceptions on 
+their platforms.
+</p>
+
+<p>
+The code above may look a bit lengthy, but we should note that it is the same 
+<em>regardless</em> of the complexity of the <code>HelloBits</code> object. Even for the objects
+where the end of data can be detected by the syntax, it is always a good idea to check for end
+of data conditions so that broken files are easily identified as such.
+</p>
+
+<p>
+One can combine the two approaches together using <code>#ifdef USE_EXCEPTION</code>, so that a
+single source file will work with both environments (all distributed samples are written this
+way).
+</p>
+
+
+<h5>All Characters in One Object</h5>
+
+<p>
+As we mentioned earlier, an alternative approach is to consider the entire file as an object. 
+This means that we must modify the syntax for our <code>HelloBits</code> object. Here is a
+possible modification.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile.fl</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    while (1) {
+        char(8) c;
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Here we wrapped the declaration of <code>c</code> in an endless <code>while</code> loop. Note
+that, in contrast with traditional C++ and Java, Flavor allows actual code to be written 
+together with the class declaration (all your familiar C++/Java <code>for</code>, 
+<code>do</code>, <code>while</code>, <code>switch</code>, etc. statements are supported). 
+Remember that the whole purpose of Flavor is to properly declare the parsable variables, as this
+is what defines the representation format. As a result, Flavor does not support class 
+methods or functions.
+</p>
+
+<p>
+The loop above will not, of course, really be endless; as the translator makes calls to the 
+<code>Bitstream</code> class to obtain the values for <code>c</code>, it will eventually trigger
+an end-of-file condition. This can be picked up by the user's C++ code as we showed earlier.
+</p>
+
+<p>
+The problem here is that we have no way of printing the value for <code>c</code>. When 
+<code>get()</code> returns, <code>c</code> will contain just the last character of the file as 
+the <code>while</code> loop will be embedded in the <code>get()</code> method. There are several
+ways to solve this: <a href="#verbatim">verbatim code</a>, <a href="#tracing">tracing</a>, 
+and <a href="#arrays">arrays</a>.
+</p>
+
+
+<h4><a name="verbatim">1.4 Verbatim Code</a></h4>
+
+<p>
+First, we can use Flavor's <em>verbatim code</em> feature to insert our own C++ or Java code into
+the <code>flavorc</code>-generated code. There are four different types of verbatim code:
+
+<ol>
+  <li>Class declaration code. This is introduced using the delimiters <code>%{</code> and 
+      <code>%}</code> and will be inserted by the translator in the class declaration (or in the
+      global scope, outside of any class). For Java this verbatim will be ignored by the 
+      translator since Java does not have scope outside of a class definiton.</li>
+  <li>Code that should go to both the <code>get()</code> and the <code>put()</code> methods.
+      This is introduced using the delimiters <code>%*{</code> and <code>%*}</code>.</li>
+  <li>Code that should go only to the <code>get()</code> method. The delimiters here are 
+      <code>%g{</code> and <code>%g}</code>.</li>
+  <li>Code that should go only to the <code>put()</code> method. The delimiters here are 
+      <code>%p{</code> and <code>%p}</code>.</li>
+</ol>
+
+</p> 
+
+<p>
+If a Flavor code is used to generate both C++ and Java code, the programmer should specifically 
+designate the destination of their verbatim code with more decorated delimiters. For example, 
+anthing between <code>%g.j{</code> and <code>%g.j}</code> goes to only Java code. The 
+<a href="verbatim.htm">verbatim code</a> section of this document provides more detailed 
+information on this topic.
+</p>
+
+<p>
+In our case the third type is the one needed. Here is how the modified Flavor source will look
+like.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile.fl file for C++</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    while (1) {
+        char(8) c;
+        %g{ printf("HelloFile.c: %c\n", c); %g}
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+This will cause the <code>printf</code> function to be called whenever a new character 
+<code>c</code> is read from the file. Note that, using verbatim code, we can define additional
+variables or methods for our class. Also, we can switch our variables from <code>public</code>
+to <code>protected</code> or <code>private</code>. Here is how:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile.fl with Private Variables</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    %{ private: %} // Use private variables
+    while (1) {
+        char(8) c;
+        %g{ printf("HelloFile.c: %c", c); %g}
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Note that the <code>get()</code> and <code>put()</code> methods are always declared public.
+</p>
+
+<p>
+The code below contains the verbatim code that only goes into the <code>get()</code> method of 
+the Java code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile.fl for Java</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    while (1) {
+        char(8) c;
+        %g.j{ System.out.println("HelloFile.c: " + c); %g.j}
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+
+<h4><a name="tracing">1.5 Automatic Tracing</a></h4>
+
+<p>
+Printing information about a bitstream's content turns out to be extremely useful, particularly 
+during development and debugging. Also, when two or more separate organizations are developing a
+specification and pursuing independent implementations, it is very useful to have traces of the 
+files generated by each tool for comparison and debugging purposes. One could of course insert 
+verbatim <code>printf</code> statements for all parsable variables, but this can quickly get out 
+of hand.
+</p>
+
+<p>
+The translator can automatically generate tracing code and insert it in the <code>get()</code>
+method (using the command line option <code>-t</code>). This means that, without modifying one's 
+program or Flavor source in any way, one can automatically create detailed traces of the files. 
+Here is a trace from the above <code>HelloFile.fl</code> specification, when run on this HTML 
+file.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Automatically Generated Trace from HelloFile.fl</caption>
+<tr><td width="100%"><code>   
+<pre>At Bit  Size     Value   Description
+    0:                   begin HelloFile
+    0:    8         3C c (60)
+    8:    8         68 c (104)
+   16:    8         74 c (116)
+   24:    8         6D c (109)
+   32:    8         6C c (108)
+   40:    8         3E c (62)
+   48:    8         0D c (13)
+   56:    8         0A c (10)
+   ...</pre>
+</code></td></tr>
+</table>
+
+<p>
+As you can see, the trace output includes in each line: the bit position (starting from the 
+beginning of the bitstream), the size of the quantity read, its value in hexadecimal, and a 
+description. The first line indicates '<code>begin HelloFile</code>', signalling the entry in 
+the <code>get()</code> method of <code>HelloFile</code>. All other lines include the parsed 
+<code>c</code> variable. The trace also includes the decimal value of the variable. If your 
+ASCII is in top shape, you may be able to decipher here the string <code>"&lt;html&gt;\r\n"</code>.
+</p>
+
+<p>
+The tracing output is directed to the standard output. Note that the translator does not print 
+out the trace directly. Instead, it calls a quite simple <code>trace</code> function which is 
+part of the run-time library. This means that you can very easily use your own tracing functions
+to customize both the output destination as well as formatting (more information is provided in 
+the <a href="rtl.htm">Run-Time Library</a> section).
+</p>
+
+
+<h4><a name="arrays">1.6 Arrays</a></h4>
+
+<p>
+While the preceding techniques completely solved our output problem, the fact that our 
+<code>HelloFile</code> object can only contain just a single character is certainly limiting. 
+The best solution is of course to use an array. Since we don't know the size of the array in 
+advance, we will have to use <em>partial arrays</em> and load one element at a time. Here is 
+the relevant Flavor code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile.fl with Arrays</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    while (1) {
+        int i = 0;
+        char(8) c[[i++]];
+    }
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+The double brace notation indicates that this is declaration of <em>just one element</em> of the
+array. We use the variable <code>i</code> to load each element of the array in the right 
+position. This, however, only partially solves the problem of the unknown file size. While 
+Flavor deals with arrays of dynamically varying sizes, the translator generates arrays of a 
+<em>fixed</em> size. This generates faster code, and also avoids problems with inconsistent 
+handling of fundamental and derived types.
+</p>
+
+<p>
+The default array size used by the translator is 64, and it can be changed via the 
+<code>-a</code> command line option. Also, when the array size in a Flavor expression is a 
+constant, the translator can automatically check the value and increase the array size if needed
+(it will also issue a warning).
+</p>
+
+<p>
+Essentially all media representation formats of any practical interest do not use such 
+open-ended structures. In fact, even a text file itself can be considered as composed of a set
+of lines, rather than a large collection of characters. Here is a modification of 
+<code>HelloFile.fl</code> to read only one line of information.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloLine.fl</caption>
+<tr><td width="100%"><code>
+<pre>class HelloLine {
+    int i = 0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Observe that the double brace notation can only be used when <em>declaring</em> partial arrays;
+in all other places you can use the familiar sing-brace notation from C++ and Java. With this
+modification our individual objects can have a more manageable size. We can also redefine our
+<code>HelloFile</code> to use an array of lines, instead of characters.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloFile using HelloLine</caption>
+<tr><td width="100%"><code>
+<pre>class HelloFile {
+    int i = 0;
+    while (1) {
+        HelloLine line[[i++]];
+    };
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Here the file is considered as an array of line objects; as before, the size of the array is
+dynamic.
+</p>
+
+<p>
+Let's consider now the case where the Flavor source contains more than one array, and that all
+of them are small except one that is very large. For example, assume that you have files with
+very short lines but that contain a very large number of lines. Based on the above, we will have
+to use an array size suitable for the longest array contained in the media representation. This,
+however, will significantly increase the memory requirements for the C++ program as all arrays
+would have to use this size. The solution to this problem is to be able to individually specify
+the maximum array size when needed. This, among other things, is accomplished using <em>pragma
+statements.</em>
+</p>
+
+
+<h4><a name="pragmas">1.7 Pragma Statements</a></h4>
+
+<p>
+Pragma statements are similar to those found in C or C++ preprocessors. This contain statements 
+that set options to the compiler/translator itself, rather than generating any actual code. 
+Pragma statements are introduced in Flavor files using the <code>%pragma</code> directive. They
+become effective at the exact place where they appear. If they are inside a class, they affect 
+both that class as well as all subsequent classes.
+</p>
+
+<p>
+Almost all command-line options can be set using pragma statements. Here are a few examples.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Example Pragma Statements</caption>
+<tr><td width="100%"><code>
+<pre>// Generate put, do not generate get, generate trace, and set array size to 1024
+%pragma put, noget, trace, array=1024
+
+// Generate put and get, and use custom tracing function
+%pragma put, get, tfunc="Tracer.print"
+
+// Do not generate put
+%pragma noput</pre>
+</code></td></tr>
+</table>
+
+<p>
+For more information on pragma statements, refer to the <a href="pragma.htm">Pragma Statements</a>
+section.
+</p>
+
+ 
+<h4><a name="syntaxerrors">1.8 Bitstream Syntax Errors</a></h4>
+
+<p>
+We mentioned earlier that the translator only reports syntax errors. These errors are detected
+whenever a parsed variable does not have its expected value. Such "marker" variables are very
+frequently used in practical representation formats. Here is the description of a file in which
+each line must begin with the character '<code>A</code>'.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloALine.fl</caption>
+<tr><td width="100%"><code>
+<pre>class HelloALine {
+    char(8) id = 'A'; // First char *must* be 'A'
+    int i = 0;
+    do {
+        char(8) c[[i]];
+    }
+    while (c[i++] != '\n');
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Note that here we have more than one parsable variable; as you would expect, they are parsed
+(or output) in exactly the same order as they are declared.
+</p>
+
+<p>
+The translator will generate code that checks if the value read for <code>id</code> is actually
+an '<code>A</code>'. If it is not, it will have to report the error. This is done by calling a 
+function called <code>flerror</code>. This function should accept a variable number of arguments 
+so that the translator can generate rich error message (i.e., declared as: <code>void flerror(char 
+*fmt, ...)</code>). The run-time libary includes a sample implementation that prints the message 
+to <code>stderr</code> and exits. The implementation in the library will be ignored by your linker
+if you provide your own function. Note that when you output data, the translator will make sure
+that the <code>id</code> variable is loaded with the value '<code>A</code>' before output, so you 
+don't have to set it yourself.
+</p>
+
+<p>
+The Java version of <code>flerror</code> comes with its containing class. In order to specify 
+method where syntax error messages are directed, you need to provide its name as a command line 
+argument like the following: <code>flavorc -E "YourClass.flerror"</code>. The classpath should 
+point to the class you specified. Arguement of the method is limited to only the <code>String</code> 
+class provided in JDK.
+</p>
+
+
+<h4><a name="inheritance">1.9 Inheritance</a></h4>
+
+<p>
+Flavor fully supports inheritance.  The keyword <code>extends</code> is used to declare a 
+derived class (similar to Java).  Note that only single-inheritance is supported; in general, 
+only features common to both C++ and Java are supported by Flavor in order to allow translation 
+to both.  We have yet to find an example where multiple inheritance would be useful for media 
+representation.
+</p>
+
+<p>
+Inheritance is useful when we want to redefine existing objects.  For example, we can split our 
+<code>HelloALine</code> class into two parts: our base part will be the initial character, and
+the derived class will include the remainder of the line. Here is the Flavor description for 
+this structure.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloALine Using Inheritance</caption>
+<tr><td width="100%"><code>
+<pre>class CharA {
+    char(8) id = 'A';
+}
+
+class HelloALine extends CharA {
+    int i = 0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+The base class is parsed <em>before</em> any element of the derived class is parsed. This means
+that <code>id</code> will be parsed before the <code>c</code> array.
+</p>
+
+
+<h4><a name="parameter">1.10 Parameter Types</a></h4>
+
+<p>
+In the preceding example, the expected value for <code>id</code> in <code>CharA</code> was
+hard-coded. Depending on the specific representation format, this may not be desirable. 
+Consider, for example, the case where each line of the file starts with the same character as
+the first.
+</p>
+
+<p>
+This is a trivial example of a more fundamental problem, i.e., passing contextual information 
+to an object. As Flavor does not have methods, the mechanism to accomplish this is 
+<em>parameter types</em>. These behave identically to method or function arguments found in C++
+and Java, but they are specified as arguments to the class itself.
+</p>
+
+<p>
+Here is a modified version of <code>CharA</code>, called <code>FirstChar</code>, that accepts 
+the expected character value as an argument.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Parameter Types</caption>
+<tr><td width="100%"><code>
+<pre>class FirstChar(char c) {
+    char(8) id = c;
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Whenever you instantiate in Flavor an object that uses parameter types, you must provide actual
+arguments for all formal arguments. For example:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Instantiating Objects with Parameter Types</caption>
+<tr><td width="100%"><code>
+<pre>class HelloALine {
+    FirstChar c('A');
+    ...
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Parameter types can be simple variables, classes, or arrays of these.
+</p>
+
+<p>
+We can use the above definition with our inheritance-based <code>HelloALine</code> example, to 
+define a class describing a line that also accepts the expected first letter as a parameter. A 
+possible definition is as follows.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloALine Using Parameter Types and Inheritance</caption>
+<tr><td width="100%"><code>
+<pre>class FirstChar(char c) {
+    char(8) id = c;
+}
+
+class HelloAnyLine(char c) extends FirstCharA {
+    int i=0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+As we can see, both <code>FirstChar</code> and <code>HelloAnyLine</code> accept a single
+parameter as an argument.  It would be incorrect to omit the declaration from 
+<code>HelloAnyLine</code>, as it extends <code>FirstChar</code>. A derived class <em>must</em> 
+use the same parameter types as its base class.
+</p>
+
+<p>
+Naturally, you also need to provide values for these parameters from your C++ code. This is 
+accomplished by providing additional arguments to the <code>get()</code> and <code>put()</code>
+methods. For classes that use parameter types, the translator will generate method declarations
+that include all parameter types as additional arguments to <code>get()</code> and 
+<code>put()</code>, immediately following the <code>IBitstream</code> argument. Here is an 
+example, where we a read a line starting with the letter 'Z'.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Parameter Types and C++</caption>
+<tr><td width="100%"><code>
+<pre>HelloAnyLine line;
+line.get(bs, 'Z');</pre>
+</code></td></tr>
+</table>
+
+
+<h4><a name="poly">1.11 Bitstream Polymorphism</a></h4>
+
+<p>
+One of the key benefits of object-oriented programming and inheritance is polymorphism: the 
+capability of derived classes to be used in the place of base classes. For the purposes of 
+illustration, let's assume that our media representation consists of lines beginning either with
+'A' or with 'B'. We also want a single object <code>HelloLine</code> that is capable of 
+representing either. A potential solution is to use simple containment.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloLine Using Containment</caption>
+<tr><td width="100%"><code>
+<pre>class Line {
+    int i = 0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}
+
+class HelloALine {
+    char(8) id = 'A';
+    Line line;
+}
+
+class HelloBLine {
+    char(8) id = 'B';
+    Line line;
+}
+
+class HelloLine {
+    char(8)* id; // Read ahead
+    if (id == 'A')
+        HelloALine lineA;
+    else 
+        HelloBLine lineB;
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Here we define our basic line as <code>Line</code>. We then define classes for lines that begin
+with an '<code>A</code>' or <code>B</code>' (<code>HelloALine</code> and <code>HelloBLine</code>). 
+Finally, we define a class <code>HelloLine</code> that can contain either type. Observe the 
+'<code>*</code>' notation; this is <em>not</em> a pointer declaration (in fact, Flavor does not 
+support pointers or references). The '<code>*</code>' after the parse size declaration means that 
+the bitstream should be examined but not actually read. This is the way to implement look-ahead 
+input in Flavor. Our class, then, looks ahead to see what is the next character; if it is an 
+'<code>A</code>', then an object of type <code>HelloALine</code> is read, or an object of type
+<code>HelloBLine</code> otherwise. Both of these objects (and <code>id</code>) will be member 
+variables of the <code>HelloLine</code> class. When accessing such an object, it is up to you to 
+examine which of the two subobjects is valid, by checking the contents of <code>id</code>. For
+example, if you need to access the third character of a line, you should write code like the 
+following:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Accessing Contained Members</caption>
+<tr><td width="100%"><code>    
+<pre>// This is in your C++ code
+HelloLine line;
+line.get(bs);
+char c3;
+if (line.id == 'A' )
+    c3 = line.lineA.c[2];
+else
+    c3 = line.lineB.c[2];</pre>
+</code></td></tr>
+</table>
+
+<p>
+Similarly, if you want to output data, you will have to set the correct value for 
+<code>id</code> so that the <code>put()</code> method can figure out which object it should
+write:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Accessing Contained Members: Preparing for Output</caption>
+<tr><td width="100%"><code>
+<pre>// Prepare for output
+HelloLine line;
+strcpy(line.lineA.c, "test\n");
+line.id = 'A'; // You *must* set a value for id
+line.put(bs);</pre>
+</code></td></tr>
+</table>
+
+<p>
+This will output the string "<code>Atest</code>".
+</p>
+
+<p>
+Although this works, it can get very problematic and defeats the whole purpose of 
+object-oriented programming. That's where polymorphism can provide significant value.
+</p>
+
+<p>
+In a traditional programming context, polymorphism is implemented using vtables that handle
+dispatch of method calls to the right class. In a bitstream context, however, any such 
+information <em>must be present</em> in the bitstream itself. Bitstream objects that can take
+the place of each other need a mechanism to distinguish which of them is the one actually
+provided in the bitstream. This gives rise to the concept of <em>object identifiers</em>, or 
+IDs for short.
+</p>
+
+<p>
+The identifier is a common variable shared by all classes in the same hierachy. The value of 
+the identifier uniquely determines the actual type of the object that is present in the 
+bitstream (or should be output to a bitstream). This requires that ID values are unique for each
+class within a given hierarchy.
+</p>
+
+<p>
+To signify the special characteristics of IDs, they are declared outside the braces of the class
+declaration, immediately after the name of the class. They are also the first element that is 
+parsed. They must also be simple variables, and cannot be arrays. Let's convert our previous 
+containment example to use object IDs.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloLine Using Bitstream Polymorphism</caption>
+<tr><td width="100%"><code>
+<pre>class Line : char(8) id = 0 {
+    int i = 0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}
+
+class HelloALine extends Line : char(8) id = 'A' {
+    // Empty
+}
+
+class HelloBLine extends Line : char(8) id = 'B' {
+    // Empty
+}
+
+class HelloLine {
+    Line line;
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+Observe how the ID is declared before the opening brace and after '<code>:</code>' character. 
+<code>HelloALine</code> and <code>HelloBLine</code> trivially extend <code>Line</code> to just
+use a different ID value. Here we called our ID '<code>id</code>', but any name would do.
+</p>
+
+<p>
+Let's follow step-by-step what the generated code will do when the <code>get()</code> method of
+<code>HelloLine</code> is called.  The code will first do a look-ahead to check the value of the
+ID.  Then, depending on its value, it will create an object of the correct type and assign it to
+<code>line</code>.  When calling the <code>get()</code> method of the <code>HelloLine</code> 
+class, the <code>get()</code> method of the newly created <code>Line</code> object.  Since, both 
+<code>get()</code> and <code>put()</code> are declared as virtual member functions, the correct 
+method will be called.
+</p>
+
+<p>
+Note that the base class, <code>Line</code>, has an ID value of 0. It is important that the
+<code>line</code> variable corresponds to a polymorphic class, i.e., one with an ID.
+</p>
+
+<p>
+Here are some examples to illustrate how to handle polymorphic parsable classes in your C++ 
+code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Bitstream Polymorphism and C++</caption>
+<tr><td width="100%"><code>
+<pre>// Example 1
+// Read a line from input bitstream 'bsIn', change the 1st char to 'X', and output to bitstream 'bsOut'
+HelloLine hline;
+hline.get(bsIn);
+hline.line-&gt;c[0] = 'X'
+hline.put(bsOut);
+
+// Example 2
+// Prepare a second line for output
+HelloLine hline2;
+hline2.line = new(HelloALine);
+strcpy(hline2.line-&gt;c, "test");
+hline2.put(bsOut);
+
+// Example 3
+// Try to trick the code to think it is dealing with a HelloBLine object
+hline2.id = 'B'
+hline2.put(bsOut); // not what you may expect</pre>
+</code></td></tr>
+</table>
+
+<p>
+Examples 1 and 2 should be self-explanatory. For Example 3, we try to trick the code by 
+modifying the ID value. The <code>put()</code> method code that is called, however, is that of
+object <code>HelloALine</code>. Before sending the ID variable to the output (or any variable 
+that has an expected value), the code will set it to its correct value. That not only saves you
+from having to set such variables yourself, but it also guarantees that the state of all 
+variables after <code>put()</code> is called is the one specified by the Flavor code. The end
+result is that the correct output will be produced.
+</p>
+
+
+<h4><a name="abstract">1.12 Abstract Classes</a></h4>
+
+<p>
+In the preceding example the base class <code>Line</code> had to have its own ID. As a result,
+this ID value would have to be excluded from the space of the IDs available to derived classes.
+If the base class can appear on its own in the bitstream, this is not a source for concern. 
+Oftentimes, however, the base class is only supposed to act as a placeholder and never appear in
+the bitstream. In other words, only one of its derived classes will appear in the actual data. 
+Assigning an ID for the base class can then be wasteful, as it may require that an extra bit is
+spent for IDs, just to accommodate the base class.
+</p>
+
+<p>
+The solution to this problem is <em>abstract classes</em>. These are identified with the keyword
+<code>abstract</code> in their declaration. They must have an ID declaration, but the value of
+the ID must be set to 0. Abstract classes do not participate in ID resolution, and thus the 
+entire range of IDs is available to the derived classes. The only case where an abstract may be
+instantiated by the code generated by the translator is when ID resolution fails (no derived
+class is found with and ID matching the value on the bitstream). In this case the code 
+instantiates the base class in an attempt to continue parsing the bitstream.
+</p>
+
+<p>
+Here is the previous example of polymorphic classes, this time using an abstract base class.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloLine Using Abstract Bitstream Polymorphism</caption>
+<tr><td width="100%"><code>
+<pre>abstract class Line : char(8) id = 0 {
+    int i = 0;
+    do {
+        char(8) c[[i++]];
+    }
+    while (c[i++] != '\n');
+}
+
+class HelloALine extends Line : char(8) id = 'A' {
+    // Empty
+}
+
+class HelloBLine extends Line : char(8) id = 'B' {
+    // Empty
+}
+
+class HelloLine {
+    Line line;
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+The only difference is the use of the keyword <code>abstract</code> in the declaration of the
+Line class. With this modification, the entire range of ID values (here, 0 - 255) is available
+to the derived classes.
+</p>
+
+
+<h4><a name="comments">1.13 Comments</a></h4>
+
+<p>
+The above covers all issues relating to the interface between Flavor and C++ and Java. Note that
+a number of Flavor's features are not related at all to this interface, and have thus been 
+omitted. This includes several important details, such as scoping rules and maps. Please refer
+to the <a target="_blank" href="../spec/spec.htm">Flavor Specification</a> for more information.
+</p>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>
