@@ -1,0 +1,159 @@
+<html>
+
+<head>
+
+<title>Command Line Reference</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="./css/txt.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h1>Flavorc Version 5.x Command Line Reference</h1>
+
+<p><strong>Usage</strong></p>
+
+<p><code>flavorc [<em>options</em>] <em>input.fl</em></code></p>
+
+<p><strong>Options</strong></p>
+
+<p>
+The options which are only available for C++ code generation are in <font color="#3333FF">blue</font>,
+while the ones pertaining to only Java code are in <font color="#006400">green</font>.  The options
+corresponding to the XML features are in <font color="#FF0000">red</font>.
+</p>
+
+<dl>
+  <dt><code>-h</code> or <code>-?</code></dt>
+  <dd>Print a usage message.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-V</code></dt>
+  <dd>Print version information.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#3333FF"><code>-gc</code></font></dt>
+  <dd>Generate C++ code (default).</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#006400"><code>-gj</code></font></dt>
+  <dd>Generate Java code.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#FF0000"><code>-gx</code></font></dt>
+  <dd>Generate XML schema.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-n</code></dt>
+  <dd>Parse only; no code will be generated.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-g</code></dt>
+  <dd>Do not generate a get() method.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-p</code></dt>
+  <dd>Do not generate a put() method.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-x</code></dt>
+  <dd>Do not generate a putxml() method.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><code>-t</font></code></dt>
+  <dd>Generate tracing code.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><code>-l</code></dt>
+  <dd>Suppress output of line number information for user code (verbatim sections).</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#3333FF"><code>-oh</code> <em>name</em></font></dt>
+  <dd>Set the name of the output C++ include file.  The default is <em>input.h</em>.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#3333FF"><code>-oc</code> <em>name</em></font></dt>
+  <dd>Set the name of the output C++ file.  The default is <em>input.cpp</em>.</dd>
+  <dt><em>&nbsp;</em></dt>
+
+  <dt><font color="#006400"><code>-oj</code> <em>name</em></font></dt>
+  <dd>Set the name of the output Java package.  The default is <em>input</em>.</dd>
+  <dt><code>&nbsp;</code></dt>
+
+  <dt><font color="#006400"><code>-og</code> <em>name</em></font></dt>
+  <dd>Set the name of the Java class that will contain all the global constants.  The 
+      default is <em>Global</em>.</dd>
+  <dt><code>&nbsp;</code></dt>
+
+  <dt><font color="#006400"><code>-op</code> <em>name</em></font></dt>
+  <dd>Set the name of the Flavor run-time library package that will be imported by the 
+      generated Java code.  The default is <em>flavor</em>.</dd>
+  <dt><code>&nbsp;</code></dt>
+
+  <dt><font color="#FF0000"><code>-ox</code> <em>name</em></font></dt>
+  <dd>Set the name of the output XML schema file.  The default is <em>input.xsd</em>.</dd>
+  <dt><code>&nbsp;</code></dt>
+
+  <dt><code>-a</code> <em>size</em></dt>
+  <dd>Set maximum array size. The default is 64, and will be automatically increased whenever
+      the translator can detect it (when the array size is a constant expression).</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#3333FF"><code>-s</code></font></dt>
+  <dd>Use null-terminated strings.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><code><font color="#3333FF">-msvc</font></code></dt>
+  <dd>Generate Microsoft Visual C++-style error messages. This enables direct 
+      integration with the Microsoft Developer Studio development environment.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#3333FF"><code>-i</code></font></dt>
+  <dd>Don't generate include directives when generating C++ code.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><code>-w </code><em>check</em></dt>
+  <dd>Enable optional checks; use <code>-w help</code> for more information (may be used multiple times).<br><br>
+      The following options are available:</dd>
+      <dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>help</code>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print the list of available options</dt>
+      <dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>abstract</code>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when pure abstract classes are used</dt>      
+      <dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>cyclic</code>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when cyclic references are detected</dt>
+      <dt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <code>includes</code>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;warn when cyclic includes/imports are detected</dt>
+      <dt>&nbsp;</dt>
+      
+  <dt><code>-B</code> <em>string</em></dt>
+  <dd>Use <em>string</em> as the bitstream I/O class. The default is <code>Bitstream</code>.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-F</code> <em>string</em></dt>
+  <dd>Use <em>string</em> as a prefix for internal Flavor-generated variables. The default is <code>_F_</code>.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-E</code> <em>string</em></dt>
+  <dd>Use function <em>string</em> to report bitstream syntax errors. The default is <code>flerror</code>.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>-T</code> <em>string</em></dt>
+  <dd>Use function <em>string</em> to create trace reports. The default is <code>trace</code>.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><code>--</code></dt>
+  <dd>This options is used to disallow usage of further options. This allows to use a Flavor source file name
+	   that starts with a dash.</dd>
+  <dt>&nbsp;</dt>
+</dl>
+
+
+<p align="center" class="notice"><a href='copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

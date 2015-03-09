@@ -1,0 +1,95 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+# Danny Hong <danny@ee.columbia.edu>
+
+# Parameters
+prefix  = @prefix@
+bindir  = $(prefix)/bin
+jlibdir = $(prefix)/lib/java
+fldir   = $(prefix)/samples/fl
+datadir = $(prefix)/samples/data
+
+SRC    = .
+
+CLASSES = \
+	Main.class \
+	AIFCCommonChunkExt.class \
+    AIFF.class \
+    AUData.class \
+    Audio.class \
+	AUHeader.class \
+	BaseChunk.class \
+	CommonChunk.class \
+	DataChunk.class \
+    ExtendedFloat.class \
+	FormatChunk.class \
+    Global.class \
+	OtherChunk.class \
+	PString.class \
+	Raw8.class \
+	Raw16.class \
+	Raw16Little.class \
+	RIFFChunk.class \
+    SkipChunk.class \
+	SoundChunk.class \
+	SoundData.class \
+	WAV.class \
+	WAVData.class
+
+JAVAFILES = \
+	AIFCCommonChunkExt.java \
+    AIFF.java \
+    AUData.java \
+    Audio.java \
+	AUHeader.java \
+	BaseChunk.java \
+	CommonChunk.java \
+	DataChunk.java \
+    ExtendedFloat.java \
+	FormatChunk.java \
+    Global.java \
+	OtherChunk.java \
+	PString.java \
+	Raw8.java \
+	Raw16.java \
+	Raw16Little.java \
+	RIFFChunk.java \
+    SkipChunk.java \
+	SoundChunk.java \
+	SoundData.java \
+	WAV.java \
+	WAVData.java
+
+TARGET = audio
+
+
+all: 
+	$(bindir)/flavorc -gj -x $(fldir)/$(TARGET).fl
+	javac -classpath .:$(jlibdir) -d $(SRC) Main.java $(JAVAFILES)
+
+clean:
+	rm -rf $(CLASSES) $(JAVAFILES) *.bs *.xml $(TARGET)
+
+run1:
+	java -classpath .:$(jlibdir) $(TARGET).Main -- $(datadir)/test.au
+
+run2:
+	java -classpath .:$(jlibdir) $(TARGET).Main -- $(datadir)/test.aiff
+
+run3:
+	java -classpath .:$(jlibdir) $(TARGET).Main -- $(datadir)/test.aifc
+
+run4:
+	java -classpath .:$(jlibdir) $(TARGET).Main -- $(datadir)/test.wav
+
+

@@ -1,0 +1,609 @@
+<html>
+
+<head>
+<title>What's New</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="./css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<a name="top"></a>
+
+<h1>What's New?</h1>
+
+<p>
+<a href="#whatsnew5.2">Version 5.2</a> | <a href="#whatsnew5.1">Version 5.1</a>
+<a href="#whatsnew5.0">Version 5.0</a> | <a href="#whatsnew4.3">Version 4.3</a> | 
+<a href="#whatsnew4.1">Version 4.1</a> | <a href="#whatsnew4.0">Version 4.0</a> |
+<a href="#whatsnew3.0">Version 3.0</a> | <a href="#whatsnew2.1">Version 2.1</a>
+</p>
+
+<h2><a name="whatsnew5.2">What's new in Version 5.2</a></h2>
+<dl> 
+	<dt><a name="bac"><strong>Binary arithmetic coding</strong></a></dt>
+	<dd>A new construct <code>bac</code> is introduced for describing binary arithmetic
+        coders (BACs).  It comes with parameters for describing any one of the currently
+        deployed BACs such as Q/QM/MQ-Coder, M coder as well as the coders specified in 
+        the MPEG-4 standard.  The construct is flexible in that any variant of the 
+        above-mentioned BACs can be easily produced by simply modifying the parameters.
+        For more information about this new construct, refer to the <a target="_top" 
+        href="spec/spec.htm">Flavor specification</a></dd>.
+	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew5.1">What's new in Version 5.1</a></h2>
+<dl> 
+	<dt><a name="vlcenc"><strong>New VLC encoding method</strong></a></dt>
+	<dd>Up to the previous version, for encoding variable-length codes, nested 
+	    <code>if</code>-<code>else</code> statements were used.  However, Visual C++ imposes 
+        a hard limit on the number of nested blocks (should be less than 128), and to circumvent 
+        this problem, only the <code>if</code> statements are used.  Note that the latter 
+        approach does not increase the encoding time since, as soon as a match is found, the 
+        corresponding codeword is returned.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="buffbitstream"><strong>A new buffered bitstream class</strong></a></dt>
+	<dd>A new <code>Bitstream</code> class (<code>BuffBitstream</code>, derived from the <code>
+        IBitstream</code> class) is designed to support parsing of MP3 or similar files.  This 
+        new class introduces three new methods - <code>buffer()</code>, <code>swap()</code>, and 
+        <code>getdsize()</code> - to support random access into the coded data, as required by
+        the MPEG-1 Audio Layer III standard.  For example, in MP3 bitstreams, the main data can
+        appear before its header information.  Note that the old <code>Bitstream</code> class 
+        simply discards all the bits that are behind the current bit position in the bitstream.<br><br>
+        
+        The <code>buffer()</code> method can be used to store parts of a bitstream that needs to
+        be processed later.  When parsing, data can be obtained either from the input bitstream
+        or the buffered parts of the bitstream, and the <code>swap()</code> method can be used to 
+        switch the source of the input between the two.  The <code>getdsize()</code> method returns 
+        the size of the buffered data.<br><br>        
+               
+        Refer to the <a href="sources.htm">Source Code</a> page for information on how to build a 
+        new library with the <code>BuffBitstream</code> class, and refer to the <a href="samples.htm#mpeg1as">
+        mpeg1as</a> sample in the <a href="samples.htm">Samples</a> page for an example of using 
+        the new library.</dd>
+	<dt>&nbsp;</dt>
+
+	<dt><a name="javapackage"><strong>Output Java package</strong></a></dt>
+	<dd>Starting from this version, the translator groups the generated Java files into
+        one package.  By default, the name of the input file (the <code>.fl</code> file)
+        is used as the name of the package.  The name can also be set by using the <code>-oj</code>
+        <a href="cmdline.htm">command line option</a>.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="flpackage"><strong>Flavor run-time library Java package</strong></a></dt>
+	<dd>By default, the Java version of the Flavor run-time library is compiled as the <code>
+        flavor</code> package, and all the generated Java code imports this package.  The
+        name of the Flavor library package, which is imported by the generated Java code, can 
+        be changed by using the <code>-op</code> <a href="cmdline.htm">command line option</a>.</dd>
+	<dt>&nbsp;</dt>
+
+	<dt><a name="globalconsts"><strong>Global constants in Java</strong></a></dt>
+	<dd>All global constans declared in Flavor are contained in a Java class named <code>
+        Global</code>, by default.  The name of the class can be changed using the <code>
+        -og</code> <a href="cmdline.htm">command line option</a>.</dd>
+	<dt>&nbsp;</dt>
+
+	<dt><a name="skipbits"><strong>New <code>skipbits()</code> operator</strong></a></dt>
+	<dd>A new operator <code>skipbits()</code> is supported, which can be used to skip an 
+	    arbitrary number of bits from the input bitstream, without having to define a
+		parsable variable or using verbatim code.  With the current run-time library,
+		bits can be skipped only in the forward direction; i.e., only non-negative number
+		of bits can be skipped.  (The generated code uses the <code>skipbits()</code>
+		method of the run-time library.)  However, to support bit-skipping in backward 
+		direction, a new library can be derived from the <code>IBitstream</code> class.  
+		The <code>IBitstream</code> class is an abstract class with the definition of
+		required methods, and simply deriving a new class from it ensures compatibility
+		with the Flavor translator.<br><br>
+
+		This operator is extremely useful as any information that is not pertinent to an 
+		application can be simply skipped.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="nextbits"><strong>New <code>nextbits()</code> operator</strong></a></dt>
+	<dd>A new operator <code>nextbits()</code> is supported as a substitute for look-ahead
+		parsing.  Using the operator instead of a look-ahead parsable variable avoids
+		declaring an extra variable.  The generated code uses a new method 
+		<a href="#newrtlib3"><code>next()</code></a> available in the run-time library.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="nextcode"><strong>New <code>nextcode()</code> operator</strong></a></dt>
+	<dd>A new operator <code>nextcode()</code> can be used to search for a given code 
+		(such as start codes in MPEG) in a bitstream.  All bits upto and excluding the 
+		specified code are skipped.  The generated code uses a new method 
+        <a href="#newrtlib3"><code>nextcode()</code></a> available in the run-time library.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="numbits"><strong>New <code>numbits()</code> operator</strong></a></dt>
+	<dd>A new operator <code>numbits()</code> can be used to obtain the total 
+	    number of bits read or written at anytime during reading or writing bits.  
+        The generated code uses the <code>getpos()</code> method already available in 
+        the run-time library.</dd>
+	<dt>&nbsp;</dt>
+  
+   	<dt><a name="newrtlib3"><strong>Additions to the run-time library</strong></a></dt>
+  	<dd>The run-time library has been extended with <code>next()</code> and 
+        <code>nextcode()</code> methods to support the <code>nextbits()</code> and 
+		<code>nextcode()</code> operators.  Refer to the Run-Time Library section in 
+        the translator's <a target="_top" href="manual/manual.htm">user's manual</a>
+        for more information</dd>
+  	<dt>&nbsp;</dt>
+
+ 	<dt><a name="nonbool"><strong>Non-boolean expressions</strong></a></dt>
+  	<dd>Up to the previous version, only boolean expressions were allowed as part of the 
+	    flow control statements (i.e., statements like <code>"if (1) {...}"</code> 
+		were not allowed).  This was to ensure compatibility with Java.  Now non-boolean
+		expressions such as the ones allowed in C/C++ are also allowed in Flavor for less
+        verbose description.  The translator automatically converts non-boolean expressions
+        into corresponding boolean ones, when generating Java code.</dd>
+  	<dt>&nbsp;</dt>
+
+	<dt><a name="valuerange"><strong>Expected value ranges</strong></a></dt>
+  	<dd>Parsable variables can now be declared with not just one expected value, but a 
+	    range of values.  This is very similar in concept to the <a href="#idrange">id 
+        range</a>.</dd>
+  	<dt>&nbsp;</dt>
+
+    <dt><a name="newsample"><strong>New and modified samples</strong></a></dt>
+    <dd>All samples are modified so that the new features are used when appropriate.
+        New samples that demonstrate how to parse MPEG-1 Systems, Video and Audio files,
+        as well the ones that demonstrate how to use XML features of Flavor, are presented.
+        Please refer to the <a href="samples.htm">Samples</a> page for more information.</dd>
+  	<dt>&nbsp;</dt>
+
+    <dt><a name="newbitgen"><strong>Modified bitstream generator</strong></a></dt>
+    <dd>The <a href="#bitgen"><em>bitgen</em></a> tool is modified so that it uses
+        <a target="_blank" href="http://xml.apache.org">Xerces-C++</a> XML parser to read 
+        XML documents.</dd>
+  	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew5.0">What's new in Version 5.0</a></h2>
+<p>The translator is enhanced so that it can support XML.  Additionally, a software tool
+   - <em>bitgen</em> - is provided to complement the enhanced translator; together, they 
+   comprise <em>XFlavor</em>.  With XFlavor, the traditional (compressed) bitstream 
+   representation of multimedia data can be converted into an XML representation for more 
+   flexible and extensible manipulation.  Representing bitstreams as XML documents provides 
+   many advantages and they are discussed in the "XFlavor: Providing XML Features in Media
+   Representation" paper.  See the <a href="overviews.htm">Overview Documents</a> page for 
+   more information.</p>
+<dl> 
+	<dt><a name="xml_schema"><strong>XML schema</strong></a></dt>
+  	<dd>Given a Flavor description, in addition to C++/Java code, a corresponding XML
+        schema can be created using the command line option <code>-gx</code>.</dd>
+	<dt>&nbsp;</dt>
+
+ 	<dt><a name="xml_doc"><strong>XML document</strong></a></dt>
+	<dd>Along with the <code>get()</code> and <code>put()</code> methods for parsing
+        and generating bitstreams, the translator also generates a <code>putxml()</code>
+        method for generating XML documents corresponding to the Flavor-described 
+        bitstreams.</dd>
+  	<dt>&nbsp;</dt>
+
+ 	<dt><a name="bitgen"><strong>Bitstream generator</strong></a></dt>
+	<dd>As a complement to the enhanced translator, a software tool - <em>bitgen</em> - 
+        has been created for converting the XML representation of multimedia data back into 
+        its native bitstream form.  The tool and corresponding code are located in the 
+        <code>bitgen</code> directory.  This is a simple lexer created with <a target="_blank" 
+        href="http://www.antlr.org">Antler</a> for reading the XML elements, and based on 
+        their attributes, correct bitstream representation of the content of the elements 
+        is generated.</dd>
+  	<dt>&nbsp;</dt>
+
+    <dt><a name="gifxml"><strong>New sample - gifxml</strong></a></dt>
+    <dd>A new sample - <em>gifxml</em> - is included in this version.  This sample
+        illustrates how an XML document is generated from a Flavor described 
+        bitstream.  Here Flavor describes the GIF87a bitstream specification
+        and any bitstream corresponding to the specification can be converted into a 
+        corresponding XML document.  Refer to the <a href="samples.htm">Samples</a> page 
+        for more information.</dd>
+  	<dt>&nbsp;</dt>
+
+    <dt><a name="audio"><strong>New sample - audio</strong></a></dt>
+    <dd>A new sample - <em>audio</em> - is included in this version.  This sample
+        replaces the previous <em>wavtest</em> sample where multiple audio file
+        formats are supported.  Refer to the <a href="samples.htm">Samples</a> page 
+        for more information.</dd>
+  	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew4.3">What's new in Version 4.3</a></h2>
+<dl> 
+	<dt><a name="idrange"><strong>ID ranges</strong></a></dt>
+  	<dd>ID ranges are finally supported for polymorphic classes.  If a class is associated 
+        with a range of IDs, then its <code>get()</code> method makes sure that the parsed
+        ID value is in the specified range.  Its <code>put()</code> method also checks if
+        its ID is in the specified range, and if it is, then the ID is output into the bitstream;
+        otherwise, the first value of the range is used for the ID.</dd>
+  	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew4.1">What's new in Version 4.1</a></h2>
+<p>The following is the list of the new features in Version 4.1.</p>
+<dl> 
+	<dt><a name="opensource"><strong>Open source</strong></a></dt>
+  	<dd>From this version (Version 4.1) on, Flavor is an open source project under the 
+	    <a href="license.htm">Flavor Artistic License</a>.</dd>
+	<dt>&nbsp;</dt>
+
+ 	<dt><a name="little"><strong>Little-endian format support</strong></a></dt>
+	<dd>The translator now allows the modifiers <code>big</code> and <code>little</code>
+        to account for both the big and little-endian byte-orderings.  By default, the 
+		big endian method of storing numbers is assumed, and thus, the most significant 
+		byte (and the most significant bit) is stored first.  For example, for the hexadecimal
+        number 0xABCD, 0xAB will be stored first, and then 0xCD.  If the <code>little</code> 
+        modifier is used, then the reverse-byte ordering method is used; that is, in the case 
+        of the hexadecimal number 0xABCD, 0xCD is stored first and then 0xAB.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="newrtlib2"><strong>Additions to the run-time library</strong></a></dt>
+  	<dd>The run-time library has been extended with <code>little_*next*()</code> and 
+        <code>little_*get*()</code> methods to support the little-endian format in addition
+        to the already supported big-endian format.  Note that endianess here refers to the 
+        bitstream representation, not the processor on which the Flavor library may be running.  
+        The latter is irrelevant for the bitstream description.</dd>
+  	<dt>&nbsp;</dt>
+ 
+  	<dt><a name="wavtest"><strong>New sample - wavtest</strong></a></dt>
+	<dd>A new sample - <i>wavtest</i> - is included in this version. This sample
+        uses the Canonical WAVE file format to parse the bitstream of RIFF WAV
+        files.  Many numerical fields of the format are specified using little-endian byte
+        ordering and they are represented using the <code>little</code> modifier in the 
+        sample code.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="gifprint"><strong>Modified sample - gifprint</strong></a></dt>
+  	<dd>The sample - <i>gifprint</i> - is modified to use the <code>little</code> 
+        modifier.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="giftrace"><strong>Modified sample - giftrace</strong></a></dt>
+  	<dd>The sample - <i>giftrace</i> - is modified to use the <code>little</code>
+        modifier.</dd>
+  	<dt>&nbsp;</dt>
+</dl>
+  
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew4.0">What's new in Version 4.0</a></h2>
+<p>Starting with Version 4.0, the Flavor translator supports Java and map.</p>
+<dl> 
+  	<dt><a name="javasupport"><strong>Java language support</strong></a></dt>
+	<dd>The translator now generates <code>.java</code> files.  The code for Java language
+        can be generated with the <code>-gj</code> flag of the Flavor translator - 
+        <code>flavorc</code>.  Java version of the Flavor run-time library is also provided
+        within this package.  The library contains the <code>Bitstream</code> implementation
+        as well as the trace and error utility functions.  It is ensured that bitstreams
+        generated from the Flavor code with both languages (C++ and Java) are compatible. The
+        Java code generated by the translator was fully tested with JDK1.3.</dd>
+	<dt>&nbsp;</dt>
+
+	<dt><a name="mapsupport"><strong>Support for map</strong></a></dt>
+	<dd>Maps are used to define constant or variable-length mappings between bitstream
+        values and object variables.  Support for map came back with this release after it got
+        discontinued from Version 2.0.  For its type, Maps can take any one of the primitive
+        types as well as the user-defined types - <i>classes</i>.
+	</dd>
+  	<dt>&nbsp;</dt>
+  
+	<dt><a name="javatracing"><strong>Tracing support for Java</strong></a></dt>
+  	<dd>Tracing feature is also supported for Java.  The output format for tracing in Java
+        is the same as that in C++.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="abstractbug"><strong>New abstract class member function signature for C++</strong></a></dt>
+  	<dd><a href="#abstract">Abstract classes</a> have not been properly supported in Version 
+        3.0 because the <code>put()/get()</code> methods of the abstract base class was 
+        hiding those of the derived classes.  This problem is fixed by modifying the 
+        signature of the base member functions.</dd>
+	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew3.0">What's new in Version 3.0</a></h2>
+<p>The following is the list of the new features in Version 3.0 as compared with 
+   Version 2.1. The list of the new features for Version 2.1 as compared to version
+   2.0 is also available <a href="#whatsnew2.1">below</a>.</p> 
+<dl>
+  	<dt><a name="cppfile"><strong>New .cpp file output</strong></a></dt>
+  	<dd>The translator now generates a <code>.cpp</code> file in addition to a 
+        <code>.h</code> file (for C++ code generation).  The <code>.h</code> file 
+        contains all the class declarations, whereas the <code>.cpp</code> file 
+        contains the definition of all <code>get()</code> and <code>put()</code>
+        methods.  To avoid accidentally overwriting an older user file with the same name
+        as the <code>.h</code> file, the translator will check if the <code>.cpp</code>
+        file has been generated by itself.  This is done by checking for a specific 
+        string at the beginning of the file. If it is not there, a warning message will 
+  	    be issued and the file will not be affected.</dd>
+	<dt>&nbsp;</dt>
+
+  	<dt><a name="arrayinit"><strong>Array initializers</strong></a></dt>
+  	<dd>Array initialization is now much easier: you no longer have to partially declare
+        each element separately.  You can directly write, e.g., <code>char(8) abc[3]={'A', 
+        'B', 'C'};</code>.  Array initialization can only work with constant array sizes.
+        Double braces, however, are allowed and can contain variables; they are ignored
+        when performing initialization (e.g., they do not count in the array dimensions).
+        For example, this is a proper Flavor declaration: <code>char(8) a[[0]][2] = 
+        {'a', 'b'};</code>.</dd>
+  	<dd>&nbsp;</dd>
+
+  	<dd>Array initialization is implemented by unrolling the declaration; regular code
+        generation is then used.  Note that array element evaluation (reduction to a
+        literal when an array element participates in an expression) works fully and 
+        correctly. Of course, it can only be applied when literals are used for array
+        indices, and also when the initial value is a literal as well (to avoid
+        unexpected side-effects from expression evaluations).</dd>
+  	<dt>&nbsp;</dt>
+  
+  	<dt><a name="strings"><strong>Support for strings</strong></a></dt>
+  	<dd>This version now supports string initializers for arrays.  Strings are handled as
+        regular arrays.  For example, <code>&quot;alex&quot;</code> is equivalent to 
+        <code>{97, 98, 101, 120}</code> or <code>{97, 98, 101, 120, 0}</code>.  The 
+        inclusion of the null character at the end of strings is optional, and is 
+        controlled by the <code>-s</code> command line option and the 
+        <code>nullstrings</code>/<code>nonullstrings</code> pragma directives.</dd>
+	<dt>&nbsp;</dt>
+
+  	<dt><a name="include"><strong>New <code>%include</code>/<code>%import</code> directives</strong></a></dt>
+	<dd>The translator now supports <code>%include</code> &quot;<em>file</em>&quot; and
+        <code>%import</code> &quot;<em>file</em>&quot; directives to facilitate
+        organization of Flavor source code into separate files.  The <code>%include</code>
+        directive will force the translator to process the new file but will flag all
+        included declarations so that no code generation is performed from them, except
+        from a corresponding <code>#include</code> statement in the <code>.h</code> file.
+        The <code>%import</code> directive behaves similarly to <code>%include</code>, but
+        code is generated for the included file and no <code>#include</code> statement is
+        generated for the <code>.h</code> file.  This is how a <code>cpp</code> 
+        <code>#include</code> would behave in Flavor.  For a series of nested 
+        includes/imports, a file is treated as imported if and only if all the previous 
+        files were imported as well.  An <code>%include</code> inside an imported file
+        shows up as an <code>%include</code> in the top-most file.  An <code>%include</code>
+   	    inside an included file does not show up at the top file at all.</dd>
+	<dd>&nbsp;</dd>
+ 
+	<dd>There are a few caveats with included/imported files.  Polymorphism, 
+        <code>lengthof()</code>, and <code>isidof()</code> operators can break if they
+        happen across different files.  If you extend a polymorphic class in a different
+        source file from the base class, you <em>must</em> make sure that the source of 
+        the derived class is included in the file of the base class.  This will ensure 
+        that the entire range of IDs is accessible to both files.  Similarly, 
+        <code>lengthof()</code> is not generated automatically for all variables, but is
+        flagged for use on a particular variable when the translator encounters it. If 
+        this flagging is not done on the current run, then the needed code will 
+        <em>not</em> be generated. Again, the solution 	is to cross-include the files. 
+        Note that this can potentially create a problem of looped includes in the 
+        <code>.h</code> files.  The translator detects these cases and avoids them. 
+        There is also an option to report them (see the <code>-w</code> option). 
+        Detection is based on the base name of the file (i.e., the directory where a
+        file is located is not taken into account).  Also, the file name comparison 
+        on Win32 systems is case insensitive, whereas on UNIX systems it is case 
+        sensitive.  Finally, note that <code>%pragma</code> statements contained in 
+        included/imported files also follow the above rules.  In other words, for 
+        inclusion they will not be effective on the parent file, whereas for importing
+        they will be.</dd>
+  	<dt>&nbsp;</dt>
+  	
+  	<dt><a name="allpointers"><strong>All variables of type class are now pointers (C++) or references (Java)</strong></a></dt>
+  	<dd>In order to allow recursive types, all variables of type class appear in the
+        generated code as pointers (C++) or references (Java).  This provides for uniform 
+        handling of such variables (in the past, pointers were used only for polymorphic 
+        classes).</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="abstract"><strong>Abstract polymorphic classes</strong></a></dt>
+	<dd>In the past, the base class of a set of polymorphic classes (i.e., classes with IDs)
+        had to have its own	ID, regardless if it was intended to be present in the bitstream
+        or not. That took one slot away from the set of derived classes, thus sometimes 
+        requiring that an extra bit be set aside. To resolve this, the keyword 
+        <code>abstract</code> can be used in the declaration of the base class in order to 
+        signal that this class will never appear in a bitstream (and thus is never considered
+        when doing ID resolution).  Rather, always one of its derived classes will be present.
+        The ID value for the abstract base class must be set to 0.  This frees the entire
+        range of IDs for use in the derived classes, providing for a more logical organization
+        of the ID space.  Note that if no derived class exists, an abstract class behaves the
+	    same way as a regular class.  In particular, the ID is <em>not</em> set in either the
+        <code>get()</code> or <code>put()</code> methods.</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="alignedclasses"><strong>Aligned classes</strong></a></dt>
+	<dd>The <code>aligned</code> keyword can now be applied to entire classes. It propagates
+        to derived classes as well, unless overriden by another <code>aligned</code> keyword.
+        Note that you cannot "unalign"; a class in a derived declaration. Also, class 
+        alignment is applied prior to ID alignment.</dd>
+	<dt>&nbsp;</dt>
+ 
+	<dt><a name="lengthof"><strong>New <code>lengthof()</code> operator</strong></a></dt>
+	<dd>A new operator <code>lengthof()</code> is supported in order to obtain the number
+        of bits used in the parsed representation of a parsable variable (either simple or
+        class).  A shadow variable <code>_F_<em>var</em>_lengthof</code> is used to save the
+        parse size for simple variables, whereas a similar <code>_F_lengthof</code> variable
+        is used for classes.  The generated code uses the <code>getpos()</code> method of
+        the run-time library to implement the operator.  As a side-benefit, it can account
+        for any user-provided input or output that may be hidden from the Flavor description
+        (via verbatim code).</dd>
+	<dt>&nbsp;</dt>
+  
+	<dt><a name="isidof"><strong>New <code>isidof()</code> operator</strong></a></dt>
+  	<dd>In the ISO MPEG-4 standardization activity, there was a need to express arrays of
+        polymorphic classes of arbitrary length, in which the array was to be terminated
+        when the ID resolution failed.  The proposed syntax involved empty array braces,
+        e.g., <code>Foo f[]</code>.  After careful consideration, we opted in Flavor to
+        introduce an <code>isidof()</code> operator, that simply checks if a value is a 
+        valid ID of a class or one of its derived classes.  In addition to being simpler
+        to implement, it also allows for tracking of the length of the array in an 
+        explicit way.  See the <a target="_top" href="spec/spec.htm">specification</a>
+        for more information.</dd>
+	<dt>&nbsp;</dt>
+  
+  	<dt><a name="forward"><strong>Forward declarations</strong></a></dt>
+	<dd>The translator now allows forward declaration of classes. They must match the 
+        actual definition in terms of parameter types. The <code>extends</code>, 
+        <code>abstract</code>, or ID declaration is neither needed nor allowed. Also, 
+        forward declarations cannot be used as base classes; the entire definition must be
+	    provided in order to use a class as a base.  Note that forward-declared classes are
+        considered parsable classes, and as a result the variables that have their type 
+        will be scoped as regular parsable variables (even if the actual definition of the
+        class does not end up being that of a parsable one).</dd>
+	<dt>&nbsp;</dt>
+ 
+ 	<dt><a name="cyclic"><strong>Cyclic data types</strong></a></dt>
+	<dd>With forward declarations, it is now possible to have cyclic declarations: 
+        a class that contains variables of type class which in turn contains variables
+        of the original class.  In fact, since all variables of type class are now 
+        treated as pointers or references, it is possible to declare a class that includes
+        variables of the same class type.	Note that the syntax must be such that the 
+        possible infinite loop of <code>get()</code> or <code>put()</code> calls is 
+        properly terminated.  The translator can optionally check for such cyclic 
+        references and warn about them (see the <code>-w</code> option for more details).</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="warn"><strong>Optional checks for potentially harmful constructs</strong></a></dt>
+  	<dd>The translator can optionally perform checks for constructs that can be sources
+        of potential problems (see the <code>-w</code> option). This includes use of
+        variables that have as a type an abstract polymorphic classes for which no 
+        derived classes were provided (in which case no proper ID is available), cyclic
+        declarations which can potentially generate infinite loop of <code>get()</code> 
+        or <code>put()</code> calls, as well as looped file inclusions (see 
+        <code>%include</code> and <code>%import</code> directives
+        <a href="#include">above</a>).</dd>
+  	<dt>&nbsp;</dt>
+  
+  	<dt><a name="newverbatim"><strong>New set of verbatim code options</strong></a></dt>
+	<dd>The verbatim code directives (e.g., %{ and %}) have been significantly expanded
+        giving full control on where the code will be placed.  See the 
+        <a target="_top" href="manual/manual.htm">user's manual</a> for more 
+        information on the available options.</dd>
+  	<dt>&nbsp;</dt>
+ 
+  	<dt><a name="newtracing"><strong>New tracer features</strong></a></dt>
+  	<dd>The tracer now puts a '<code>*</code>' in the trace after the name of a variable
+        that uses look-ahead parsing.  It also outputs an '<code>ERROR</code>' string in
+        cases of bitstream syntax errors, so that one can easily search for syntax
+        problems in voluminous traces.</dd>
+  	<dt>&nbsp;</dt>
+ 
+  	<dt><a name="newrtlib"><strong>Additions to the run-time library</strong></a></dt>
+  	<dd>The run-time library has been extended with <code>snextbits()</code> and 
+        <code>sgetbits()</code> methods that do sign extension.  Also, the 
+        <code>align()</code> method now returns the number of bits skipped.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="globalvars"><strong>Global scope variables</strong></a></dt>
+  	<dd>Global scope variables are declared as <code>extern</code> in the 
+        <code>.h</code> file, and are defined in the <code>.cpp</code> file.</dd>
+	<dt>&nbsp;</dt>
+  
+  	<dt><a name="newoutputdir"><strong>New output directory rules</strong></a> </dt>
+  	<dd>The translator's output is now placed in the directory where 
+        <code>flavorc</code> is run, instead of the	directory where the 
+        source <code>.fl</code> file is located.</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="newmaxarray"><strong>New handling of maximum array size</strong></a></dt>
+  	<dd>In order to make handing of the maximum array size similar to other 
+        <code>%pragma</code> statements inthe presence of 
+        <code>%include</code>/<code>%import</code> directives, the defined constant 
+  	    <code>_F_SIZE</code> is no longer used in the generated C++ code. This 
+        approach was not usable in Java	anyway.  The translator now outputs at the
+        beginning of the file an informative comment on the value used,	and still 
+        keeps track of the current value (so that warning messages can be issued 
+        when the value is exceeded).  However, it cannot automatically increase the
+        value, since deciding where to place the increase is complicated by the
+        <code>%include</code>/<code>%import</code> directives.  It is up to the
+  	    user to select the proper location.</dd>
+  	<dt>&nbsp;</dt>
+
+	<dt><a name="includes"><strong>Optional generation of include directives</strong></a></dt>
+	<dd>Added new option (<code>-i</code>) to disable generation of include directives
+        in C++ <code>.cpp</code> file.  The user is then responsible for issuing the
+        required include using verbatim code.	This is needed when generating code to
+        be used, for example, with the Microsoft MFC library, which requires that the
+	    "<code>stdafx.h</code>" file is included before any others. This can also be 
+        controlled by the new  pragma directives <code>includes</code>/<code>noincludes</code>.
+        The last directive will apply to the entire file.  This option is also used for
+        Java, for the <code>import</code> statements.</dd>
+	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="whatsnew2.1">What's new in Version 2.1</a></h2>
+<p>The following is the list of the new features in Version 2.1 from Version 2.0.</p>
+<dl>
+  	<dt><a name="platforms"><strong>Unix support</strong></a></dt>
+  	<dd>In addition to Windows NT and 95, all popular version of Unix are now 
+        supported.  In particular, distribution sets are available for SunOS,
+        Solaris, IRIX, HP-UX, AIX, FreeBSD, and Linux.</dd>
+  	<dt>&nbsp;</dt>
+  	
+  	<dt><a name="tracing"><strong>Tracing support</strong></a></dt>
+  	<dd>The translator now has a new option (<code>-t</code>) to output tracing 
+        code.  Totally transparently to the programmer, this will cause a detailed 
+        dump of an input bitstream to be output. This is extremely useful for 
+        development and debugging purposes.</dd>
+  	<dt>&nbsp;</dt>
+  
+  	<dt><a name="pragma"><strong>Pragma statements</strong></a></dt>
+	<dd>The translator now accepts <code>pragma</code> statements, i.e., special commands 
+        inserted in the source file that trigger option settings in the translator itself.
+        These statements are introduced using the keyword <code>%pragma</code>.  Almost 
+        all command line options can now be set using these statements.  There are
+	    three cases worth mentioning where this is especially useful.
+      <ol>
+      <li>For selective generation of <code>put()</code> or <code>get()</code> methods for 
+          each of the defined classes (e.g., using: <code>%pragma put, noget</code>).<br></li>
+      <li>For fine-tuning the size of arrays: using <code>%pragma array=<em>number</em></code>,
+          one can selectively use a very large array without requiring all arrays on the same
+          file to have the same size.<br></li>
+      <li>For selectively triggering tracing of just a particular class (surrounding it by 
+          <code>%pragma trace</code> and <code>%pragma notrace</code>). This can help minimize
+          clutter from other classes in the trace dump.</li>
+      </ol>	</dd>
+  	<dt>&nbsp;</dt>
+
+  	<dt><a name="globals"><strong>No global variables</strong></a></dt>
+  	<dd>The translator now uses no global variables (previously some needed temporary
+        variables were given global scope).  This is useful especially for 
+        multi-threaded applications. Overall variable use has been reduced as well.</dd>
+  	<dt>&nbsp;</dt>
+  
+  	<dt><a name="doc"><strong>New documentation</strong></a></dt>
+  	<dd>The documentation has now been expanded and improved, to help you use the 
+        software to its maximum potential as quickly as possible.</dd>
+	<dt>&nbsp;</dt>
+</dl>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+<p align="center" class="notice"><a href='copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>
+

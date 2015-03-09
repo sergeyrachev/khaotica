@@ -1,0 +1,103 @@
+<html>
+
+<head>
+<title>Scoping Rules</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3><strong>6. Scoping Rules</strong></h3>
+
+<p>
+The scoping rules that Flavor uses are identical with C++ and Java, with the exception of parsable variables.
+</p>
+
+<p>
+As in C++ and Java, a new scope is introduced with curly braces (<code>{}</code>). Since Flavor does not have 
+functions or methods, a scope can either be the global one or a scope within a class declaration.
+</p>
+
+<p>
+The global scope cannot contain any parsable variable, since it does not belong to any object. As a result, global 
+variables can only be constants.
+</p>
+
+<p>
+Within a class, all parsable variables are considered as class member variables, regardless of the scope they are 
+encountered in. This is essential in order to allow conditional declarations of variables which will almost always 
+require that the actual declarations occur within compound statements. Non-parsable variables that occur in the
+top-most class scope are also considered class member variables. The rest live within their individual scopes.
+</p>
+
+<p>
+This distinction is important in order to understand which variables are accessible to a class variable that is 
+contained in another class. The issues are illustrated in the following example.
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>class A {
+    int i = 1;
+    int(2) a;
+    if (a == 2) {
+        int j = i;    
+        int i = 2; // hides i, ok
+        int a;     // hides a, error
+    } 
+}
+    
+class B {
+    A a;
+    a.j = 1;       // error, j not in a
+    int j = a.a+1; // ok
+    j = a.i+2;     // ok
+    int(3) b;
+}</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+Looking at class <code>A</code>, the initial declaration of <code>i</code> occurs in
+the top-most class scope; as a result <code>i</code> is a class member. The variable <code>a</code> 
+is declared as a parsable variable, and hence it is automatically a class member variable.
+The declaration of <code>j</code> occurs in the scope enclosed by the <code>if</code>
+statement; as this is not the top-level scope, <code>j</code> is not a class member. The
+following declaration of <code>i</code> is acceptable; the original one is hidden within
+that scope. Finally, the declaration of the variable <code>a</code> as a non-parsable
+would hide the parsable version. As parsable variables do not obey scoping rules, this is
+not allowed (hiding parsable variables of a base class, however, is allowed).
+</p>
+
+<p>
+Looking now at the declaration of class <code>B</code> which contains a variable of
+type <code>A</code>, it becomes clear which variables are available as class members.
+</p>
+
+<p>
+Variables that have as their type a forward-declared class are considered parsable,
+regardless if the actual definition turns out to be parsable or not.
+</p>
+
+<p>
+In summary, the scoping rules have the following two special considerations. Parsable
+variables do not obey scoping rules and are always considered class members. Non-parsable
+variables obey the standard scoping rules and are considered class members only if they are
+at the top-level scope of the class.
+</p>
+
+<p>
+Note that parameter type variables are considered as having the top-level scope of the
+class. Also, they are not allowed to hide the object identifier, if any.
+</p>
+
+
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

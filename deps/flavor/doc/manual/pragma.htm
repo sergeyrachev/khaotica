@@ -1,0 +1,171 @@
+<html>
+
+<head>
+
+<title>Pragma Statements</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3>5. Pragma Statements</h3>
+
+<p>
+Pragma statements are used as a mechanism for setting translator options from inside a Flavor source
+file. This allows modification of translation parameters without modifying the makefile that builds
+the user's program, but - more importantly - it allows very fine control on which translation options
+are applied to each class, or even variable. Almost all command-line options have pragma equivalents.
+The ones excluded were not considered useful for specification within a source file.
+</p>
+
+<p>
+Pragma statements are introduced with the <code>%pragma</code> directive. It can appear wherever a 
+statement or declaration can. It can contain one or more settings, separated by commas, and it cannot 
+span more than one line. After a setting is provided, it will be used for the remainder of the Flavor
+file, unless overridden by a different pragma setting. In other words, pragma statements do <em>not</em>
+follow the scope of Flavor code.
+</p>
+
+<p>
+A pragma statement that is included in a class will affect not only the class where it is contained but
+<em>all</em> classes declared after it. An example is provided below.
+</p>
+
+<p>
+The following table summarizes the correspondence between command line options and pragma settings. The
+prefix '<code>no</code>' in front of an option, when applicable, disables that option.
+</p>
+
+<table border="1" width="100%" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" bgcolor="#FFFFFF">
+  <tr>
+    <td width="15%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Command Line</span></font></td>
+    <td width="20%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Pragma</span></font></td>
+    <td width="65%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Notes</span></font></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-g</code></td>
+    <td width="20%" valign="top"><code>get<br>noget</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Controls if a <code>get()</code> method is generated.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-p</code></td>
+    <td width="20%" valign="top"><code>put<br>noput</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Controls if a <code>put()</code> method is generated.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-x</code></td>
+    <td width="20%" valign="top"><code>putxml<br>noputxml</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Controls if a <code>putxml()</code> method is generated.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-t</code></td>
+    <td width="20%" valign="top"><code>trace<br>notrace</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Controls if tracing code is generated in the <code>get()</code> method.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-l</code></td>
+    <td width="20%" valign="top"><code>line<br>noline</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Controls line number output information for verbatim code.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-a num</code></td>
+    <td width="20%" valign="top"><code>array = num</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Sets maximum array size.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-s</code></td>
+    <td width="20%" valign="top"><code>nullstrings<br>nonullstrings</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Stores the strings as arrrays with null</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-i</code></td>
+    <td width="20%" valign="top"><code>includes<br>noincludes</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Generates include directives when for C++ code</span></td>
+  </tr>
+  
+  <tr>
+    <td width="15%" valign="top"><code>-B string</code></td>
+    <td width="20%" valign="top"><code>bitstream = &quot;string&quot;</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Sets the name for the bitstream I/O class.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-F string</code></td>
+    <td width="20%" valign="top"><code>prefix = &quot;string&quot;</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Sets the prefix for Flavor-generated internal variables.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-E string</code></td>
+    <td width="20%" valign="top"><code>efunc = &quot;string&quot;</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Sets the name for the bitstream syntax error reporting function.</span></td>
+  </tr>
+  <tr>
+    <td width="15%" valign="top"><code>-T string</code></td>
+    <td width="20%" valign="top"><code>tfunc = &quot;string&quot;</code></td>
+    <td width="65%" valign="top"><span class="ExampleText">Sets the name for the tracing function.</span></td>
+  </tr>
+</table>
+
+<p>
+The following shows an example of the use of pragma statements.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>Example of Pragma Statements</caption>
+<tr><td width="100%"><code>
+<pre>// Activate both put and get, generate tracing code, and set array size to 128
+%pragma put, get, trace, array=128
+
+class Example {
+    // No put() method needed
+    %pragma noput
+
+    unsigned int(10) length;
+
+    // Switch array size to 1024
+    %pragma array=1024
+
+    char(3) data[length];
+
+    // Switch array size back to 128
+    %pragma array=128
+
+    // Use custom tracer
+    %pragma trace=&quot;Tracer.trace&quot;
+}
+
+// The settings above are still active here!</pre>
+</code></td></tr>
+</table>
+
+<p>
+Here we start off setting the generation of both <code>get()</code> and <code>put()</code> methods,
+enabling tracing and setting the maximum array size to 128 elements. Inside the <code>Example</code>
+class, we disable the <code>put()</code> method output. This class reads a chunk of data, which is
+preceded by its size (<code>length</code>, a 10-bit quantity). This means that the largest possible
+buffer size is 1024 elements. Hence for the <code>data</code> array that immediately follows, we set
+the array size to 1024, and then switch it back to the default of 64.
+</p>
+
+<p>
+Finally, at the end of the class we select a different tracing function name; this function is really a 
+method of a clas, but this is irrelevant for the translator. Since this directive is used when the 
+<code>get()</code> method code is produced, it will affect the entire class despite the fact that it is 
+declared at its end.
+</p>
+
+<p>
+Note that these pragma settings remain in effect even after the end of the <code>Example</code> class.
+</p>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

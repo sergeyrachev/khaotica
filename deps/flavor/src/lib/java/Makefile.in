@@ -1,0 +1,42 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+# Danny Hong <danny@ee.columbia.edu>
+
+# Makefile for Flavor run-time library - Java
+
+# Parameters
+prefix   = @prefix@
+jlibdir  = $(prefix)/lib/java
+fjlibdir = $(jlibdir)/flavor
+
+SRC = .
+
+CLASSES = \
+    $(fjlibdir)/PrintfFormat.class \
+    $(fjlibdir)/FlIOException.class \
+    $(fjlibdir)/IBitstream.class \
+    $(fjlibdir)/Bitstream.class \
+    $(fjlibdir)/MapResult.class \
+    $(fjlibdir)/Util.class \
+    $(fjlibdir)/XML.class
+
+
+all: $(CLASSES) 
+
+# Target for classes
+
+$(fjlibdir)/%.class: $(SRC)/%.java
+	javac -classpath $(jlibdir) -d $(jlibdir) $?
+    
+clean:
+	rm -r -f *.class
