@@ -1,9 +1,17 @@
 
-#include <stdlib.h>
-#include <stdio.h>
+class IBitstream {
+public:     
+    void get(){
 
-int main( int argc, char* argv[] ) {
-    const char* p = "Hello, World";
-    printf( "%s", p );
-    return 0;
-}
+    }
+};
+
+class Data {
+public:
+    int field;
+
+    void read(IBitstream* bs) {
+
+    }
+};
+
