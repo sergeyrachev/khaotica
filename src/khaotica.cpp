@@ -80,13 +80,14 @@ int main( int argc, char* argv[] ) {
     auto compiler(std::make_shared<CompilerInstance>());
     compiler->createDiagnostics(); // to stdout
     assert(compiler->hasDiagnostics());
-    compiler->getFrontendOpts().Inputs.push_back({ "microuniverse.cpp", IK_CXX });
 
+    compiler->getFrontendOpts().Inputs.push_back({ "microuniverse.cpp", IK_CXX });
     compiler->getFrontendOpts().OutputFile = "ast.xml";
     compiler->getTargetOpts().Triple = "i686"; // x86, alpha, ppc, ppc64, ...
     compiler->getLangOpts().CPlusPlus = 1;
-    std::shared_ptr<FrontendAction> action(std::make_shared<ASTPrintAction>());
+    
+    std::shared_ptr<FrontendAction> action(std::make_shared<ASTDeclListAction>());
 
     bool actionSuccessful = compiler->ExecuteAction(*action);
-    assert(actionSuccessful);
+    assert(actionSuccessful);   
 }
