@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Output Files">
+      <UniqueIdentifier>{67708900-4857-4866-b2c1-924a4f0e8b1f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\khaotica.cpp">
@@ -21,5 +24,10 @@
     <ClCompile Include="..\bin\microuniverse.cpp">
       <Filter>Resource Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\bin\ast.xml">
+      <Filter>Output Files</Filter>
+    </Xml>
   </ItemGroup>
 </Project>
