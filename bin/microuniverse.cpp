@@ -1,17 +1,5 @@
 
-class IBitstream {
-public:     
-    void get(){
 
-    }
-};
-
-class Data {
-public:
-    int field;
-
-    void read(IBitstream* bs) {
-
-    }
-};
-
+int foo( int a, int b) {
+    return a + b;
+}
