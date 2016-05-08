@@ -67,7 +67,7 @@ int main( int argc, char* argv[] ) {
 
     po::positional_options_description _pos_opt_desc;
     _pos_opt_desc.add( "input", 1 );
-    _pos_opt_desc.add( "flavor", std::numeric_limits<int>::max() );
+    _pos_opt_desc.add( "flavor", -1);
 
     po::variables_map varmap;
     if( !process_arguments( argc, argv, _opt_desc, _pos_opt_desc, varmap ) ) {
@@ -83,7 +83,7 @@ int main( int argc, char* argv[] ) {
     compiler->getFrontendOpts().Inputs.push_back({ "microuniverse.cpp", IK_CXX });
 
     compiler->getFrontendOpts().OutputFile = "ast.xml";
-    compiler->getTargetOpts().Triple = "x86"; // x86, alpha, ppc, ppc64, ...
+    compiler->getTargetOpts().Triple = "i686"; // x86, alpha, ppc, ppc64, ...
     compiler->getLangOpts().CPlusPlus = 1;
     std::shared_ptr<FrontendAction> action(std::make_shared<ASTPrintAction>());
 
