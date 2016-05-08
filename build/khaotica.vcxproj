@@ -70,6 +70,9 @@
     </ClCompile>
     <ClCompile Include="..\src\khaotica.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\bin\ast.xml" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
