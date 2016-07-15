@@ -92,6 +92,8 @@ int main( int argc, char* argv[] ) {
         return 1;
     }
 
+    const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
+    std::cout << input_definition_filename << std::endl;
 //     using namespace clang;
 //     using namespace llvm;
 // 
