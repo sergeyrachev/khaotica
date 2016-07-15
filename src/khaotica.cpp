@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/make_shared.hpp>
@@ -33,8 +34,24 @@
 #include <clang/Parse/ParseAST.h>
 #include <clang/Parse/Parser.h>
 #include <clang/Sema/Sema.h>
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/ExecutionEngine/MCJIT.h>
+#include <llvm/Support/TargetSelect.h>
+#include "llvm/Bitcode/ReaderWriter.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/Support/raw_ostream.h"
 
 bool process_arguments( int argc, char* argv[], const boost::program_options::options_description& _opt_desc, const boost::program_options::positional_options_description& _pos_opt_desc, boost::program_options::variables_map& varmap ) {
     namespace po = boost::program_options;
@@ -90,4 +107,42 @@ int main( int argc, char* argv[] ) {
 
     bool actionSuccessful = compiler->ExecuteAction(*action);
     assert(actionSuccessful);   
+
+
+
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
+
+    llvm::LLVMContext Context;
+
+    // Create the "module" or "program" or "translation unit" to hold the
+    // function
+    auto M = std::make_unique<llvm::Module>("test", Context);
+
+    Function *F = cast<Function>(M->getOrInsertFunction("main", llvm::Type::getInt32Ty(Context), llvm::Type::getInt32Ty(Context), nullptr));
+    // Add a basic block to the function... again, it automatically inserts
+    // because of the last argument.
+    llvm::BasicBlock *BB = llvm::BasicBlock::Create(Context, "EntryBlock", F);
+
+    // Get pointers to the constant integers...
+    llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2);
+    llvm::Value *Three = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 3);
+
+    // Create the add instruction... does not insert...
+    llvm::Instruction *Add = llvm::BinaryOperator::Create(llvm::Instruction::Add, Two, Three, "addresult", BB);
+
+
+    // Create the return instruction and add it to the basic block
+    BB->getInstList().push_back(ReturnInst::Create(Context, Add));
+
+    M->dump();
+    
+        
+    auto execution_engine = llvm::EngineBuilder(std::move(M)).create();
+    auto ret = execution_engine->runFunctionAsMain(F, std::vector<std::string>(), nullptr);
+
+   
+    return 0;
+
 }
