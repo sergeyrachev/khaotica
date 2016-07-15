@@ -25,9 +25,4 @@
       <Filter>Resource Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Xml Include="..\bin\ast.xml">
-      <Filter>Output Files</Filter>
-    </Xml>
-  </ItemGroup>
 </Project>
