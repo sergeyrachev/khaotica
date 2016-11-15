@@ -65,7 +65,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\grammar\lex.yy.cc" />
+    <ClCompile Include="..\src\grammar\parser.tab.cc" />
     <ClCompile Include="..\src\khaotica.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\grammar\location.hh" />
+    <ClInclude Include="..\src\grammar\parser.tab.hh" />
+    <ClInclude Include="..\src\grammar\position.hh" />
+    <ClInclude Include="..\src\grammar\stack.hh" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\grammar\lexer.l" />
+    <None Include="..\src\grammar\parser.y" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
