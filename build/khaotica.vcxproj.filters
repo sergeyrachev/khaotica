@@ -10,5 +10,29 @@
     <ClCompile Include="..\src\khaotica.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\grammar\lex.yy.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\grammar\parser.tab.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\grammar\location.hh">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\grammar\parser.tab.hh">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\grammar\position.hh">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\grammar\stack.hh">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\grammar\lexer.l" />
+    <None Include="..\src\grammar\parser.y" />
   </ItemGroup>
 </Project>

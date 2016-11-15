@@ -1,53 +1,69 @@
-#include <iostream>
-
 #include <boost/program_options.hpp>
-//#include <boost/uuid/uuid_io.hpp>
-//#include <boost/make_shared.hpp>
-// #include <boost/date_time.hpp>
-// #include <boost/rational.hpp>
-// #include <boost/limits.hpp>
-// #include <boost/foreach.hpp>
-// #include <boost/uuid/string_generator.hpp>
-// #include <boost/thread/thread.hpp>
-// #include <boost/thread/locks.hpp>
-// #include <boost/algorithm/hex.hpp>
-// #include <boost/chrono.hpp>
-// 
-// #include <clang/AST/ASTConsumer.h>
-// #include <clang/AST/ASTContext.h>
-// #include <clang/AST/DeclVisitor.h>
-// #include <clang/Basic/Builtins.h>
-// #include <clang/Basic/Diagnostic.h>
-// #include <clang/Basic/FileManager.h>
-// #include <clang/Basic/IdentifierTable.h>
-// #include <clang/Basic/SourceManager.h>
-// #include <clang/Basic/TargetInfo.h>
-// #include <clang/Frontend/CompilerInstance.h>
-// #include <clang/Frontend/FrontendActions.h>
-// #include <clang/Frontend/TextDiagnosticBuffer.h>
-// #include <clang/Lex/HeaderSearch.h>
-// #include <clang/Lex/Preprocessor.h>
-// #include <clang/Parse/ParseAST.h>
-// #include <clang/Parse/Parser.h>
-// #include <clang/Sema/Sema.h>
-// 
-// #include <llvm/IR/LLVMContext.h>
-// #include <llvm/Support/Casting.h>
-// #include <llvm/IR/DerivedTypes.h>
-// #include <llvm/IR/LLVMContext.h>
-// #include <llvm/IR/Module.h>
-// #include <llvm/IR/IRBuilder.h>
-// #include <llvm/ExecutionEngine/ExecutionEngine.h>
-// #include <llvm/ExecutionEngine/GenericValue.h>
-// #include <llvm/ExecutionEngine/MCJIT.h>
-// #include <llvm/Support/TargetSelect.h>
-// #include "llvm/Bitcode/ReaderWriter.h"
-// #include "llvm/IR/Constants.h"
-// #include "llvm/IR/DerivedTypes.h"
-// #include "llvm/IR/Instructions.h"
-// #include "llvm/IR/LLVMContext.h"
-// #include "llvm/IR/Module.h"
-// #include "llvm/Support/raw_ostream.h"
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/date_time.hpp>
+#include <boost/rational.hpp>
+#include <boost/limits.hpp>
+#include <boost/foreach.hpp>
+#include <boost/uuid/string_generator.hpp>
+#include <boost/thread/thread.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/algorithm/hex.hpp>
+#include <boost/chrono.hpp>
+
+#include <clang/AST/ASTConsumer.h>
+#include <clang/AST/ASTContext.h>
+#include <clang/AST/DeclVisitor.h>
+#include <clang/Basic/Builtins.h>
+#include <clang/Basic/Diagnostic.h>
+#include <clang/Basic/FileManager.h>
+#include <clang/Basic/IdentifierTable.h>
+#include <clang/Basic/SourceManager.h>
+#include <clang/Basic/TargetInfo.h>
+#include <clang/Frontend/CompilerInstance.h>
+#include <clang/Frontend/FrontendActions.h>
+#include <clang/Frontend/TextDiagnosticBuffer.h>
+#include <clang/Lex/HeaderSearch.h>
+#include <clang/Lex/Preprocessor.h>
+#include <clang/Parse/ParseAST.h>
+#include <clang/Parse/Parser.h>
+#include <clang/Sema/Sema.h>
+
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/Casting.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/ExecutionEngine/MCJIT.h>
+#include <llvm/Support/TargetSelect.h>
+#include "llvm/Bitcode/ReaderWriter.h"
+#include "llvm/IR/Constants.h"
+#include "llvm/IR/DerivedTypes.h"
+#include "llvm/IR/Instructions.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/Module.h"
+#include "llvm/ADT/STLExtras.h"
+#include "llvm/Analysis/BasicAliasAnalysis.h"
+#include "llvm/Analysis/Passes.h"
+#include "llvm/IR/DIBuilder.h"
+#include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/IR/Module.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Support/raw_ostream.h"
+
+#include <cctype>
+#include <cstdio>
+#include <map>
+#include <string>
+#include <vector>
+#include <iostream>
 
 bool is_args_valid( int argc, char* argv[], const boost::program_options::options_description& opt_desc, const boost::program_options::positional_options_description& pos_opt_desc, boost::program_options::variables_map& varmap ) {
     namespace po = boost::program_options;
@@ -79,9 +95,6 @@ int main( int argc, char* argv[] ) {
     opt_desc.add_options( )
         ( "help,h", "Produce this message" )
         ( "input-definition,i", po::value<std::string>( )->required(), "Flavor definition for input bitstream" )
-        ( "output-definition,o", po::value<std::string>(), "Flavor definition for output bitstream")
-        ( "input-bitstream,I", po::value<std::string>( ), "Input bitstream" )
-        ( "output-bitstream,O", po::value<std::string>(), "Output bitstream")
        ;
 
     po::positional_options_description pos_opt_desc;
