@@ -65,19 +65,58 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\grammar\lex.yy.cc" />
-    <ClCompile Include="..\src\grammar\parser.tab.cc" />
+    <ClCompile Include="..\src\grammar\carray.c" />
+    <ClCompile Include="..\src\grammar\cbac.c" />
+    <ClCompile Include="..\src\grammar\cclass.c" />
+    <ClCompile Include="..\src\grammar\cexpr.c" />
+    <ClCompile Include="..\src\grammar\cgetput.c" />
+    <ClCompile Include="..\src\grammar\check.c" />
+    <ClCompile Include="..\src\grammar\cid.c" />
+    <ClCompile Include="..\src\grammar\cmap.c" />
+    <ClCompile Include="..\src\grammar\compile.c" />
+    <ClCompile Include="..\src\grammar\cout.c" />
+    <ClCompile Include="..\src\grammar\cpragma.c" />
+    <ClCompile Include="..\src\grammar\ctrace.c" />
+    <ClCompile Include="..\src\grammar\cvar.c" />
+    <ClCompile Include="..\src\grammar\cverbatim.c" />
+    <ClCompile Include="..\src\grammar\cxml.c" />
+    <ClCompile Include="..\src\grammar\error.c" />
+    <ClCompile Include="..\src\grammar\eval.c" />
+    <ClCompile Include="..\src\grammar\lex.yy.c" />
+    <ClCompile Include="..\src\grammar\ptree.c" />
+    <ClCompile Include="..\src\grammar\symbol.c" />
+    <ClCompile Include="..\src\grammar\util.c" />
+    <ClCompile Include="..\src\grammar\y.tab.c" />
     <ClCompile Include="..\src\khaotica.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\grammar\location.hh" />
-    <ClInclude Include="..\src\grammar\parser.tab.hh" />
-    <ClInclude Include="..\src\grammar\position.hh" />
-    <ClInclude Include="..\src\grammar\stack.hh" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\grammar\lexer.l" />
     <None Include="..\src\grammar\parser.y" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\grammar\carray.h" />
+    <ClInclude Include="..\src\grammar\cbac.h" />
+    <ClInclude Include="..\src\grammar\cclass.h" />
+    <ClInclude Include="..\src\grammar\cexpr.h" />
+    <ClInclude Include="..\src\grammar\cgetput.h" />
+    <ClInclude Include="..\src\grammar\check.h" />
+    <ClInclude Include="..\src\grammar\cid.h" />
+    <ClInclude Include="..\src\grammar\cmap.h" />
+    <ClInclude Include="..\src\grammar\compile.h" />
+    <ClInclude Include="..\src\grammar\cout.h" />
+    <ClInclude Include="..\src\grammar\cpragma.h" />
+    <ClInclude Include="..\src\grammar\ctrace.h" />
+    <ClInclude Include="..\src\grammar\cvar.h" />
+    <ClInclude Include="..\src\grammar\cverbatim.h" />
+    <ClInclude Include="..\src\grammar\cxml.h" />
+    <ClInclude Include="..\src\grammar\error.h" />
+    <ClInclude Include="..\src\grammar\eval.h" />
+    <ClInclude Include="..\src\grammar\globals.h" />
+    <ClInclude Include="..\src\grammar\port.h" />
+    <ClInclude Include="..\src\grammar\ptree.h" />
+    <ClInclude Include="..\src\grammar\symbol.h" />
+    <ClInclude Include="..\src\grammar\util.h" />
+    <ClInclude Include="..\src\grammar\y.tab.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
