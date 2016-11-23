@@ -1,0 +1,8 @@
+[requires]
+Boost/1.60.0@lasote/stable
+llvm/3.8.0@smspillaz/stable
+clang/3.8.0@smspillaz/stable
+
+[generators]
+cmake
+
