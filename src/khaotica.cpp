@@ -37,7 +37,6 @@
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/ExecutionEngine/MCJIT.h>
 #include <llvm/Support/TargetSelect.h>
 #include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/IR/Constants.h"
