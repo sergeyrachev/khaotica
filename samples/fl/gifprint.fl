@@ -1,0 +1,254 @@
+/*
+ * Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and 
+ * Yuntai Kyong.
+ *
+ * This file is part of Flavor, developed at Columbia University
+ * (http://flavor.sourceforge.net).
+ *
+ * Flavor is free software; you can redistribute it and/or modify
+ * it under the terms of the Flavor Artistic License as described in
+ * the file COPYING.txt. 
+ *
+ */
+
+/*
+ * Authors:
+ * Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+ * Danny Hong <danny@ee.columbia.edu>
+ * Yuntai Kyong <yuntaikyong@ieee.org>
+ *
+ */
+
+/*
+ * This example will read the header of a GIF87a file and print its values. 
+ *
+ * To make sure that our print statements are called at the right time,
+ * we insert them as verbatim statements in the syntax (within %g{ and %g}
+ * markers, since the code should go into the get() method).  We also declare
+ * the print methods using %.c{ and %.c} (in case of C++) and %.j{ and %.j} 
+ * (in case of Java).  We have put the actual definitions in the file 
+ * 'gif_aux.cpp' in case of C++, in case of Java, the definitions are directly
+ * placed within the delimiters (%.j{ and %.j}). 
+ *
+ * For convenience, we include the GIF87a spec (gif87a.txt) in case you want
+ * to refresh your memory.
+ *
+ * WARNING: You *must* set the maximum array size to at least 256 (-a option
+ *          in the translator), otherwise the colormap arrays may overflow.
+ *          You can also do that using a 'pragma' statement as shown below.
+ */
+
+
+// Set array size to 256
+%pragma array=256
+
+// Color map entries
+class ColorEntry {
+    unsigned int(8) r;
+    unsigned int(8) g;
+    unsigned int(8) b;
+
+    // This will be called at exactly this point within the get() method
+    %g{ 
+	print(); %g}
+
+    // Declare our print member function for C++ and Java, respectively
+    %.c{
+    // The actual implementation of the method is defined in the gif_aux.cpp file
+    void print(); %.c}
+	%.j{
+    void print() { System.out.println("\tr: " + r + "\tg: " + g + "\tb: " + b); } %.j}
+}
+
+// Color maps (argument is bits/pixel)
+class ColorMap(unsigned int bpp) {
+    %g{ 
+    print(); %g}
+
+    aligned ColorEntry color[1<<bpp];
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() { System.out.println("Color Map:"); } %.j}
+}
+
+// Screen descriptor
+class ScreenDescriptor {
+    // GIF uses LSB ordering
+    little unsigned int(16) width;
+    little unsigned int(16) height; 
+    
+    // This flag is set if a global color map follows the descriptor
+    bit(1) M;
+
+    // The color resolution minus 1
+    unsigned int(3) cr;
+
+    // The marker (always 0)
+    bit(1) marker = 0;
+
+    // The bits/pixel in image minus 1
+    unsigned int(3) pixel;
+
+    // The index of background color
+    unsigned int(8) background;
+
+    %g{
+	print(); %g}
+
+    // If M is set, we have a global colormap; its size is 2**(pixel+1)
+    if (M != 0) {
+        ColorMap globalColorMap(pixel+1);
+    }
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() {
+    	System.out.println("Screen Descriptor:");
+		System.out.println("\twidth: " + width);
+		System.out.println("\theight: " + height);
+		System.out.println("\tM: " + M);
+		System.out.println("\tcr: " + cr);
+		System.out.println("\tmarker: " + marker);
+		System.out.println("\tpixel: " + pixel);
+		System.out.println("\tbackground: " + background);
+    } %.j}
+}
+
+// Extension block (signalled by '!')
+class ExtensionBlock {
+    unsigned int(8) function_code;
+
+    // Keep track of total (this is not needed, but it's useful to print out)
+    int total = 0;
+
+    do {
+        unsigned int(8) byte_count;
+        total += byte_count;
+        if (byte_count != 0) {
+            unsigned int i;
+            for (i=0; i<byte_count; i++) {
+                unsigned int(8) data;
+            }
+        }
+    } while (byte_count != 0);
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() {
+    	System.out.println("Extension Block:");
+		System.out.println("\tfunction_code : " + function_code);
+		System.out.println("\ttotal bytes: " + total);
+    } %.j}
+}
+
+// The image data 
+class ImageData {
+    // Code size
+    unsigned int(8) code_size;
+
+    // Keep track of total (this is not needed, but it's useful to print out)
+    int total = 0;
+
+    // Series of data blocks
+    do {
+        unsigned int(8) byte_count;
+        total += byte_count;
+        if (byte_count != 0) {
+            unsigned int i;
+            for (i=0; i<byte_count; i++) {
+                unsigned int(8) data;
+            }
+        }
+    } while (byte_count != 0);
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() {
+    	System.out.println("Image Data:");
+		System.out.println("\tcode_size: " + code_size);
+		System.out.println("\ttotal bytes: " + total);
+    } %.j}
+}
+
+// Image descriptor (signalled by ',')
+class ImageDescriptor {
+    // GIF uses LSB ordering
+    little unsigned int(16) left;
+    little unsigned int(16) top;
+    little unsigned int(16) width;
+    little unsigned int(16) height;
+    
+    /* If set, use local color map, and use 'pixel' below;
+     * otherwise ignore 'pixel' and use global colormap
+     */
+    bit(1) M;
+
+    // Interlace flag
+    bit(1) I;
+
+    // Three reserved bits; must be 0
+    bit(3) markers = 0;
+
+    // bits/pixel in this image minus 1 (valid only if M=1)
+    unsigned int(3) pixel;
+
+    // If M is set, we have a local colormap; its size is 2**(pixel+1)
+    if (M != 0) {
+        ColorMap localColorMap(pixel+1);
+    }
+
+    %g{
+    print(); %g}
+
+    // Image data
+    ImageData data;
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() {
+    	System.out.println("Image Descriptor:");
+		System.out.println("\tleft: " + left);
+		System.out.println("\ttop: " + top);
+		System.out.println("\twidth: " + width);
+		System.out.println("\theight: " + height);
+		System.out.println("\tM: " + M);
+		System.out.println("\tI: " + I);
+		System.out.println("\tmarkers: " + markers);
+		System.out.println("\tpixel: " + pixel);
+	} %.j}
+}
+
+class GIF87a {
+    // GIF signature
+    char(8) GIFsignature[6] = "GIF87a";
+
+    %g{
+    print(); %g}
+
+    // Screen descriptor
+    ScreenDescriptor sd;
+
+    // One or more image descriptors
+    do {
+        unsigned int(8) end;
+        
+        if (end == ',')    // We found an image descriptor
+            ImageDescriptor id;
+        if (end == '!')    // We found an extension block
+            ExtensionBlock eb;
+
+        // Everything else is ignored
+    } while (end != ';');   // ';' is the end-of-data marker
+
+    %.c{
+    void print(); %.c}
+    %.j{
+    void print() { System.out.println("GIF87a"); } %.j}
+}
+

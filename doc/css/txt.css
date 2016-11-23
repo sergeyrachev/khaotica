@@ -1,0 +1,48 @@
+/* standard styles */
+BODY { font-family: Verdana, Helvetica, sans-serif; }
+P    { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; MARGIN-LEFT: 8px;}
+H1#title {font-family: Verdana, Helvetica, sans-serif; color: white; vertical-alilgn: 605}
+H1   { font-family: Verdana, Helvetica, sans-serif; font-size: 18pt; font-weight: bold; MARGIN-LEFT: 8px;}
+H2   { font-family: Verdana, Helvetica, sans-serif; font-size: 16pt; font-weight: bold; MARGIN-LEFT: 8px;}
+H3   { font-family: Verdana, Helvetica, sans-serif; font-size: 14pt; font-weight: bold; MARGIN-LEFT: 8px;}
+H4   { font-family: Verdana, Helvetica, sans-serif; font-size: 12pt; font-weight: bold; MARGIN-LEFT: 8px;}
+H5   { font-family: Verdana, Helvetica, sans-serif; font-size: 10pt; font-weight: bold; MARGIN-LEFT: 8px;}
+H6   { font-family: Verdana, Helvetica, sans-serif; font-size: 10pt; font-style: italic; MARGIN-LEFT: 8px;}
+DL   { font-family: Verdana, Helvetica, sans-serif; font-size: 10pt; MARGIN-LEFT: 8px;}
+OL   { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; MARGIN-LEFT: 30px;}
+UL   { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; MARGIN-LEFT: 30px;}
+/*
+LI   { font-family: Verdana, Helvetica, sans-serif; font-size: 8pt; MARGIN-LEFT: 30px;}
+*/
+
+/* code examples */
+CODE { font-family: Courier New, Courier, monotype; font-size: 9pt }
+
+/* caption format */
+CAPTION { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; font-weight: bold;}
+
+/* code example table format  (yellow: FFFF7F, gray: CFCFCF) */
+.Example { background-color: CFCFCF; }
+.ExampleText { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt }
+.ExampleHeading { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; font-weight: bold; }
+
+/* syntax rule table format */
+.Syntax { background-color: BEFFCA; }
+.SyntaxText { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt }
+.SyntaxHeading { font-family: Verdana, Helvetica, sans-serif; font-size: 9pt; font-weight: bold; font-color: FFFFFF; background-color: 000000 }
+.Syntax TABLE CAPTION { font-color: FFFFFF; background-color: 000000; }
+
+/* copyright notice format */
+.Notice { font-family: Verdana, Helvetica, sans-serif; font-size: 8pt; }
+
+A { font-family: Verdana, Helvetica, sans-serif; COLOR: BLACK; TEXT-DECORATION: none; }
+A { TEXT-DECORATION: underline; }
+
+A#BACK { font-family: Verdana, Helvetica, sans-serif; COLOR: WHITE; TEXT-DECORATION: none; }
+A#BACK:hover { TEXT-DECORATION: underline; }
+
+
+
+
+
+
