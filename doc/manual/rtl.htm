@@ -1,0 +1,430 @@
+<html>
+
+<head>
+<title>Run-Time Library</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3>8. Run-Time Library</h3>
+
+<p>
+The run-time library provides low-level bitstream I/O facilities, as well as functions for 
+reporting bitstream syntax errors and generating trace information. Although the Flavor 
+translator could directly output the required code, using a thin library provides significant 
+benefits in terms of flexibility. For example, it is impossible to anticipate all possible I/O
+structures that might be needed by applications (network-based, multi-threaded, multiple 
+buffers, etc.). Attempting to provide a universal solution would be futile. By separating this
+layer from the core translator, programmers have the option of replacing parts of, or the entire
+layer with their own code. The only requirement is that this custom code provides an identical
+interface to the one needed by the translator.
+</p>
+
+<p>
+This interface is defined in a pure virtual class called <code>IBitstream</code>. This class
+contains all the methods that the translator expects from its supported underlying bitstream 
+I/O class.
+</p>
+
+<p>
+Based on the <code>IBitstream</code> class, we provide a complete run-time library that supports
+file-based input and output, as well as error reporting and tracing functions. As the source 
+code for the library is included in its entirety, customization can be performed quite easily. 
+Note that the library is just about 600 lines of code, demonstrating the simplicity of the 
+interface. We also provide information on how to rebuild the library, if needed. Custom library 
+can be built simply by deriving from the <code>IBitstream</code> class. This will ensure 
+compatibility with the translator.
+</p>
+
+<p>
+In the following, we document both the abtstract interface expected by the translator, as well
+as the components of the run-time library. Note that only the abstract interface is used by the
+translator. For example, the constructor for the bitstream I/O class is irrelevant for the 
+translated code, but of course an implementation is required in order to have a fully functional
+class. We thus indicate the interfaces required by the translator in <font color="#800040">
+red</font>, while the rest are shown in <font color="#008000">green</font>. These interfaces 
+(in <font color="#800040">red</font>) need to be provided by any custom code that interfaces to 
+the <code>flavorc</code>-generated code.
+</p>
+
+
+<h4><a name="ibitstream">8.1 IBitstream Interface</a></h4>
+
+<p>
+The <code>IBitstream</code> interface defines the methods that the translator expects from the 
+underlying class that performs bitstream I/O. Its definition is as follows (the <code>flavori.h
+</code> file contains the definition for the C++ library and the <code>IBitstream.java</code>
+file for the Java library).
+</p>
+
+<h5><strong>Methods</strong></h5>
+
+<dl> 
+  <dt><font color="#800040"><code>nextbits(int n)</code></font></dt>
+  <dd>Obtains the next <code>n</code> bits from the bitstream and returns them 
+      as an unsigned integer, but does not advance the bitstream pointer. Only supported 
+      for input bitstreams.</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#800040"><code>little_nextbits(int n)</code></font></dt>
+  <dd>This method is the same as the above method except that it obtains the bits from the 
+      bitstream using the little-endian method. That is, the least significant byte is obtained 
+      first</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#800040"><code>snextbits(int n)<br>
+                                  little_snextbits(int n)</code></font></dt>
+  <dd>Obtains the next <code>n</code> bits from the bitstream and returns them 
+      as a signed integer, but does not advance the bitstream pointer. Only supported 
+      for input bitstreams.</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#800040"><code>getbits(int n)<br>
+                                  little_getbits(int n)</code></font></dt>
+  <dd>Reads the next <code>n</code> bits from the bitstream and returns them as an unsigned 
+      integer. Only supported for input bitstreams.</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#800040"><code>sgetbits(int n)<br>
+                                  little_sgetbits(int n)</code></font></dt>
+  <dd>Reads the next <code>n</code> bits from the bitstream and returns them as a signed 
+      integer. Only supported for input bitstreams.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>putbits(unsigned int bits, int n)<br>
+                                  little_putbits(unsigned int bits, int n)</code></font></dt>
+  <dd>Outputs the unsigned integer value <code>bits</code> using <code>n</code> 
+      bits to the bitstream. Returns the value of <code>bits</code>. Only supported 
+      for output bitstreams.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>nextfloat(void)<br>
+                                  little_nextfloat(void)<br>
+                                  getfloat(void)<br>
+                                  little_getfloat(void)<br>
+                                  putfloat(void)<br>
+                                  little_putfloat(void)</code></font></dt>
+  <dd>This is equivalent to the <code>*nextbits</code>, <code>*getbits</code>, and 
+      <code>*putbits</code> methods, but for <code>float</code> quantities. In this implementation, 
+      floats are assumed to be represented by 32 bits.</dd>
+  <dt>&nbsp;</dt>
+ 
+  <dt><font color="#800040"><code>nextdouble(void)<br>
+                                  little_nextdouble(void)<br>
+                                  getdouble(void)<br>
+                                  little_getdouble(void)<br>
+                                  putdouble(void)<br>
+                                  little_putdouble(void)</code></font></dt>
+  <dd>This is equivalent to the <code>*nextbits</code>, <code>*getbits</code>, and 
+      <code>*putbits</code> methods, but for <code>double</code> quantities. In this implementation, 
+      doubles are assumed to be represented by 64 bits.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#800040"><code>nextldouble(void)<br>
+                                  little_nextldouble(void)<br>
+                                  getldouble(void)<br>
+                                  little_getldouble(void)<br>
+                                  putldouble(void)<br>
+                                  little_putldouble(void)</code></font></dt>
+  <dd>This is equivalent to the <code>*nextbits</code>, <code>*getbits</code>, and 
+      <code>*putbits</code> methods, but for <code>long double</code> quantities. In this implementation, 
+      long doubles are assumed to be represented by 64 bits.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>skipbits(int n)</code></font></dt>
+  <dd>Skips the next <code>n</code> bits from the bitstream. Supported in both input and output bitstreams.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>align(int n)</code></font></dt>
+  <dd>Aligns a bitstream to the closest following bitstream position that is a multiple of <code>n</code>. 
+      Note that <code>n</code> must be a multiple of 8. Supported in both input and output 
+      bitstreams.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>next(int n, int big, int sign, int alen)</code></font></dt>
+  <dd>Probes the next n bits (input) or returns 0 (output); in either case, the bitstream is 
+      (<code>alen</code>-bit) aligned. If <code>big</code>=0, then the number is represented using the 
+      little-endian method; otherwise, big-endian byte ordering is used. If <code>sign</code>=0, then no sign 
+      extension is used; otherwise, sign extension is used.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>nextcode(unsigned int code, int n, int alen)</code></font></dt>
+  <dd>Skips all bits upto, but excluding, the specified <code>code</code>.  The code is represented using
+      <code>n</code> bits and it is <code>alen</code>-bit aligned.</dd>
+  <dt>&nbsp;</dt>
+
+  <dt><font color="#800040"><code>getpos(void)</code></font></dt>
+  <dd>Returns the current position of a bitstream. Supported in both input and output bitstreams.</dd>
+  <dt>&nbsp;</dt>
+</dl>
+
+
+<h4><a name="bitstream">8.2 Bitstream Class</a></h4>
+
+<p>
+The <code>Bitstream</code> class is derived from the <code>IBitstream</code> interface, and
+provides basic bitstream I/O facilities in terms of reading or writing bits from/to a file.
+</p>
+
+<p>
+Note that this class only supports bistream I/O for quantities of length up to 32 bits (except 
+for <code>double</code> or <code>long double</code> quantities which have length 64 bits). This
+ensures that all bitstream manipulation is performed using integers, and is thus very fast.
+</p>
+
+
+<h5><a name="C++ Bitstream Class Construction">C++ Bitstream Class Construction/Destruction</a></h5>
+
+<p>
+The following documents the interface provided by the <code>Bitstream</code> class. We encourage
+the interested reader to review the actual definitions as given in the <code>bitstream.h</code>
+file of the run-time library, as additional methods may have become available since this text
+has been prepared.
+</p>
+
+<p>
+To facilitate the <code>Bitstream</code> class management, in addition to a set of constructors
+we also provide corresponding <code>Create()/Destroy()</code> methods. This allows the same 
+instance of a <code>Bitstream</code> class to be reused many times.
+</p>
+
+<dl>
+  <dt><font color="#008000"><code>Bitstream()</code></font></dt>
+  <dd>Create an unitialized bistream. Further initialization can be done using one of the
+      <code>Create()</code> methods indicated below.</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#008000"><code>Bitstream(const char *filename, Bitstream_t mode)</code></font></dt>
+  <dt><font color="#008000"><code>Create(const char *filename, Bitstream_t mode)</code></font></dt>
+  <dd>Create a bistream using the file name <code>filename</code>. <code>mode</code>
+      determines if it is an input (<code>BS_INPUT</code>) or output (<code>BS_OUTPUT</code>)
+      bitstream. A <code>Bitstream</code> object cannot simultaneously support input and output
+      modes. If the constructor fails, an error message will be printed to <code>stderr</code>
+      and the program will terminate.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>Bitstream(int fd, Bitstream_t mode)</code></font></dt>
+  <dt><font color="#008000"><code>Create(int fd, Bitstream_t mode)</code></font></dt>
+  <dd>Create a bistream using the file descriptor <code>fd</code>. <code>mode</code>
+      determines if it is an input (<code>BS_INPUT</code>) or output (<code>BS_OUTPUT</code>)
+      bitstream. A <code>Bitstream</code> object cannot simultaneously support input and output
+      modes. If the constructor fails, an error message will be printed to <code>stderr</code>
+      and the program will terminate.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>~Bitstream();</code></font></dt>
+  <dt><font color="#008000"><code>Destroy();</code></font></dt>
+  <dd>This method can be called to close a bitstream, and all pending data will be flushed. For both 
+      input and output bitstreams, if the file has been opened by the class, it will be closed before 
+      the function returns. This function is also called by the <code>Bitstream</code> class 
+      destructor.</dd>
+</dl>
+
+
+<h5><a name="Java Bitstream Class Construction">Java Bitstream Class Construction</a></h5>
+
+<dl> 
+  <dt><font color="#008000"><code>Bitstream(String filename, int type, int bufferlength);</code></font></dt>
+  <dd>Create a bistream using the file name <code>filename</code>. <code>type</code> 
+      determines if it is an input (<code>BS_INPUT</code>) or output (<code>BS_OUTPUT</code>)   
+      bitstream. A <code>Bitstream</code> object cannot simultaneously support input 
+      and output modes. If the constructor fails, an IOException will be thrown. 
+      <code>BS_INPUT</code> and <code>BS_OUTPUT</code> are defined in the <code>IBistream</code>
+      interface. The length of internal buffer can also be specified with <code>bufferlength</code>
+      parameter.</dd>
+  <dt>&nbsp;</dt>
+  <dt><font color="#008000"><code>Bitstream(String filename, int type);</code></font></dt>
+  <dd>Same as above except using default buffer length.</dd>
+</dl>
+
+
+<h5><a name="Public Methods">Public Methods</a></h5>
+
+<dl>
+  <dt><font color="#008000"><code>int atend(void);</code></font></dt>
+  <dd>Returns non-zero value of the input bitstream has reached and end-of-file condition. Not
+      supported for output bitstreams.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>int geterror(void);</code></font></dt>
+  <dd>Return the last error recorded by the bitstream. See <a href="#Error Handling">Error
+      Handling</a> below for more information on the return values.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>char* const geterror(void);</code></font></dt>
+  <dd>Return a string describing the last error recorded by the bitstream. See <a
+      href="#Error Handling">Error Handling</a> below for more information on the return values.</dd>
+</dl>
+
+
+<h5><a name="Error Handling">C++ Error Handling</a></h5>
+
+<p>
+A <code>Bitstream</code> object maintains as state information the value of the last error message
+detected. This information is described by an <font color="#008000"><code>Error_t</code></font> 
+enumeration. The following values are defined.
+</p>
+
+<dl>
+  <dt><font color="#008000"><code>E_NONE</code></font></dt>
+  <dd>No error has been detected.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>E_END_OF_DATA</code></font></dt>
+  <dd>An end-of-file condition has been detected.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>E_INVALID_ALIGNMENT</code></font></dt>
+  <dd>An invalid alignment argument (not a multiple of 8) has been given to the <code>align()</code> method.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>E_READ_FAILED</code></font></dt>
+  <dd>A reading operation on the input file has failed.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>E_WRITE_FAILED</code></font></dt>
+  <dd>An output operation on the output file has failed.</dd>
+</dl>
+
+<p>
+A user can query the value of the last error recorded using the <code>geterror()</code> method. A text 
+message describing the error can be obtained using the <code>getmsg()</code> method.
+</p>
+
+<p>
+In addition to the above interface, the <code>Bitstream</code> class can also support C++ exceptions
+for error handling. Support for exceptions is controlled by the <code>USE_EXCEPTION</code> defined 
+constant, which can be found in the file <code>port.h</code> of the source code distribution. By 
+default, only the Win32 distribution supports exceptions as almost all UNIX C++ compilers do not yet 
+support them.
+</p>
+
+<p>
+The following exception classes are defined. All support the <code>geterror()</code> and <code>
+getmsg()</code> interfaces described above.
+</p> 
+
+<dl>
+  <dt><font color="#008000"><code>Error</code></font></dt>
+  <dd>This is the base exception type. You can use the methods <code>geterror()</code> and <code>getmsg()</code>
+      to identify the particular error signalled. These methods can be used on both the
+      exception object or the original <code>Bitstream</code> object.</dd>
+  <dt>&nbsp;</dt>
+ 
+  <dt><font color="#008000"><code>EndOfData</code></font></dt>
+  <dd>An end-of-date condition has been detected (<code>E_END_OF_DATA</code>).</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>InvalidAlignment</code></font></dt>
+  <dd>An invalid argument (not a multiple of 8) has been given to the <code>align()</code>
+      method (<code>E_INVALID_ALIGNMENT</code>).</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>ReadFailed</code></font></dt>
+  <dd>A reading operation on the input file has failed (<code>E_READ_FAILED)</code>.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><font color="#008000"><code>WriteFailed</code></font></dt>
+  <dd>An output operation on the output file has failed (<code>E_WRITE_FAILED)</code>.</dd>
+</dl>
+
+<p>
+Exceptions is the preferred mechanism for error handling as the traditional error reporting mechanism
+will delay error reporting to the user's code.
+</p>
+
+
+<h5><a name="Error Handling">Java Error Handling</a></h5>
+
+<p>
+All the error methods are reported with standard Java exception mechanism. Currently we are using
+<code>IOException</code> of Java API for handling all errors, mainly because all the possible errors are related
+to underlying I/O failure. Since Java allows for the programmer to extend excpetion type to handle more specific
+error, a programmer who is extending <code>IBistream</code> methods can define their own exception by extending
+<code>IOException</code> class. The <code>FlIOException</code> exception class, derived from <code>
+IOException</code>, is provided to handle error condition. Almost all the methods in <code>IBitstream</code>
+throws this exception when there is an error condition. 
+</p>
+
+
+<h4><a name="flerror">8.3 Error Function</a></h4>
+
+<p>
+The <code>flerror()</code> function is used by the translator to report bitstream syntax errors. Currently, 
+these errors refer to parsable variables with expected values that do not match the value that was read from 
+the bitstream. In C++, the function is declared as follows.
+</p>
+
+<p><font color="#800040"><code>void flerror(char* fmt, ...)</code></font></p>
+
+<p>
+The <code>fmt</code> argument is a string containing a text description of the error, including formatting 
+information similar to a <code>printf()</code> statement. The ellipses (<code>...</code>) at the end of the 
+declaration indicate a variable number of arguments, which describes potential additional values needed by
+the <code>fmt</code> description.
+</p>
+
+<p>
+Similarly in Java, a <code>flerror()</code> method is defined as a part of the <code>Util</code>
+class and below is its declaration.
+</p>
+
+<p><font color="#800040"><code>public static void flerror(String msg)</code></font></p>
+
+<p>
+If an alternate implementation is provided in the user's code, the version present in the library will be
+ignored by the linker. The user can also change the name of the function using the <code>-E</code> command 
+line option of the translator. The interface, however, must be the same.
+</p>
+
+
+<h4><a name="trace">8.4 Trace Function</a></h4>
+
+<p>
+In order to produce bitstream traces, the translator inserts calls to a set of <code>trace()</code> functions
+in the <code>get()</code> method. Two such functions are used; one for tracing quantities that are compatible
+with integer types, and one for quantities that are compatible with double types.
+</p>
+
+<p>
+Here are the declarations used in the C++ code generated by the translator.
+</p>
+
+<p>
+<font color="#800040"><code>void trace(int pos, int size, unsigned int val, char* fmt, ...)<br>
+void trace(int pos, int size, double val, char* fmt, ...)</code></font>
+</p>
+
+<p>
+The first argument is the position of the first bit of the traced quantity in the bitstream. The second
+argument is the length of the quantity in bits. Next, we have the actual value, either as an integer or
+a double. Finally, the <code>fmt</code> argument is a string containing a text description of the traced
+quantity, including formatting information similar to a <code>printf()</code> statement. The ellipses 
+(<code>...</code>) indicate a variable number of arguments, which describes potential additional values 
+needed by the <code>fmt</code> description.
+</p>
+
+<p>
+Similarly in Java, a set of <code>trace()</code> methods are defined as a part of the <code>Util</code>
+class and below are their declarations.
+</p>
+
+<p>
+<font color="#800040"><code>public static void trace(int pos, int size, int val, String desc)<br>
+public static void trace(int pos, int size, long val, String desc)<br>
+public static void trace(int pos, int size, double val, String desc)</code></font>
+</p>
+
+<p>
+If an alternate implementation is provided in the user's code, the version present in the library will be
+ignored by the linker. The user can also change the name of the function using the <code>-T</code> command 
+line option of the translator. The interface, however, must be the same.
+</p>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>

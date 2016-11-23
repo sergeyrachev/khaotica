@@ -1,0 +1,386 @@
+/*
+ * Copyright (c) 1997-2005 Alexandros Eleftheriadis and Danny Hong.
+ *
+ * This file is part of Flavor, developed at Columbia University
+ * (http://flavor.sourceforge.net).
+ *
+ * Flavor is free software; you can redistribute it and/or modify
+ * it under the terms of the Flavor Artistic License as described in
+ * the file COPYING.txt. 
+ *
+ */
+
+/* 
+ * Authors:
+ * Danny Hong <danny@ee.columbia.edu>
+ * Chun Hao (Tony) Wang <tony.wang@ee.cooper.edu>
+ * Haidi Gu
+ *
+ */
+
+/*
+ * MPEG-1 Audio
+ *
+ * This example reads audio files in MPEG-1 audio formats.  It supports all
+ * three layers (Layer 1, Layer 2, and Layer 3).
+ * 
+ */
+
+
+%pragma trace
+
+%import "mpeg1asconst.fl"
+%import "mpeg1asmap.fl"
+
+// Header
+class Header {
+    const bit(12) syncword = 0b1111.1111.1111;
+    bit(1) id = 1; // 0 is reserved
+    bit(2) layer;
+    bit(1) protection_bit;
+    bit(4) bitrate_index;
+    bit(2) sampling_frequency;
+    bit(1) padding_bit;
+    bit(1) private_bit;
+    bit(2) mode;
+    bit(2) mode_extension;
+    bit(1) copyright;
+    bit(1) original_copy;
+    bit(2) emphasis;
+
+    int nch = (mode == SINGLE_CHANNEL) ? 1 : 2; // # of channels
+    int bitrate = BITRATE[bitrate_index][3-layer];
+    int frequency = SAMPLING_FREQ[sampling_frequency];
+}
+
+class ErrorCheck (Header h) {
+    if (h.protection_bit == 0) 
+        bit(16) crc_check;
+}
+
+%pragma notrace
+
+// Layer 1 
+class AudioDataLayer1 (Header h) {
+    int sb;     // Subband
+    int ch;     // Channel
+    int bound = (h.mode == JOINT_STEREO) ? BOUND[h.mode_extension] : 32; // # of subbands
+	    
+    unsigned int allocation[2][32] = 0;
+
+    for (sb=0; sb<bound; sb++)
+        for (ch=0; ch<h.nch; ch++) {
+            unsigned int(4) allocation_value;
+            allocation[ch][sb] = allocation_value;
+        }
+    for (sb=bound; sb<32; sb++) {
+        unsigned int(4) allocation_value;
+        allocation[0][sb] = allocation_value;
+        allocation[1][sb] = allocation_value;
+    }
+    for (sb=0; sb<32; sb++)
+        for (ch=0; ch<h.nch; ch++)
+            if (allocation[ch][sb] != 0)
+                unsigned int(6) scalefactor[[ch]][[sb]];
+    int s;
+    for (s=0; s<12; s++) {
+        for (sb=0; sb<bound; sb++)
+            for (ch=0; ch<h.nch; ch++)
+                if (allocation[ch][sb] != 0)
+                    bit(BPS[allocation[ch][sb]]) sample[[ch]][[sb]][[s]];
+        for (sb=bound; sb<32; sb++)
+            if (allocation[0][sb] != 0)
+               bit(BPS[allocation[0][sb]]) sample[[0]][[sb]][[s]];
+    }
+}
+
+// Layer 2
+class AudioDataLayer2 (Header h) {
+    int sb;         // Subband
+    int ch;         // Channel
+    int gr;         // Granule of 3*32 subband samples
+
+    // Bitrate per channel index
+    int rate_chan = (h.mode != SINGLE_CHANNEL) ? CHANNELRATE[h.bitrate_index-4] : h.bitrate_index;  
+    // Allocation table (Table B.2a-d) index
+    int table = TABLEINDEX[h.sampling_frequency][rate_chan];     
+    // # of the lowest subband for which no bits are allocated
+    int sblimit = TSBLIMIT[table];  
+    // # of subbands                                
+    int bound = (h.mode == JOINT_STEREO) ? BOUND[h.mode_extension] : sblimit;
+ 
+    unsigned int allocation[2][sblimit] = 0;
+
+    for (sb=0; sb<bound; sb++) 
+        for (ch=0; ch<h.nch; ch++) {
+            unsigned int(NBAL[table][sb]) allocation_value;
+            allocation[ch][sb] = allocation_value;
+        }
+    for (sb=bound; sb<sblimit; sb++) {
+        unsigned int(NBAL[table][sb]) allocation_value;
+        allocation[0][sb] = allocation_value;
+        allocation[1][sb] = allocation_value;
+    }
+    for (sb=0; sb<sblimit; sb++)
+        for (ch=0; ch<h.nch; ch++)
+            if (allocation[ch][sb] != 0)
+                bit(2) scfsi[[ch]][[sb]];
+    for (sb=0; sb<sblimit; sb++)
+        for (ch=0; ch<h.nch; ch++)
+            if (allocation[ch][sb] != 0) {
+                if (scfsi[ch][sb] == 0) {
+                    unsigned int(6) scalefactor[[ch]][[sb]][[0]];
+                    unsigned int(6) scalefactor[[ch]][[sb]][[1]];
+                    unsigned int(6) scalefactor[[ch]][[sb]][[2]];
+                }
+                if (scfsi[ch][sb] == 1 || scfsi[ch][sb] == 3) {
+                    unsigned int(6) scalefactor[[ch]][[sb]][[0]];
+                    unsigned int(6) scalefactor[[ch]][[sb]][[2]];
+                }
+                if (scfsi[ch][sb] == 2) {
+                    unsigned int(6) scale_factor[[ch]][[sb]][[0]];
+                }
+            }
+    for (gr=0; gr<12; gr++) {
+        for (sb=0; sb<bound; sb++)
+            for (ch=0; ch<h.nch; ch++)
+                if (allocation[ch][sb] != 0) {
+                    int step = QUANTIZATION[table][sb][allocation[ch][sb]];
+                    if (GROUPING[step] == 1)
+                        unsigned int(CODEBITS[step]) samplecode[[ch]][[sb]][[gr]];
+                    else {
+                        int s;
+                        for (s=0; s<3; s++)
+                            unsigned int(CODEBITS[step]) sample[[ch]][[sb]][[3*gr+s]];
+                    }
+                }
+        for (sb=bound; sb<sblimit; sb++)
+            if (allocation[0][sb] != 0) {
+                int step = QUANTIZATION[table][sb][allocation[0][sb]];
+                if (GROUPING[step] == 1)
+                    unsigned int(CODEBITS[step]) samplecode[[0]][[sb]][[gr]];
+                else {
+                    int s;
+                    for (s=0; s<3; s++)
+                        unsigned int(CODEBITS[step]) sample[[0]][[sb]][[3*gr+s]];                                                       
+                }
+            }
+    }
+}
+
+%pragma trace
+
+// Layer 3
+class AudioDataLayer3 (Header h) {
+    int ch;             // Channel
+    int gr;             // Granule of 18*32 subband samples
+
+    unsigned int region0_count[2][2];
+    unsigned int region1_count[2][2];
+
+    unsigned int(9) main_data_begin; // Location of the main data (in negative byte offset)
+
+    if (h.mode == SINGLE_CHANNEL)
+        bit(5) private_bits;
+    else
+        bit(3) private_bits;
+
+    %pragma array=5	
+    bit(1) scfsi[h.nch][4]; // Scalefactor selection info for each channel and 4 bands
+
+    for (gr=0; gr<2; gr++) {
+        for (ch=0; ch<h.nch; ch++) {
+            unsigned int(12) part2_3_length[[gr]][[ch]];
+            unsigned int(9) big_values[[gr]][[ch]];
+            unsigned int(8) global_gain[[gr]][[ch]];
+            bit(4) scalefac_compress[[gr]][[ch]];
+            bit(1) window_switching_flag[[gr]][[ch]];
+
+            if (window_switching_flag[gr][ch]) {
+                bit(2) block_type[[gr]][[ch]];
+                unsigned int(1) mixed_block_flag[[gr]][[ch]];
+                bit(5) table_select[[gr]][[ch]][2];             // 2 regions per gr and ch
+                unsigned int(3) subblock_gain[[gr]][[ch]][3];   // 3 windows per gr and ch
+
+                if (mixed_block_flag[gr][ch] == 0 && block_type[gr][ch] == 2) 
+                    region0_count[gr][ch] = 8;				
+                else 
+                    region0_count[gr][ch] = 7;		
+                region1_count[gr][ch] = 36;
+            }
+            else {
+                bit(5) table_select[[gr]][[ch]][3]; // 3 regions per gr and ch
+                bit(4) region0_count_value;
+                bit(3) region1_count_value;
+                region0_count[gr][ch] = region0_count_value;
+                region1_count[gr][ch] = region1_count_value;
+            }
+            bit(1) preflag[[gr]][[ch]];
+            bit(1) scalefac_scale[[gr]][[ch]];
+            bit(1) count1table_select[[gr]][[ch]];
+        }
+    }
+}
+
+%pragma notrace
+
+class MainData (Header h, AudioDataLayer3 adl3) {
+    int region_table = (h.sampling_frequency) + 1 % 3;
+    int ch; // Channel
+    int gr; // Granule of 18*32 subband samples
+
+    %pragma array=22
+    for (gr=0; gr<2; gr++) {
+        for (ch=0; ch<h.nch; ch++) {
+
+            int data_begin = numbits(); // start of the main data
+
+            int sfb;
+            if (adl3.window_switching_flag[gr][ch] == 1 && adl3.block_type[gr][ch] == 2) {
+                if (adl3.mixed_block_flag[gr][ch]) {
+                    for (sfb=0; sfb<8; sfb++)
+                        unsigned int(SLEN1[adl3.scalefac_compress[gr][ch]]) scalefac_l[[gr]][[ch]][[sfb]];						
+                    for (sfb=3; sfb<6; sfb++)
+                        unsigned int(SLEN1[adl3.scalefac_compress[gr][ch]]) scalefac_s[[gr]][[ch]][[sfb]][3]; // 3 windows
+                    for (sfb=6; sfb<12; sfb++)
+                        unsigned int(SLEN2[adl3.scalefac_compress[gr][ch]]) scalefac_s[[gr]][[ch]][[sfb]][3]; // 3 windows
+                }
+                else {
+                    for (sfb=0; sfb<6; sfb++)
+                        unsigned int(SLEN1[adl3.scalefac_compress[gr][ch]]) scalefac_s[[gr]][[ch]][[sfb]][3]; // 3 windows
+                    for (sfb=6; sfb<12; sfb++)
+                        unsigned int(SLEN2[adl3.scalefac_compress[gr][ch]]) scalefac_s[[gr]][[ch]][[sfb]][3]; // 3 windows
+                }
+            }
+            else {
+                if (adl3.scfsi[ch][0] == 0 || gr == 0)
+                    for (sfb=0; sfb<6; sfb++)
+                        unsigned int(SLEN1[adl3.scalefac_compress[gr][ch]]) scalefac_l[[gr]][[ch]][[sfb]];						
+                if (adl3.scfsi[ch][1] == 0 || gr == 0)
+                    for (sfb=6; sfb<11; sfb++)
+                        unsigned int(SLEN1[adl3.scalefac_compress[gr][ch]]) scalefac_l[[gr]][[ch]][[sfb]];						
+                if (adl3.scfsi[ch][2] == 0 || gr == 0)
+                    for (sfb=11; sfb<16; sfb++)
+                        unsigned int(SLEN2[adl3.scalefac_compress[gr][ch]]) scalefac_l[[gr]][[ch]][[sfb]];						
+                if (adl3.scfsi[ch][3] == 0 || gr == 0)
+                    for (sfb=16; sfb<21; sfb++)
+                        unsigned int(SLEN2[adl3.scalefac_compress[gr][ch]]) scalefac_l[[gr]][[ch]][[sfb]];						
+            }
+
+            /* Begin Huffman-coded data */
+            unsigned int l;
+            for (l=0; l < adl3.big_values[gr][ch] * 2; l+=2) {
+                int tt = 0;	
+                if (adl3.window_switching_flag[gr][ch] == 1) {
+                    if (adl3.block_type[gr][ch] == 2 && adl3.mixed_block_flag[gr][ch] == 0)
+                        if (l > SF_BANDS_S[region_table][adl3.region0_count[gr][ch]/3]) tt = 1;
+                    else
+                        if (l > SF_BANDS_L[region_table][adl3.region0_count[gr][ch]]) tt = 1;
+                }
+                else {
+                    if (l > SF_BANDS_L[region_table][adl3.region0_count[gr][ch]]) tt = 1;
+                    if (l > SF_BANDS_L[region_table][adl3.region1_count[gr][ch]]) tt = 2;
+                }
+                int linbits = 0; // # of esc bits
+                switch (adl3.table_select[gr][ch][tt]) {
+                case 0:  HuffPair pair; pair.x = 0; pair.y = 0; pair.hlen = 0; break;
+                case 1:	 HuffPair(Table1)  pair; break;
+                case 2:	 HuffPair(Table2)  pair; break;
+                case 3:  HuffPair(Table3)  pair; break;
+                case 4:  break;
+                case 5:	 HuffPair(Table5)  pair; break;
+                case 6:	 HuffPair(Table6)  pair; break;
+                case 7:	 HuffPair(Table7)  pair; break;
+                case 8:	 HuffPair(Table8)  pair; break;
+                case 9:	 HuffPair(Table9)  pair; break;
+                case 10: HuffPair(Table10) pair; break;
+                case 11: HuffPair(Table11) pair; break;
+                case 12: HuffPair(Table12) pair; break;
+                case 13: HuffPair(Table13) pair; break;
+                case 14: break;
+                case 15: HuffPair(Table15) pair; break;
+                case 16: HuffPair(Table16) pair; linbits = 1;  break;
+                case 17: HuffPair(Table16) pair; linbits = 2;  break;
+                case 18: HuffPair(Table16) pair; linbits = 3;  break;
+                case 19: HuffPair(Table16) pair; linbits = 4;  break;
+                case 20: HuffPair(Table16) pair; linbits = 6;  break;
+                case 21: HuffPair(Table16) pair; linbits = 8;  break;
+                case 22: HuffPair(Table16) pair; linbits = 10; break;
+                case 23: HuffPair(Table16) pair; linbits = 13; break;
+                case 24: HuffPair(Table24) pair; linbits = 4;  break;
+                case 25: HuffPair(Table24) pair; linbits = 5;  break;
+                case 26: HuffPair(Table24) pair; linbits = 6;  break;
+                case 27: HuffPair(Table24) pair; linbits = 7;  break;
+                case 28: HuffPair(Table24) pair; linbits = 8;  break;
+                case 29: HuffPair(Table24) pair; linbits = 9;  break;
+                case 30: HuffPair(Table24) pair; linbits = 11; break;
+                case 31: HuffPair(Table24) pair; linbits = 13; break;
+                default: HuffPair(Table24) pair; break;
+                }
+                if (pair.x == 15 && linbits > 0)    bit(linbits) linbitsx;
+                if (pair.x != 0)                    bit(1) signx;
+                if (pair.y == 15 && linbits > 0)    bit(linbits) linbitsy;
+                if (pair.y != 0)                    bit(1) signy;
+                %g.c{
+                delete pair; %g.c}
+            }
+
+            unsigned int data_size = numbits() - data_begin;
+			for (; data_size < adl3.part2_3_length[gr][ch] && l < 576; l+=4) {
+                if (adl3.count1table_select[gr][ch] == 0)
+                    HuffQuad(TableA) quad;
+                else
+                    HuffQuad(TableB) quad;
+
+                if (quad.v != 0) bit(1) signv;
+                if (quad.w != 0) bit(1) signw;
+                if (quad.x != 0) bit(1) signx;
+                if (quad.y != 0) bit(1) signy;
+                %g.c{
+                delete quad; %g.c}
+
+                data_size = numbits() - data_begin;
+            }
+        }
+    }	
+}
+
+%pragma trace
+
+// Frame
+class Frame {
+    int prev_size = numbits();
+
+    Header h;
+    ErrorCheck ec(h);
+
+    switch(h.layer) {
+    case LAYER3: {
+        AudioDataLayer3 adl3(h);
+        break;
+    }
+    case LAYER2: {
+        AudioDataLayer2 adl2(h);
+        while (nextbits(aligned(8), 12) != 0b1111.1111.1111)
+            skipbits(8);
+        break;
+    }
+    case LAYER1: {
+        AudioDataLayer1 adl1(h);
+        while (nextbits(aligned(32), 12) != 0b1111.1111.1111)
+            skipbits(32);
+        break;
+    }
+    default:
+        break;
+    }
+    
+    int size = numbits() - prev_size;
+}
+
+
+// MPEG-1 Audio
+class MPEG1Audio {
+    while (nextbits(12) == 0b1111.1111.1111)
+        Frame f;
+}

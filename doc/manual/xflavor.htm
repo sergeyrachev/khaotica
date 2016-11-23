@@ -1,0 +1,465 @@
+<html>
+
+<head>
+<title>Using XFlavor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+
+<h3><strong>2. Using XML Features of Flavor</strong></h3>
+
+
+<h4><a name="document">2.1 The XML Document: Data Representation in XML</a></h4>
+
+<p>
+As shown in the previous <a href="flavor.htm">section</a>, the Flavor-generated file (for C++
+or Java) also includes the <code>putxml()</code> method for converting Flavor described
+bitstreams into correspodning XML documents.  Again, the "HelloBits.fl" file will produce the 
+following C++ code.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits C++ Class</caption>
+<tr><td width="100%"><code>
+<pre>class HelloBits {
+public:
+    char c;
+    public: virtual int get(IBitstream &amp;_F_ bs);
+    public: virtual int put(IBitstream &amp;_F_bs);
+    public: virtual int putxml(IBitstream &amp;_F_bs, short int bAttr);
+};</pre>
+</code></td></tr>
+</table>
+
+<p>
+The <code>putxml()</code> method has an extra input parameter <code>bAttr</code>  that is used
+as a flag for indicating whether or not the type attribute of the parsable elements should be 
+explicitly specified.  If the value of the <code>bAttr</code> parameter is <code>0</code> (or 
+<code>false</code> in case of Java), then the existence of a corresponding XML schema is assumed 
+and the type attribute will not be specified in the generated XML document.  Let's write a simple 
+C++ program that will use the Flavor defined object and generate an XML document from a 
+Flavor-described bitstream.
+</p>
+
+<table border="0" width="100%" bgcolor="#FFFF80" class="Example">
+<caption>Using HelloBits.fl in C++ Code</caption>
+<tr><td width="100%"><code>
+<pre>#include &lt;stdio.h&gt;
+
+// Always include this
+#include &lt;flavor.h&gt;
+
+// Include the flavorc-generated code
+#include "HelloBits.h"
+
+int main(int argc, char *argv[])
+{
+    // Check that we have an argument
+    if (argc !=2 ) {
+        fprintf(stderr, "Usage: %s data\n", argv[0]);
+        exit(1);
+    }
+
+    // Our input bitstream
+    Bitstream bs(argv[1], BS_INPUT);
+
+    // Our Text object
+    HelloBits h;
+
+    // Create an output file "HelloBits.xml" and create the root element &lt;HelloBits&gt;
+    CreateXmlHeader("HelloBits.xml", "HelloBits");
+
+    /* Get the data and generate a corresponding XML document.
+     * If schema is not used, then, the data type attributes may be needed.
+     */
+    h.putxml(bs, 1);
+
+    // Make sure the end tag matches the root element tag
+    EndXml("HelloBits");
+
+    // Done
+    exit(0);
+}</pre>
+</code></td></tr>
+</table>
+
+<p>
+If one compiles and runs this program, it will generate an XML document named "HelloBits.xml".  
+The file will contain one root element corresponding to the HelloBits object that includes just 
+one child element for the class member variable <code>c</code>.  For example, consider a sample 
+text file with the first character being an '<code>a</code>'.  If this file is read in as an 
+argument to the above program, then the content of the generated XML document will be as follows:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits.xml</caption>
+<tr><td width="100%"><code>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;HelloBits
+    xmlns="http://www.ee.columbia.edu/flavor"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+&gt;
+
+&lt;c type="flSChar" bitLen="8"&gt;a&lt;/c&gt;
+
+&lt;/HelloBits&gt;</pre>
+</code></td></tr>
+</table>
+
+<p>
+The call to the <code>CreateXmlHeader("HelloBits.xml", "HelloBits")</code> function creates 
+an XML document (<code>HelloBits.xml</code>) with the root element (<code>&lt;HelloBits&gt;</code>).  Then
+the <code>putxml(bs, 1)</code> method parses the specified values of the input bitstream and
+generates corresponding XML elements that go inside the root element.  Note that the <code>bAttr</code>
+parameter of the method is set to 1, thus the type information will also be specified for
+each element; Flavor defines a set of XML data types (e.g., <code>flSChar</code> corresponds to 
+<code>signed char</code>) that correspond to the Flavor data types.  More information about the
+data types are given in the next <a href="#schema">subsection</a>.  Finally, the the call to the 
+<code>EndXml("HelloBits")</code> function closes the XML document with the end tag matching 
+the tag of the root element.
+</p>
+
+<p>
+If we have a schema that corresponds to the generated document (the next <a href="#schema">subsection</a>
+describes  how to generate an XML schema from a Flavor description), and if we want the validity
+of the document to be checked, then we can set the name of the schema in the XML document by using 
+the <code>CreateXmlHeader()</code> function, with an extra argument specifying the name of the 
+schema.  The function call <code>CreateXmlHeader("HelloBits.xml", "HelloBits", "HelloBits.xsd")</code>  
+followed with the <code>putxml(bs, 0)</code> method call generates the following document.
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits.xml</caption>
+<tr><td width="100%"><code>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;HelloBits
+    xmlns="http://www.ee.columbia.edu/flavor"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.ee.columbia.edu/flavor
+                        HelloBits.xsd"
+&gt;
+
+&lt;c bitLen="8"&gt;a&lt;/c&gt;
+
+&lt;/HelloBits&gt;</pre>
+</code></td></tr>
+</table>
+
+<p>
+Note that an element corresponding to a parsable variable must have the <code>bitLen</code>
+attribute set, which specifies parse length, i.e., the number of bits used to represent 
+the variable.
+</p>
+
+
+<h4><a name="schema">2.2 The XML Schema: "Hello Bits" in XML</a></h4>
+
+<p>
+Recall (from <a href="flavor.htm">Section 1</a>) the following Flavor description for a text 
+file, where each character is defined as a separate object.  This declares a class called 
+<code>HelloBits</code>, containing a single parsable variable <code>c</code>.  The variable is 
+of the type <code>char</code> (<code>signed</code> by default), and is represented in the 
+bitstream using 8 bits.  
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits.fl</caption>
+<tr><td width="100%"><code>
+<pre>// Both C and C++ comments are allowed
+class HelloBits {
+    char(8) c;
+};</pre>
+</code></td></tr>
+</table>
+
+<p>
+Again, save this in a file called "HelloBits.fl" and run the translator on it by typing: 
+<code>flavorc -gx HelloBits.fl</code>.  The translator will create the "HelloBits.xsd" file, 
+which contains the definition of the <code>HelloBits</code> class as a <em>complex type</em>.  
+This type will include just one child element (<code>c</code>) corresponding to the parsable 
+variable.  The generated schema looks as follows:
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>HelloBits.xsd</caption>
+<tr><td width="100%"><code>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.ee.columbia.edu/flavor"
+            xmlns="http://www.ee.columbia.edu/flavor"
+            elementFormDefault="qualified"&gt;
+&lt;xsd:include schemaLocation="fltypes.xsd"/&gt;
+
+&lt;xsd:complexType name="HelloBits"&gt;
+    &lt;xsd:sequence&gt;
+        &lt;xsd:element name="c" type="flSChar"/&gt;
+    &lt;/xsd:sequence&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:element name="HelloBits" type="HelloBits"/&gt;
+
+&lt;/xsd:schema&gt;</pre>
+</code></td></tr>
+</table>
+
+<p>
+The element <code>c</code> is defined to be of the type <code>flSChar</code> and the data type 
+is defined in the <a href="#fltypes">"fltypes.xsd"</a> file.  This file includes data type 
+definitions corresponding to the Flavor data types.  More information about the content of the 
+file is provided <a href="#fltypes">here</a>.
+</p>
+
+
+<h4><a name="bitstream">2.3 Back to the Bitstream: "Hello Bits" in Bitstream</a></h4>
+
+<p>
+To complement the enhanced translator, a software tool called <em>bitgen</em> (a bitstream 
+generator) is also provided as part of the Flavor package.  The tool has the ability to
+convert the multimedia data in XML format (XML document) back into its native bitstream form.
+</p>
+
+<p>
+The current software, in the <code>bitgen</code> directory, is implemented using <a target="_blank"
+href="http://xml.apache.org">Xerces-C++ Version 2.2.0</a> and it uses the <code>type</code> and 
+<code>bitLen</code> attributes to convert the content of each element into a corresponding bit 
+string.  If the <code>aligned</code> attribute is specified, then <em>bitgen</em> makes sure 
+that the corresponding bit string is appropriately aligned in the bitstream; and if the 
+<code>big</code> attribute is set to <code>false</code>, then little-endian byte-ordering
+is used.  For example, the content of the parsable element - <code>length</code> - in the 
+example below would yield yield 0x000080 in hex.  First, the content 128 is read in as a string
+and then using the value of the <code>type</code>, it's converted into a signed integer.
+Then, using the <code>bitLen</code> attribute, the integer is converted into a bit string of 
+24 bits (with the most significant byte first, by default).  
+</p>
+
+<table border="0" width="100%" class="Example">
+<caption>A parsable XML element - <code>length</code>.</caption>
+<tr><td width="100%"><code>
+<pre>&lt;length type=&quot;flSInt&quot; bitLen=&quot;24&quot;&gt;128&lt;/length&gt;</pre>
+</code></td></tr>
+</table>
+
+<p>
+The "samples\xml" directory already includes a set of samples demonstrating how to use the 
+3 XML features.  Refer to the <a href="..\samples.htm">Samples</a> page for more information
+about the samples.
+</p>
+
+<p>
+The source code for <code>bitgen</code> ("bitgen.cpp") is provided, and in
+order to rebuild the software tool, one needs to download the <a target="_blank"
+href="http://xml.apache.org">Xerces parser</a> and set corresponding paths for the include
+files and libraries.
+</p>
+
+
+<h4><a name="fltypes">2.4 Data Types</a></h4>
+
+<p>
+Below is the content of the "fltypes.xsd" file, which is referenced by all schemas generated by
+Flavor.  The file includes the data type definitions for all elements corresponding to parsable
+variables.  The actual <a href="fltypes.xsd">"fltypes.xsd"</a> can also be downloaded.
+</p>
+
+<p>
+The <code>bitLen</code> attribute is required for all data types as it determines the number of
+bits to use to represent the corresponding content.  By default, the <code>flFloat</code> and 
+<code>flDouble</code> types have <code>bitLen</code> set to 32 and 64, respectively.  This 
+corresponds to the <code>float</code> and <code>double</code> types in Flavor, which must also 
+have parse length set to 32 and 64, respectively.  We also allow the case where the parse length
+may have the value 0.      
+</p>
+
+<p>
+The <code>aligned</code> attribute is optionally used if the bit string of the corresponding content
+needs to be aligned.  Additionally, the <code>flSInt</code> and <code>flUInt</code> types may
+be accompanied with the <code>big</code> attribute to specify the byte-ordering (big or little-endian)
+to use to represent the content in bit string.
+</p>
+
+<table border="0" width="100%" bgcolor="#FFFF80" class="Example">
+<caption>The Data Types Schema - fltypes.xsd</caption>
+<tr><td width="100%"><code>
+<pre>&lt;?xml version="1.0"?&gt;
+&lt;xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.ee.columbia.edu/flavor"
+            xmlns="http://www.ee.columbia.edu/flavor"
+            elementFormDefault="qualified"&gt;
+
+
+&lt;xsd:annotation&gt;
+    &lt;xsd:documentation&gt;
+        Copyright (c) 1997-2002 Alexandros Eleftheriadis, Danny Hong and
+        Yuntai Kyong.
+        
+        This file is part of Flavor, developed at Columbia University
+        (www.ee.columbia.edu/flavor).
+    
+        Flavor is free software; you can redistribute it and/or modify
+        it under the terms of the Flavor Artistic License as described in
+        the file COPYING.txt. 
+    &lt;/xsd:documentation&gt;
+&lt;/xsd:annotation&gt;
+
+&lt;xsd:annotation&gt;
+    &lt;xsd:documentation&gt;
+        Authors:
+        Danny Hong &lt;danny@ee.columbia.edu&gt;
+    &lt;/xsd:documentation&gt;
+&lt;/xsd:annotation&gt;
+
+
+&lt;xsd:simpleType name="char"&gt;
+    &lt;xsd:restriction base="xsd:string"&gt;
+        &lt;xsd:length value="1" fixed="true"/&gt;
+    &lt;/xsd:restriction&gt;
+&lt;/xsd:simpleType&gt;
+
+
+&lt;xsd:annotation&gt;
+    &lt;xsd:documentation&gt;
+        Below are the Flavor types.  Each type is comprised of attributes that determine
+        the bitstream representation.  The 'aligned' attribute is optional and it is 
+        used if the 'aligned' modifier is used in Flavor.  The 'type' attribute seems
+        to be redundant as the type name already implies the type; however, currently
+        available XML parsers are unable to correctly return the type name, even with 
+        the advent of DOM Level 3, which provides an interface called TypeInfo.  The
+        'bitLen' attribute is required to determine the number of bits (parse length) 
+        used to represent a given value.  Note that the value is not fixed as the parse 
+        length can be variable; in this case, the actual parse value may be known only 
+        during the time of actual parsing.  Additionally, the value may be different 
+        for different bitstreams.  The 'big' attribute is used for types other than 
+        char to determine the byte-ordering method used to represent a given number.
+    &lt;/xsd:documentation&gt;
+&lt;/xsd:annotation&gt;
+
+
+&lt;xsd:complexType name="flSChar"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="char"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="bitLen" use="required"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:maxInclusive value="8"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flUChar"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="char"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="bitLen" use="required"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:maxInclusive value="8"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flBit"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="xsd:unsignedInt"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="bitLen" use="required"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:maxInclusive value="32"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flSInt"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="xsd:int"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/&gt;
+            &lt;xsd:attribute name="bitLen" use="required"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:maxInclusive value="32"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flUInt"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="xsd:unsignedInt"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/&gt;
+            &lt;xsd:attribute name="bitLen" use="required"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:maxInclusive value="32"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flFloat"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="xsd:float"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/&gt;
+            &lt;xsd:attribute name="bitLen" default="32"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:enumeration value="0"/&gt;
+                        &lt;xsd:enumeration value="32"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+&lt;xsd:complexType name="flDouble"&gt;
+    &lt;xsd:simpleContent&gt;
+        &lt;xsd:extension base="xsd:double"&gt;
+            &lt;xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/&gt;
+            &lt;xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/&gt;
+            &lt;xsd:attribute name="bitLen" default="64"&gt;
+                &lt;xsd:simpleType&gt;
+                    &lt;xsd:restriction base="xsd:unsignedInt"&gt;
+                        &lt;xsd:enumeration value="0"/&gt;
+                        &lt;xsd:enumeration value="64"/&gt;
+                    &lt;/xsd:restriction&gt;
+                &lt;/xsd:simpleType&gt;
+            &lt;/xsd:attribute&gt;
+        &lt;/xsd:extension&gt;
+    &lt;/xsd:simpleContent&gt;
+&lt;/xsd:complexType&gt;
+
+
+&lt;/xsd:schema&gt;</pre>
+</code></td></tr>
+</table>
+
+
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+
+</body>
+
+</html>
