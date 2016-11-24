@@ -1,0 +1,66 @@
+/*
+ * Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and 
+ * Yuntai Kyong.
+ *
+ * This file is part of Flavor, developed at Columbia University
+ * (http://flavor.sourceforge.net).
+ *
+ * Flavor is free software; you can redistribute it and/or modify
+ * it under the terms of the Flavor Artistic License as described in
+ * the file COPYING.txt. 
+ *
+ */
+
+/*
+ * Authors:
+ * Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+ * Danny Hong <danny@ee.columbia.edu>
+ * Yuntai Kyong <yuntaikyong@ieee.org>
+ *
+ */
+ 
+/*
+ * This example shows how to use map, a construct for variable length codes.
+ *
+ */
+
+// Enable tracing
+%pragma trace
+
+class YUVblocks {
+	int Yblocks;
+    int Ublocks;
+    int Vblocks;
+
+    // Define constructors
+	%.c{
+	YUVblocks(int y,int u,int v) : Yblocks(y), Ublocks(u), Vblocks(v) {}
+	YUVblocks() {} %.c}
+
+	%.j{
+	YUVblocks(int y,int u,int v) { Yblocks = y; Ublocks = u; Vblocks = v; }
+	YUVblocks() { Yblocks = 0; Ublocks = 0; Vblocks = 0; } %.j}
+}
+
+// Number of blocks per component
+map BPC(YUVblocks) {
+	0b0,	{14, -1, 1},
+	0b10,	{-4, 22, 2},
+    0b110,	{4, 2, -33},
+    0b1110, {unsigned int(8), int(8), int(12)}
+}
+
+map A(float) {
+	0b1,    1.3,
+	0b01,   2.2,
+	0b001,  3.3,
+	0b0001, float(32)
+}
+
+class MapTest {
+	int(32) a;
+	float(A) fm[4];
+	YUVblocks(BPC) chroma_format[4];
+}
+
+

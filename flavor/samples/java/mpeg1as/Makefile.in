@@ -1,0 +1,107 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+# Danny Hong <danny@ee.columbia.edu>
+
+# Parameters
+prefix  = @prefix@
+bindir  = $(prefix)/bin
+jlibdir = $(prefix)/lib/java
+fldir   = $(prefix)/samples/fl
+datadir = $(prefix)/samples/data
+
+SRC     = .
+
+CLASSES = \
+	Main.class \
+	AudioDataLayer1.class \
+	AudioDataLayer2.class \
+	AudioDataLayer3.class \
+	ErrorCheck.class \
+	Frame.class \
+	Global.class \
+	Header.class \
+	HuffPair.class \
+	HuffQuad.class \
+	MainData.class \
+	MPEG1Audio.class \
+	Table0.class \
+	Table1.class \
+	Table2.class \
+	Table3.class \
+	Table5.class \
+	Table6.class \
+	Table7.class \
+	Table8.class \
+	Table9.class \
+	Table10.class \
+	Table11.class \
+	Table12.class \
+	Table13.class \
+	Table15.class \
+	Table16.class \
+	Table24.class \
+	TableA.class \
+	TableB.class
+
+JAVAFILES = \
+	AudioDataLayer1.java \
+	AudioDataLayer2.java \
+	AudioDataLayer3.java \
+	ErrorCheck.java \
+	Frame.java \
+	Global.java \
+	Header.java \
+	HuffPair.java \
+	HuffQuad.java \
+	MainData.java \
+	MPEG1Audio.java \
+	Table0.java \
+	Table1.java \
+	Table2.java \
+	Table3.java \
+	Table5.java \
+	Table6.java \
+	Table7.java \
+	Table8.java \
+	Table9.java \
+	Table10.java \
+	Table11.java \
+	Table12.java \
+	Table13.java \
+	Table15.java \
+	Table16.java \
+	Table24.java \
+	TableA.java \
+	TableB.java
+
+TARGET = mpeg1as
+
+
+all: 
+	$(bindir)/flavorc -gj -p -x -op flavormp3 $(fldir)/$(TARGET).fl
+	javac -classpath .:$(jlibdir) -d $(SRC) Main.java $(JAVAFILES)
+
+clean:
+	rm -rf $(CLASSES) $(JAVAFILES) *.bs *.xml $(TARGET)
+
+run1:
+	java -classpath .:$(jlibdir) $(TARGET).Main $(datadir)/layer1.mp1
+
+run2:
+	java -classpath .:$(jlibdir) $(TARGET).Main $(datadir)/layer2.mp2
+
+run3:
+	java -classpath .:$(jlibdir) $(TARGET).Main $(datadir)/layer3.mp3
+
+
+

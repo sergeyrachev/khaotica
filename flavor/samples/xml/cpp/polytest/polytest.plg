@@ -1,0 +1,44 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: polytest - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\Owner\LOCALS~1\Temp\RSPFD.bat" with contents
+[
+@echo off
+..\..\..\..\bin\flavorc -gc -g -p -msvc ..\..\..\fl\polytest.fl
+]
+Creating command line "C:\DOCUME~1\Owner\LOCALS~1\Temp\RSPFD.bat"
+Creating temporary file "C:\DOCUME~1\Owner\LOCALS~1\Temp\RSPFE.tmp" with contents
+[
+/nologo /MLd /W3 /Gm /GX /ZI /Od /I "..\..\..\..\include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Debug/polytest.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /GZ /c 
+"D:\flavor\samples\xml\cpp\polytest\main.cpp"
+"D:\flavor\samples\xml\cpp\polytest\polytest.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\Owner\LOCALS~1\Temp\RSPFE.tmp" 
+Translating Flavor source...
+Creating command line "link.exe flavor.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/polytest.pdb" /debug /machine:I386 /out:"Debug/polytest.exe" /pdbtype:sept /libpath:"..\..\..\..\lib\cpp"  .\Debug\main.obj .\Debug\polytest.obj "
+<h3>Output Window</h3>
+Compiling...
+main.cpp
+polytest.cpp
+Linking...
+Creating temporary file "C:\DOCUME~1\Owner\LOCALS~1\Temp\RSP100.bat" with contents
+[
+@echo off
+copy .\Debug\polytest.exe ..\..\bin
+]
+Creating command line "C:\DOCUME~1\Owner\LOCALS~1\Temp\RSP100.bat"
+
+        1 file(s) copied.
+
+
+
+<h3>Results</h3>
+polytest.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

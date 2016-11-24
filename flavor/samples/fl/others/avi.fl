@@ -1,0 +1,82 @@
+%pragma trace
+
+const signed int RIFF_ID    = 0x52494646;	// "RIFF" in big-endian form
+const signed int LIST_ID    = 0x4C495354;	// "LIST" in big-endian form
+const signed int HDRL_ID    = 0x6864726C;	// "hdrl" in big-endian form
+const signed int STRL_ID    = 0x5354524C;   // "strl" in big-endian
+const signed int AVIH_ID    = 0x61766968;	// "avih" in big-endian form
+const signed int AVI_ID     = 0x57415645;	// "AVI" in big-endian form
+const signed int STRH_ID    = 0x53545248;
+const signed int STRF_ID    = 0x53545246;
+const signed int PCM_TAG    = 0x1;
+
+class BaseChunk 
+{
+    signed int(32) name;                    
+    signed int(32) fileSize;        
+}
+
+class RIFFHeader extends BaseChunk
+{
+    signed int(32) riffType = AVI_ID;
+} 
+
+class AVIHeaderList
+{
+    signed int(32) list = LIST_ID;
+    signed int(32) headerListLength;
+    signed int(32) hdrlname = HDRL_ID;
+}
+
+class AVIHeaderChunk
+{
+    unsigned int(32) avihname = AVIH_ID;
+    unsigned int(32) aviChunkSize;
+    char(8) aviChunkData[aviChunkSize];
+}
+
+/********************** VIDEO ***************************************/
+
+class VideoStreamList
+{
+    signed int(32) videoStreamlist = LIST_ID;
+    signed int(32) videoStreamListLength;
+    signed int(32) strlname = STRL_ID;	
+}
+
+class VideoStreamHeader
+{
+    signed int(32) videostreamheader = STRH_ID;
+    signed int(32) videoStreamHeaderSize;
+    char(8) videoStreamHeaderChunk[videoStreamHeaderSize];
+}
+
+class VideoStreamFormat
+{
+    signed int(32) videoStreamFormat = STRF_ID;
+    signed int(32) videoStreamFormatSize;
+    char(8) videoStreamFormatChunk[videoStreamFormatSize];
+}
+
+/********************** AUDIO ***************************************/
+
+class AudioStreamList
+{
+    signed int(32) audioStreamlist = LIST_ID;
+    signed int(32) audioStreamListLength;
+    signed int(32) strlname = STRL_ID;	
+}
+
+class AudioStreamHeader
+{
+    signed int(32) audioStreamHeader = STRH_ID;
+    signed int(32) audioStreamHeaderSize;
+    char(8) audioStreamHeaderChunk[audioStreamHeaderSize];
+}
+
+class AudioStreamFormat
+{
+    signed int(32) audioStreamFormat = STRH_ID;
+    signed int(32) audioStreamFormatSize;
+    char(8) audioStreamFormatChunk[audioStreamFormatSize];
+}

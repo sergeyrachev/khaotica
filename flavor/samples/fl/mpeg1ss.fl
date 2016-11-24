@@ -1,0 +1,166 @@
+/*
+ * Copyright (c) 1997-2005 Alexandros Eleftheriadis and Danny Hong.
+ *
+ * This file is part of Flavor, developed at Columbia University
+ * (http://flavor.sourceforge.net).
+ *
+ * Flavor is free software; you can redistribute it and/or modify
+ * it under the terms of the Flavor Artistic License as described in
+ * the file COPYING.txt. 
+ *
+ */
+
+/* 
+ * Authors:
+ * Danny Hong <danny@ee.columbia.edu>
+ * Chun Hao (Tony) Wang <tony.wang@ee.cooper.edu>
+ *
+ */
+
+/*
+ * MPEG-1 Systems
+ *
+ * This example reads MPEG-1 Systems streams.  It only parses the Systems data
+ * and all elementary streams are skipped.
+ *
+ */
+
+
+const int PACK_START_CODE           = 0x000001BA;
+const int SYSTEM_HEADER_START_CODE  = 0x000001BB;
+const int PROGRAM_END_CODE          = 0x000001B9;
+
+%pragma trace
+
+class PacketHeader {
+    
+    while (nextbits(8) == 0b1111.1111)
+        skipbits(8);    // Skip stuffing bytes
+	
+    if (nextbits(2) == 0b01) {
+        skipbits(2);
+        bit(1)      std_buffer_scale;
+        bit(13)     std_buffer_size;
+    }
+    if (nextbits(4) == 0b0010) {
+        skipbits(4);
+        bit(3)      presentation_time_stamp1;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     presentation_time_stamp2;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     presentation_time_stamp3;
+        bit(1)      marker_bit = 0b1;
+    }
+    else if (nextbits(4) == 0b0011) {
+        skipbits(4);
+        bit(3)      presentation_time_stamp1;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     presentation_time_stamp2;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     presentation_time_stamp3;
+        bit(1)      marker_bit = 0b1;
+        bit(4)      filler = 0b0001;
+        bit(3)      decoding_time_stamp1;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     decoding_time_stamp2;
+        bit(1)      marker_bit = 0b1;
+        bit(15)     decoding_time_stamp3;
+        bit(1)      marker_bit = 0b1;
+    }
+    else
+        skipbits(8);
+}
+
+%pragma notrace
+
+abstract class Packet : unsigned int(32) st_id = 0  {
+    bit(16) packet_length;
+}
+
+%pragma array=65536
+
+abstract class NonPrivate2Packet extends Packet: unsigned int(32) st_id = 0 {
+    PacketHeader ph;
+    bit(8) packet_data_byte[packet_length - (lengthof(ph) / 8)];
+}
+
+class Private2Packet extends Packet : unsigned int(32) st_id = 0x000001BF {
+    bit(8) packet_data_byte[packet_length];
+}
+
+class ReservedPacket extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001BC {}
+class Private1Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001BD {}
+class PaddingPacket extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001BE {}
+class AudioPacket extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001C0 .. 0x000001DF {}
+class VideoPacket extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001E0 .. 0x000001EF {}
+class Reserved0Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F0 {}
+class Reserved1Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F1 {}
+class Reserved2Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F2 {}
+class Reserved3Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F3 {}
+class Reserved4Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F4 {}
+class Reserved5Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F5 {}
+class Reserved6Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F6 {}
+class Reserved7Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F7 {}
+class Reserved8Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F8 {}
+class Reserved9Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001F9 {}
+class Reserved10Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FA {}
+class Reserved11Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FB {}
+class Reserved12Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FC {}
+class Reserved13Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FD {}
+class Reserved14Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FE {}
+class Reserved15Packet extends NonPrivate2Packet : unsigned int(32) st_id = 0x000001FF {}
+
+%pragma trace
+
+class SystemHeader {
+    bit(32)     start_code = SYSTEM_HEADER_START_CODE;
+    bit(16)     header_length;
+    bit(1)      marker_bit = 0b1;
+    bit(22)     rate_bound;
+    bit(1)      marker_bit = 0b1;
+    bit(6)      audio_bound;
+    bit(1)      fixed_flag;
+    bit(1)      csps_flag;
+    bit(1)      system_audio_lock_flag;
+    bit(1)      system_video_lock_flag;
+    bit(1)      marker_bit = 0b1;
+    bit(5)      video_bound;
+    bit(8)      reserved_byte = 0b11111111;
+
+    while (nextbits(1) == 0b1) {
+        bit(8)      stream_id;
+        skipbits(2);
+        bit(1)      std_buffer_bound_scale;
+        bit(13)     std_buffer_size_bound;
+    }
+}
+
+class Pack {
+    bit(32)     start_code = PACK_START_CODE;
+    bit(4)      filler = 0b0010;
+    bit(3)      system_clock_reference1;
+    bit(1)      marker_bit = 0b1;
+    bit(15)     system_clock_reference2;
+    bit(1)      marker_bit = 0b1;
+    bit(15)     system_clock_reference3;
+    bit(1)      marker_bit = 0b1;
+    bit(1)      marker_bit = 0b1;
+    bit(22)     mux_rate;
+    bit(1)      marker_bit = 0b1;
+
+    if (nextbits(32) == SYSTEM_HEADER_START_CODE)
+        SystemHeader sh;
+
+    while (isidof(Packet, nextbits(32))) 
+        Packet p;
+}
+ 
+////////////////////
+// The main class //
+////////////////////
+class MPEG1Systems {
+    do {
+        Pack p;
+    } while (nextbits(32) == PACK_START_CODE);
+    bit(32) iso_11172_end_code = PROGRAM_END_CODE;
+}

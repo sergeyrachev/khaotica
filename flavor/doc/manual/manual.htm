@@ -1,0 +1,46 @@
+<html>
+
+<head>
+
+<title>Manual</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+
+<script type="text/javascript" language="JavaScript">
+<!-- 
+window.onload = window_manual_load;
+var ua;
+var ver;
+
+function load() 
+{
+	if ((ua == 'MSIE' && ver >= 4) || (ua == 'nav' && ver > 4)) {
+		document.write("<frameset rows='43,*' BORDER='2' FRAMESPACING=0><frame name='topFrame' noresize src='manual_top.htm' scrolling='no'><frameset cols='230,819*' rows='*' BORDER='2' FRAMESPACING=0><frame name='leftFrame' noresize scrolling='yes' src='manual_left.htm'><frame name='mainFrame' scrolling='yes' src='manual_main.htm'></frameset></frameset></html>");
+	}
+	else {
+		document.location = 'manual_nav.htm';
+	}
+}
+
+function caps() 
+{
+    var UA = navigator.userAgent;
+    if (UA.indexOf("MSIE") != -1) {
+        ua = 'MSIE';
+        ver = UA.charAt(UA.indexOf("MSIE") + 5);
+    } else if(UA.indexOf("Mozilla") != -1 && UA.indexOf("compatible") == -1){
+        ua = "nav";
+        ver = UA.charAt(UA.indexOf("Mozilla") + 8);
+    }
+}
+
+function window_manual_load()
+{
+	caps();
+	load();
+}
+// -->
+</script>
+
+</head>
+
+</html>
