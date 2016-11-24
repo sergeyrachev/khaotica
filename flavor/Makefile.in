@@ -1,0 +1,27 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Danny Hong <danny@ee.columbia.edu>
+
+# Makefile for the entire Flavor source and samples
+
+# Directories to build (the order is significant)
+COMPONENTS = \
+	src \
+	samples/cpp \
+	samples/java
+
+all:
+	for dir in $(COMPONENTS); do (cd $$dir; $(MAKE) all); done
+
+clean:
+	for dir in $(COMPONENTS); do (cd $$dir; $(MAKE) clean); done
+

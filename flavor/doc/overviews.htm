@@ -1,0 +1,83 @@
+<html>
+
+<head>
+<title>Overview</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="./css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h1>Overview of Flavor</h1>
+
+
+<h2><a name="overview">Overview Documents</a></h2>
+
+<p>
+As the design of Flavor progressed starting from its initial design in November 1995, we have 
+produced a number of documents that describe its architecture and functionality as well as 
+analyze its performance.  As a result of the evolution of the language, some of these documents 
+only have historic interest, as they no longer accurately reflect the latest specification.  In 
+many respects, however, the actual differences are rather minor.
+</p>
+
+<p>
+In the following we only provide documents that we considered helpful (and the most up-to-date) in 
+getting started with the Version 5.1 implementation.  If you are interested in other publications, 
+please visit the Flavor web site at <a target="_blank" href="http://flavor.sourceforge.net">
+http://flavor.sourceforge.net</a>.
+</p>
+
+<dl>
+  <dt><a name="flavor"><strong>Flavor: A Language for Media Representation</strong></a></dt>
+  <dd>This is a modified version of the paper (with the same title) published in the proceedings
+      of the ACM Multimedia 1997 conference.  This paper incorporates all enhancements/extensions
+      applied to the current version of Flavor.  This is probably the best overview document
+      available.<br><br>
+     
+      The paper is available in the Adobe Acrobat <a href="papers/flavor.pdf">PDF</a> format.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><b><a name="map">Automatic Generation of Entropy Coding Programs using Flavor</a></b></dt>
+  <dd>This is a paper presented at the IEEE Workshop on Multimedia Signal Processing in
+      December 1998. It describes the rationale as well as the actual implementation of 
+      variable length code (VLC) tables in Flavor.<br><br>
+      
+      The paper is available in the Adobe Acrobat <a href="papers/map.pdf">PDF</a> format.<br><br>
+
+      Though the above paper describes the current implementation of the Flavor translator,
+      we have devised a more efficient method for VLC decoding and this is described in
+      a <a href="papers/partitioning.pdf">paper</a> submitted to the IEEE Transactions on 
+      Circuits and Systems for Video Technology.  We are currently working on this 
+      implementation.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><b><a name="bac">Automatic Generation of C++/Java Code for Efficient Binary Arithmetic Coding</a></b></dt>
+  <dd>This is a paper submitted to the IEEE Transactions on Circuits and Systems for Video
+      Technology.  It describes, in detail, the <code>bac</code> construct that is used for
+      "formally" specifying binary arithmetic coders (BACs).  The construct is comprised of 
+      a number of parameters so that a wide variety of coders can be specified.  It can 
+      be used to specified any one of the currently deployed BACs such as the ones used in 
+      JPEG, JPEG2000 and H.264.  The paper also describes a very efficient semi-quasi-renormalization 
+      method that is shown to be faster than the currently deployed renormalization methods.  
+      This is the best overview document for the <code>bac</code> construct.<br><br>
+      
+      The paper is available in the Adobe Acrobat <a href="papers/bac.pdf">PDF</a> format.</dd>
+  <dt>&nbsp;</dt>
+  
+  <dt><b><a name="xflavor">XFlavor: Providing XML Features in Media Representation</a></b></dt>
+  <dd>This is the description of the XML features added to the Flavor translator.  The 
+      paper has been submitted to the Multimedia Tools and Applications journal.<br><br>
+
+      The paper is available in the Adobe Acrobat <a href="papers/xflavor.pdf">PDF</a> format.</dd>
+  <dt>&nbsp;</dt>
+</dl>
+
+
+<p align="center" class="notice"><a href='copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+</html>

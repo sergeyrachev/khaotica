@@ -1,0 +1,53 @@
+# Copyright (c) 1997-2004 Alexandros Eleftheriadis, Danny Hong and
+# Yuntai Kyong.
+#
+# This file is part of Flavor, developed at Columbia University
+# (www.ee.columbia.edu/flavor).
+#
+# Flavor is free software; you can redistribute it and/or modify
+# it under the terms of the Flavor Artistic License as described in
+# the file COPYING.txt. 
+
+# Authors:
+# Alexandros Eleftheriadis <eleft@ee.columbia.edu>
+# Danny Hong <danny@ee.columbia.edu>
+
+# Parameters
+prefix  = @prefix@
+bindir  = $(prefix)/bin
+clibdir = $(prefix)/lib/cpp
+incdir  = $(prefix)/include
+fldir   = $(prefix)/samples/fl
+datadir = $(prefix)/samples/data
+
+CXX      = @CXX@
+CPPFLAGS = @DEFS@ 
+CFLAGS   = -g -c
+
+
+# Dependencies
+
+all: mpeg1as
+
+mpeg1as: mpeg1as.h mpeg1as.o main.o
+	$(CXX) -o $@ main.o mpeg1as.o -L$(clibdir) -lflavormp3
+
+mpeg1as.h mpeg1as.cpp: 
+	$(bindir)/flavorc -p -x $(fldir)/mpeg1as.fl
+
+clean:
+	rm -f mpeg1as.h mpeg1as.cpp *.o *.bs *.xml mpeg1as mpeg1as.exe
+
+.SUFFIXES: .o .c .cpp .h
+
+.cpp.o:
+	$(CXX) -o $@ $(CFLAGS) $(CPPFLAGS) -I$(incdir) $<
+
+run1:
+	mpeg1as $(datadir)/layer1.mp1
+
+run2:
+	mpeg1as $(datadir)/layer2.mp2
+
+run3:
+	mpeg1as $(datadir)/layer3.mp3

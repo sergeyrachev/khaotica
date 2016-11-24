@@ -1,0 +1,235 @@
+<html>
+
+<head>
+<title>BACs</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="../css/txt.css" rel="stylesheet" type="text/css"/>
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h3><strong>8. Binary Arithmetic Coders (BACs)</strong></h3>
+
+<p><em>BACs are supported from Version 5.2 of the translator.</em></p>
+
+<table border="0" width="100%" class="Syntax">
+  <tr>
+    <td class="SyntaxHeading" width="100%" bgcolor="#000000"><code></code>
+    <font color="#FFFFFF"><strong><span class="SyntaxHeading">Syntax Summary</span></strong></font><code></code>
+    </td>
+  </tr>
+  <tr>
+    <td width="100%"><pre><code>bac <em>name</em> { // bac declaration
+    <em>param</em>, <em>value</em>,
+    [<em>param</em>,<em> value, ...</em>]
+}
+</code></pre>
+    </td>
+  </tr>
+</table>
+
+
+<h4><a name="ibac">8.1 Integer BACs</a></h4>
+
+<p>
+The <code>bac</code> construct is introduced for describing any binary arithmetic coder
+(BAC).  For example, the below description defines the BAC used for MPEG-4 shape coding.   
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>bac MP4ShapeCoder {
+    "prec", 32,             // 32-bit precision
+    "ooc",  1,              // Divide first 
+    "init", {(1<<31)-1,31}, // Init: R=(1<<31)-1; read 31 code stream bits for decoding 
+    "end",  {0,3}           // End: Output minimal bits, excluding two special cases 
+}
+</code></pre>
+    </td>
+  </tr>
+</table>
+
+<p>
+The <code>bac</code> keyword indicates the definition of a BAC named <code>MP4ShapeCoder</code>. 
+The definition also includes the specification of a set of relevant parameters; the 
+complete list of available parameters are described in the <a href="../papers/bac.pdf">BAC</a> 
+paper listed in the <a href="../overviews.htm">Overview Documents</a> section.  We also  
+provide a summary of the parameter descriptions in the table below.  Note that these 
+parameters assume default values, so it is not necessary to specify all of them when 
+declaring a BAC.
+</p>
+
+<table border="1" width="100%" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" bgcolor="#FFFFFF">
+  <tr>
+    <td width="20%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Parameter</span></font></td>
+    <td width="80%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Desription</span></font></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>prec</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify the precision <i>p</i>.  Maps the [0,1) interval into the discrete integer interval [0,2^<i>p</i>). 
+      <i>p</i>=16 by default.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>ooc</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify the object ordering convention.  0: multiply first (by default), 1: divide first, 
+      2: no multiplicative operation (implies a fast BAC).
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>soc</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify the symbol ordering convention.  0: the LPS over MPS (by default), 1: the MPS over LPS, 
+      2: the symbol 0 over 1, 3: the symbol 1 over 0.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>te</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Assign the truncation error to 0: the LPS, 1: the MPS (by default), 2: the symbol 0, 3: the symbol 1.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>norm<br><i>- R_min</i><br><i>- quasi</i><br><i>- n_b</i></code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify when to apply renormalization and the minimum number of bits to output at a time.
+      If <i>R_min</i>=0, then renormalize asap; else renormalize whenever the current interval 
+      length <i>R</i>&lt <i>R_min</i>; <i>R_min</i>=2^(<i>p</i>-2) by default.  If <i>quasi</i>=0 
+      (by default), then do not apply semi-quasi-renormalization; else apply it.  If <i>R_min</i>&gt 
+      0, <i>n_b</i> specifies the minimum # of times to apply the doubling of <i>L</i> and <i>R</i>; 
+      <i>n_b</i>=1 by default.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>bs<br><i>- n_1</i><br><i>- n_0</i><br><i>- n_s</i></code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify that the bit-stuffing procedure is used to resolve the carry-over problem; 
+      <i>n_1</i> represents the # of 1-bits accounted before applying the stuffing, <i>n_0</i> 
+      represents the # of 0-bits stuffed (<i>n_0</i>=1 by default), and <i>n_s</i> indicates 
+      the # of space bits used (<i>n_s</i>=0 by default).
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>init<br><i>- R_init</i><br><i>- n_init</i></code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify how to initialize the BAC.  <i>R_init</i> (= 2^<i>p</i> by default) specifies the 
+      initial <i>R</i> value, and <i>n_init</i> (= <i>p</i> by default) specifies the initial 
+      # of bits read in from the code stream for decoding. 
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>end<br><i>- n_end</i><br><i>- action</i></code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify how to disambiguate the last symbol.  If <i>n_end</i>=0, then use minimal # of 
+      bits to disambiguate the last symbol; otherwise, use <i>n_end</i> bits (<i>n_end</i>=<i>p</i> 
+      by default).  If <i>action</i>=0, then no special action is needed (by default); else if 
+      <i>action</i>=1, then byte align with 0-bit; else if <i>action</i>=2, then byte align 
+      with 1-bit; else if <i>action</i>=3, then do not output minimal # of bits if the current 
+      interval's endpoint includes 0 or 1 and <i>n_end</i>=0.
+    </span></td>
+  </tr>
+</table>
+
+<p>
+As with the maps, BAC declarations can only occur in global scope.  Since all BACs work only 
+with binary symbols (bits), there is no need to specify the type for the symbol value.  In 
+exactly the same way as with maps, parsable variables coded using BACs are declared by specifying
+the name of the BAC in the parse size expression.  Assuming that the <code>MP4ShapeCoder</code> 
+coder has been defined, it can be used as shown below.  The below figure illustrates 
+encoding/decoding of a binary alpha block (BAB) in MPEG-4 shape coding; a BAB is a 16x16 
+binary pixel block.  Before coding each BAB, the <code>MP4ShapeCoder</code> coder is first 
+initialized -- <code>MP4ShapeCoder(1);</code> -- and then each pixel of the BAB (a total of 
+<code>NUM_BAB_PIXELS</code> pixels) can be encoded/decoded using the statement: 
+<code>bit(MP4ShapeCoder) pixel[];</code>.  Here, we are declaring a parsable array
+<code>pixel</code> whose values are coded using the <code>MP4ShapeCoder</code> coder.
+</p>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>MP4ShapeCoder(1);  // Init
+for (i=0; i&lt NUM_BAB_PIXELS; i++) {
+    // The ctx value is calculated based on the previously decoded pixel values
+    bit(MP4ShapeCoder) pixel[[i]](B32Table[ctx],(1<<16)-B32Table[ctx]);
+}
+MP4ShapeCoder(0);  // End
+</code></pre>
+    </td>
+  </tr>
+</table>
+
+
+<h4><a name="fbac">8.2 Fast BACs</a></h4>
+
+<p>
+The biggest drawback of using arithmetic coding has been its high complexity (too many 
+operations performed per symbol).  Flavor supports fast BACs such as the Q-Coder and its 
+variants (used in JBIG, JBIG2, JPEG and JPEG2000) and the M coder, which is used in the CABAC 
+entropy coding scheme of the H.264 standard.  The fast BACs replace some of the arithmetic 
+operations with table lookups, and Flavor provides several additional parameters for the <code>
+bac</code> construct to specify such tables.  Again, refer to the <a href="../papers/bac.pdf">
+BAC</a> paper for more information.  Below is a summary of the additional parameters.
+</p>
+
+<table border="1" width="100%" bordercolor="#000000" bordercolorlight="#000000" bordercolordark="#000000" bgcolor="#FFFFFF">
+  <tr>
+    <td width="20%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Parameter</span></font></td>
+    <td width="80%" valign="top" bgcolor="#000000"><font color="#FFFFFF"><span class="ExampleHeading">Desription</span></font></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>rtable<br><i>- n_r</i><br><i>- n_c</i><br><i>- name</i></code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify the <i>n_r</i> x <i>n_c</i> <i>R</i> table; the table is for the LPS or the symbol 0.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>nexti</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify the probability transition rule table.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>trans</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      Specify when to apply the probability state transition; transition can be applied 
+      0: after coding of each symbol (default) or 1: after each renormalization.
+    </span></td>
+  </tr>
+  <tr>
+    <td width="20%" valign="top"><code>exch</code></td>
+    <td width="80%" valign="top"><span class="ExampleText">
+      0: do not apply conditional exchange (default), 1: apply conditional exchange.
+    </span></td>
+  </tr>
+</table>
+
+<p>
+Flavor description of the M coder is shown below.  The description assumes that the
+specified lookup tables <code>rTblM</code> and <code>rTblM</code> are already defined.
+</P>
+
+<table border="0" width="100%" class="Example">
+  <tr>
+    <td width="100%"><pre><code>bac MCoder { 
+    "prec",     10,             // 10-bit precision	 
+    "ooc",      2,              // No multiplicative operation --> fast BAC
+    "init",     {(1<<9)-2,9},   // Init: R=(1<<9)-2; read 9 code stream bits for decoding 
+    "end",      {3,1},          // End: Output 3 bits; byte align with 0 bits
+    "rtable",   {64,4,"rTblM"}, // The rTbl table contains possible R values for the LPS
+    "nexti",    "iTblM"         // The iTbl table contains transition rules for the LPS
+}
+</code></pre>
+    </td>
+  </tr>
+</table>
+
+
+<p align="center" class="notice"><a href='..\copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+
+</html>

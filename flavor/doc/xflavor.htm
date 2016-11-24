@@ -1,0 +1,212 @@
+<html>
+
+<head>
+
+<title>XFlavor</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<link href="./css/txt.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+
+<body topmargin="20" leftmargin="5" bgcolor="white" link="red" alink="#003399" vlink="#003399">
+
+<h1>XFlavor</h1>
+
+<a name="top"></a>
+
+<p>
+<a href="#schema">XML Schema</a> | <a href="#document">XML Document</a> | 
+<a href="#bitstream">Bitstream Generator</a>
+</p>
+
+<p> 
+Since Version 5.0, the Flavor translator is also referred to as <em>XFlavor</em>, an extended 
+version that provides XML features.  XFlavor has the capability to transform Flavor 
+description into XML schema and it can also produce code for generating XML 
+documents corresponding to the bitstreams described by Flavor.  Additionally, as a 
+part of XFlavor, a compression tool (Bitstream Generator) for converting the XML 
+representation of data back into its original bitstream format is provided as well.  
+Thus, XFlavor consists of the translator and Bitstream Generator. 
+</p>
+
+<p> 
+The purpose of converting multimedia data in binary format into an equivalent XML document
+is for easier and more flexible manipulation of the data.  With the document, the 
+bitstream layer is abstracted from applications and the semantic values of the data 
+(e.g. width and height of an image) are directly available, whereas with the bitstream 
+format, such values must be extracted via bit string manipulations, according to the syntax. 
+Another advantage of using XML representation of data is that software tools are provided 
+with generic access to multimedia data (usually with a generic XML parser).  For example, 
+a search engine that uses DC values to search for images/videos can work with all of JPEG, 
+MPEG-1, 2, 4, and H.26x formats if XML is used to represent the data.  However, if each 
+individual binary format is used, then different search engines must be created for each 
+format as a different syntax is used to represent DC values by the different formats. 
+This requires different parser for each bitstream.
+</p>
+
+<p> 
+Additionally, as the name suggests, XML documents are extensible.  With XML representation 
+of data, extra information can be added to (or deleted from) the given document and a 
+software tool can use both the new and old documents without changing the parser.  On the 
+contrary, with a GIF image, for example, adding extra information anywhere in the 
+bitstream (other than at the end of the bitstream) renders the bitstream useless. 
+Additionally the extra information cannot be easily distinguished from the bitstream.
+</p>
+
+<p>
+The main goal of XFlavor is to offer an alternate form of the multimedia data with
+the goal of providing the necessary structure and information so that different and
+interoperable applications can be created for the same data even if the expected 
+syntax of the data is different among the applications.  XML has been proven to be
+the solution for providing such goal in the IT world and XFlavor, by providing an XML
+representation of the multimedia data, enables the world of media representation to 
+take advantage of such a solution.
+</p>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="schema">XML Schema</a></h2>
+
+<p>
+Given a Flavor description of a bitstream, the translator can generate a corresponding
+XML schema.  For example, using the following command produces an XML schema - 
+<code>input.xsd</code> - corresponding to the Flavor description of a bitstream -
+<code>input.fl</code>.  The translator also creates an <code>attrib.xsd</code> file,
+which contains some of the type definitions used by the <code>input.xsd</code> file.
+<br><br>
+
+<code>flavorc -gx input.fl</code>
+</p>
+
+<p>
+The XML schema is used to define the syntax of XML documents by specifying how the
+elements are laid out in the document as well as the attributes that are allowed with
+the elements.  It also sets the data types for the content of the elements.  The 
+information in the schema is usually used to check the validity of the XML documents.
+The schema can be thought of as a set of rules that applications must agree on in 
+creating/manipulating data so that their output data can be interchanged among them.
+</p>
+
+<p>
+A schema also works as a guide in creating content.  As the structure of the data and 
+their types are defined completely by the schema, a corresponding XML document can be
+easily created.   Since each element that can appear in the document is already 
+specified in the schema with proper ordering, an appropriate user interface can be
+easily derived from the schema for creating new multimedia data.  As the schema is
+created from a bitstream specification, the XML document created based on the schema
+can be transformed into a compliant bitstream form.  In essence, the schema can be
+used to easily create a content generation (or even authoring) tool.
+</p>
+
+<p>
+Another advantage of using the schema is that the data checking part can be automated
+using a schema validator.  The data checking process is a very important and tedious
+part of multimedia applications and using the schema saves much effort needed by the
+developers in coding the software.  The only part that needs to be worked on is the 
+actual decoding part of the application.
+</p>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+<h2><a name="document">XML Document</a></h2>
+
+<p>
+Given a Flavor description of a bitstream, the translator generates a <code>putxml()</code>
+method, on top of the <code>get()</code> and <code>put()</code> methods.  This new method
+can be used to convert a Flavor described bitstream into an XML document.  There are many
+benefits of using this XML feature and some of them are described here.
+</p>
+
+
+<h3>Content Extraction</h3>
+
+<p>
+XML representation allows easy access to different elements.  It allows an application to
+modify and add/delete elements of an XML document, and yet, allows different applications 
+to still work with the modified document.  In other words, even if the structure of the
+document is changed, the correct semantics of the original elements can still be obtained.
+This means, any application can add proprietary information into the document without ever
+worrying about breaking the semantics of the original data, thus preserving the 
+interoperability of the data.  This is the beauty of a <b>self-describing format</b>.
+</p>
+
+<p>
+An XML representation allows keeping all the information available in the encoder side and
+the applications decide how much of the built-in content intelligence it wishes to use.  
+In the field of content extraction, many software tools have been developed to extract
+meaningful information from the content.  For example, the score information from the 
+caption of a sports video can be obtained using various signal processing tools. However,
+such information is already present in the encoder side and it can be preserved in the XML
+document.  Any application requiring such information will be able to use it and other 
+applications can simply ignore it.
+</p>
+
+<p>
+Additionally, XML based applications offer benefits such as providing support for different 
+bitstream syntax without reprogramming/recompiling.  An application built for Syntax A 
+can still work with a document with Syntax B as long as the required elements are still
+available in the document and the tags remain the same.
+</p>
+
+
+<h3>Transcoder</h3>
+
+<p>
+With XML representation, all the XML related technologies and software tools can be directly
+used.  One very important XML technology is XSLT.  XSLT is a language defined using XML for
+transforming XML documents.  With XML alone, interoperability is only obtained among the
+applications that understand a certain set of predefined tags.  However, with XSLT, any
+application can be enabled to use any XML document as long as the actual data in the 
+document is useful to the application.  This "universal interoperability" is achieved by 
+transforming XML documents into different structures usable for different applications.
+</p>
+
+<p>
+Using such technology, a transcoder can be easily created by simply declaring a set of 
+rules to transform the source elements.  The style sheet (containing XSLT rules) along 
+with the source document can be fed into a XSLT processor to generate a new document with 
+desired structure and information.  Also, a set of style sheets can be used to manipulate 
+the elements of a given document.
+</p>
+
+<p><a href="#top">Top</a></p>
+<p>&nbsp;</p>
+
+
+
+<h2><a name="bitstream">Bitstream Generator</a></h2>
+
+<p>
+As a complement to the enhanced Flavor translator, a software tool called <em>Bitstream
+Generator</em> is provided as part of the Flavor package.  The tool has the ability
+to convert the multimedia data in XML format (XML document) back into its native
+bitstream form.
+</p>
+
+<p>
+MPEG-7 has already standardized binary encoding of its XML documents and for wireless
+applications where resources are very scarce, a binary version of XML is being deployed
+(WBXML).  Additionally, there are also a number of XML compression tools such as 
+<a target="_blank" href="http://www.research.att.com/sw/tools/xmill">XMill</a> and 
+<a target="_blank" href="http://www.garshol.priv.no/download/xmltools/prod/XMLZip.html">XMLZip</a>.  
+Though these can be applied to the XML representation of multimedia data, 
+they do not yield as efficient result as the original compressed bitstream.
+</p>
+
+<p><a href="#top">Top</a></p>
+
+
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p align="center" class="notice"><a href='copyright.htm'>Copyright Notice</a></p>
+<p>&nbsp;</p>
+
+</body>
+
+
+</html>

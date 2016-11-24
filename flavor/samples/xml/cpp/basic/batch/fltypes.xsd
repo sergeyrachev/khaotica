@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://www.ee.columbia.edu/flavor"
+            xmlns="http://www.ee.columbia.edu/flavor"
+            elementFormDefault="qualified">
+
+
+<xsd:simpleType name="char">
+    <xsd:restriction base="xsd:string">
+        <xsd:length value="1" fixed="true"/>
+    </xsd:restriction>
+</xsd:simpleType>
+
+
+<xsd:annotation>
+    <xsd:documentation>
+        Below are the Flavor types.  Each type is comprised of attributes that determine
+        the bitstream representation.  The 'aligned' attribute is optional and it is 
+        used if the 'aligned' modifier is used in Flavor.  The 'type' attribute seems
+        to be redundant as the type name already implies the type; however, currently
+        available XML parsers are unable to correctly return the type name, even with 
+        the advent of DOM Level 3, which provides an interface called TypeInfo.  The
+        'bitLen' attribute is required to determine the number of bits (parse length) 
+        used to represent a given value.  Note that the value is not fixed as the parse 
+        length can be variable; in this case, the actual parse value may be known only 
+        during the time of actual parsing.  Additionally, the value may be different 
+        for different bitstreams.  The 'big' attribute is used for types other than 
+        char to determine the byte-ordering method used to represent a given number.
+    </xsd:documentation>
+</xsd:annotation>
+
+<xsd:complexType name="flSChar">
+    <xsd:simpleContent>
+        <xsd:extension base="char">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="bitLen" use="required">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:maxInclusive value="8"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flUChar">
+    <xsd:simpleContent>
+        <xsd:extension base="char">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="bitLen" use="required">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:maxInclusive value="8"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flBit">
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:unsignedInt">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="bitLen" use="required">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:maxInclusive value="32"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flSInt">
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:int">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/>
+            <xsd:attribute name="bitLen" use="required">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:maxInclusive value="32"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flUInt">
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:unsignedInt">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/>
+            <xsd:attribute name="bitLen" use="required">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:maxInclusive value="32"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flFloat">
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:float">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/>
+            <xsd:attribute name="bitLen" default="32">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:enumeration value="0"/>
+                        <xsd:enumeration value="32"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+<xsd:complexType name="flDouble">
+    <xsd:simpleContent>
+        <xsd:extension base="xsd:double">
+            <xsd:attribute name="aligned" type="xsd:unsignedInt" use="optional"/>
+            <xsd:attribute name="big" type="xsd:boolean" use="optional" default="true"/>
+            <xsd:attribute name="bitLen" default="64">
+                <xsd:simpleType>
+                    <xsd:restriction base="xsd:unsignedInt">
+                        <xsd:enumeration value="0"/>
+                        <xsd:enumeration value="64"/>
+                    </xsd:restriction>
+                </xsd:simpleType>
+            </xsd:attribute>
+        </xsd:extension>
+    </xsd:simpleContent>
+</xsd:complexType>
+
+
+</xsd:schema>
