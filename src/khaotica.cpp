@@ -57,6 +57,19 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Support/raw_ostream.h"
 
+
+// #include "llvm/ExecutionEngine/JIT.h"
+// #include "llvm/Support/TargetSelect.h"
+
+#include <iostream>
+#include <sstream>
+#include <string>
+
+#include "codegen/renderer.h"
+#include "parsing/tree.h"
+
+
+
 #include <cctype>
 #include <cstdio>
 #include <map>
@@ -157,7 +170,33 @@ int main( int argc, char* argv[] ) {
 //     auto execution_engine = llvm::EngineBuilder(std::move(M)).create();
 //     auto ret = execution_engine->runFunctionAsMain(F, std::vector<std::string>(), nullptr);
 
-   
+    llvm::InitializeNativeTarget();
+
+    IRRenderer *renderer = new IRRenderer();
+
+    STree *tree = new STree();
+
+    std::string input;
+    fprintf(stderr, "ready> ");
+    while( std::getline(std::cin, input, ';') ) {
+        std::istringstream iss(input);
+
+        tree->parse(iss);
+        if( tree->root != 0 ) {
+            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
+                if( func->getName() == "" ) {
+                    void *func_ptr = renderer->engine->getPointerToFunction(func);
+                    double(*func_pointer)() = (double(*)())(intptr_t)func_ptr;
+                    fprintf(stderr, "Evaluated to: %f\n", func_pointer());
+                }
+            }
+        }
+        fprintf(stderr, "ready> ");
+    }
+
+    renderer->module->dump();
+
+
     return 0;
 
 }

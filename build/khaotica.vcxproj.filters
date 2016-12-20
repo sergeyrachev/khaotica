@@ -5,79 +5,97 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
-    <Filter Include="Source Files\grammar">
-      <UniqueIdentifier>{2ae13b6e-4f6c-43a8-b49b-963949722231}</UniqueIdentifier>
+    <Filter Include="Source Files\ast">
+      <UniqueIdentifier>{faed5b1c-f95f-4370-846f-14b703e3ae65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\codegen">
+      <UniqueIdentifier>{3470c801-4533-4be8-939a-d02612603945}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\parsing">
+      <UniqueIdentifier>{0bdab1c1-0ab2-411d-926d-d25dfa88240a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\khaotica.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\carray.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\binary.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cbac.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\call.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cclass.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\for.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cexpr.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\function.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cgetput.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\if.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\check.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\number.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cid.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\prototype.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cmap.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\unary.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\compile.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\var.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cout.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\ast\variable.cc">
+      <Filter>Source Files\ast</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cpragma.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\binary.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\ctrace.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\call.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cvar.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\for.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cverbatim.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\function.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\cxml.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\if.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\error.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\number.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\eval.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\prototype.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\lex.yy.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\unary.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\ptree.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\var.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\symbol.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\codegen\variable.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\util.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\parsing\lexer.cc">
+      <Filter>Source Files\parsing</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grammar\y.tab.c">
-      <Filter>Source Files\grammar</Filter>
+    <ClCompile Include="..\src\parsing\tree.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\errors.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\flex_lexer.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\grammar.tab.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\codegen\renderer.cc">
+      <Filter>Source Files\codegen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -85,74 +103,59 @@
     <None Include="..\src\grammar\parser.y" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\grammar\carray.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\binary.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cbac.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\call.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cclass.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\for.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cexpr.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\function.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cgetput.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\if.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\check.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\node.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cid.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\number.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cmap.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\prototype.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\compile.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\unary.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cout.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\var.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cpragma.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast\variable.h">
+      <Filter>Source Files\ast</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\ctrace.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\codegen\renderer.h">
+      <Filter>Source Files\codegen</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cvar.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\parsing\lexer.h">
+      <Filter>Source Files\parsing</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cverbatim.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\parsing\tree.h">
+      <Filter>Source Files\parsing</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\cxml.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\ast.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\error.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\errors.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\eval.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\parsing\grammar.tab.hh">
+      <Filter>Source Files\parsing</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grammar\globals.h">
-      <Filter>Source Files\grammar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\grammar\port.h">
-      <Filter>Source Files\grammar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\grammar\ptree.h">
-      <Filter>Source Files\grammar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\grammar\symbol.h">
-      <Filter>Source Files\grammar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\grammar\util.h">
-      <Filter>Source Files\grammar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\grammar\y.tab.h">
-      <Filter>Source Files\grammar</Filter>
+    <ClInclude Include="..\src\parsing\stack.hh">
+      <Filter>Source Files\parsing</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
