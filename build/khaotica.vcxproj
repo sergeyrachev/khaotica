@@ -65,58 +65,59 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\grammar\carray.c" />
-    <ClCompile Include="..\src\grammar\cbac.c" />
-    <ClCompile Include="..\src\grammar\cclass.c" />
-    <ClCompile Include="..\src\grammar\cexpr.c" />
-    <ClCompile Include="..\src\grammar\cgetput.c" />
-    <ClCompile Include="..\src\grammar\check.c" />
-    <ClCompile Include="..\src\grammar\cid.c" />
-    <ClCompile Include="..\src\grammar\cmap.c" />
-    <ClCompile Include="..\src\grammar\compile.c" />
-    <ClCompile Include="..\src\grammar\cout.c" />
-    <ClCompile Include="..\src\grammar\cpragma.c" />
-    <ClCompile Include="..\src\grammar\ctrace.c" />
-    <ClCompile Include="..\src\grammar\cvar.c" />
-    <ClCompile Include="..\src\grammar\cverbatim.c" />
-    <ClCompile Include="..\src\grammar\cxml.c" />
-    <ClCompile Include="..\src\grammar\error.c" />
-    <ClCompile Include="..\src\grammar\eval.c" />
-    <ClCompile Include="..\src\grammar\lex.yy.c" />
-    <ClCompile Include="..\src\grammar\ptree.c" />
-    <ClCompile Include="..\src\grammar\symbol.c" />
-    <ClCompile Include="..\src\grammar\util.c" />
-    <ClCompile Include="..\src\grammar\y.tab.c" />
+    <ClCompile Include="..\src\ast\binary.cc" />
+    <ClCompile Include="..\src\ast\call.cc" />
+    <ClCompile Include="..\src\ast\for.cc" />
+    <ClCompile Include="..\src\ast\function.cc" />
+    <ClCompile Include="..\src\ast\if.cc" />
+    <ClCompile Include="..\src\ast\number.cc" />
+    <ClCompile Include="..\src\ast\prototype.cc" />
+    <ClCompile Include="..\src\ast\unary.cc" />
+    <ClCompile Include="..\src\ast\var.cc" />
+    <ClCompile Include="..\src\ast\variable.cc" />
+    <ClCompile Include="..\src\codegen\binary.cc" />
+    <ClCompile Include="..\src\codegen\call.cc" />
+    <ClCompile Include="..\src\codegen\for.cc" />
+    <ClCompile Include="..\src\codegen\function.cc" />
+    <ClCompile Include="..\src\codegen\if.cc" />
+    <ClCompile Include="..\src\codegen\number.cc" />
+    <ClCompile Include="..\src\codegen\prototype.cc" />
+    <ClCompile Include="..\src\codegen\renderer.cc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\codegen\unary.cc" />
+    <ClCompile Include="..\src\codegen\var.cc" />
+    <ClCompile Include="..\src\codegen\variable.cc" />
+    <ClCompile Include="..\src\errors.cc" />
     <ClCompile Include="..\src\khaotica.cpp" />
+    <ClCompile Include="..\src\parsing\flex_lexer.cc" />
+    <ClCompile Include="..\src\parsing\grammar.tab.cc" />
+    <ClCompile Include="..\src\parsing\lexer.cc" />
+    <ClCompile Include="..\src\parsing\tree.cc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\src\grammar\lexer.l" />
     <None Include="..\src\grammar\parser.y" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\grammar\carray.h" />
-    <ClInclude Include="..\src\grammar\cbac.h" />
-    <ClInclude Include="..\src\grammar\cclass.h" />
-    <ClInclude Include="..\src\grammar\cexpr.h" />
-    <ClInclude Include="..\src\grammar\cgetput.h" />
-    <ClInclude Include="..\src\grammar\check.h" />
-    <ClInclude Include="..\src\grammar\cid.h" />
-    <ClInclude Include="..\src\grammar\cmap.h" />
-    <ClInclude Include="..\src\grammar\compile.h" />
-    <ClInclude Include="..\src\grammar\cout.h" />
-    <ClInclude Include="..\src\grammar\cpragma.h" />
-    <ClInclude Include="..\src\grammar\ctrace.h" />
-    <ClInclude Include="..\src\grammar\cvar.h" />
-    <ClInclude Include="..\src\grammar\cverbatim.h" />
-    <ClInclude Include="..\src\grammar\cxml.h" />
-    <ClInclude Include="..\src\grammar\error.h" />
-    <ClInclude Include="..\src\grammar\eval.h" />
-    <ClInclude Include="..\src\grammar\globals.h" />
-    <ClInclude Include="..\src\grammar\port.h" />
-    <ClInclude Include="..\src\grammar\ptree.h" />
-    <ClInclude Include="..\src\grammar\symbol.h" />
-    <ClInclude Include="..\src\grammar\util.h" />
-    <ClInclude Include="..\src\grammar\y.tab.h" />
+    <ClInclude Include="..\src\ast.h" />
+    <ClInclude Include="..\src\ast\binary.h" />
+    <ClInclude Include="..\src\ast\call.h" />
+    <ClInclude Include="..\src\ast\for.h" />
+    <ClInclude Include="..\src\ast\function.h" />
+    <ClInclude Include="..\src\ast\if.h" />
+    <ClInclude Include="..\src\ast\node.h" />
+    <ClInclude Include="..\src\ast\number.h" />
+    <ClInclude Include="..\src\ast\prototype.h" />
+    <ClInclude Include="..\src\ast\unary.h" />
+    <ClInclude Include="..\src\ast\var.h" />
+    <ClInclude Include="..\src\ast\variable.h" />
+    <ClInclude Include="..\src\codegen\renderer.h" />
+    <ClInclude Include="..\src\errors.h" />
+    <ClInclude Include="..\src\parsing\grammar.tab.hh" />
+    <ClInclude Include="..\src\parsing\lexer.h" />
+    <ClInclude Include="..\src\parsing\stack.hh" />
+    <ClInclude Include="..\src\parsing\tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
