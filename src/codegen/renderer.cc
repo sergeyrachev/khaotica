@@ -1,10 +1,10 @@
 #include "llvm/Analysis/Passes.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
+#include "llvm/ExecutionEngine/MCJIT.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 #include "llvm/IR/PassManager.h"
@@ -19,6 +19,7 @@ using ::llvm::AllocaInst;
 using ::llvm::CloneModule;
 using ::llvm::DataLayout;
 using ::llvm::ExecutionEngine;
+using ::llvm::EngineBuilder;
 using ::llvm::Function;
 using ::llvm::FunctionPassManager;
 using ::llvm::IRBuilder;
@@ -27,38 +28,31 @@ using ::llvm::Module;
 using ::llvm::Type;
 
 
-IRRenderer::IRRenderer()
-    : IRRenderer(new Module("my cool jit", llvm::getGlobalContext())) {}
+IRRenderer::IRRenderer() : IRRenderer(new Module("my cool jit", llvm::LLVMContext())) {
+
+}
 
 IRRenderer::IRRenderer(const IRRenderer &other)
-    : IRRenderer(CloneModule(other.module.get())) {}
+    : IRRenderer(CloneModule(other.module.get()).get()) {}
 
 IRRenderer::IRRenderer(Module *m)
     : module(unique_ptr<Module>(m)),
-      engine(unique_ptr<ExecutionEngine>(ExecutionEngine::MCJITCtor(module))),
-      builder(unique_ptr<IRBuilder<> >(new IRBuilder<>(module->getContext()))),
-      pass_manager(unique_ptr<FunctionPassManager>(new FunctionPassManager(module))) {
+      engine(EngineBuilder().create()),
+      builder(unique_ptr<IRBuilder<> >(new IRBuilder<>(module->getContext())))
+{
 
-    pass_manager->add(new DataLayout(*engine->getDataLayout()));
-    pass_manager->add(llvm::createBasicAAWrapperPass());
-    pass_manager->add(llvm::createPromoteMemoryToRegisterPass());
-    pass_manager->add(llvm::createInstructionCombiningPass());
-    pass_manager->add(llvm::createReassociatePass());
-    pass_manager->add(llvm::createGVNPass());
-    pass_manager->add(llvm::createCFGSimplificationPass());
-
-    pass_manager->doInitialization();
+    module->setDataLayout(engine->getTargetMachine()->createDataLayout());
 }
 
 IRRenderer::IRRenderer(IRRenderer &&other) {
     module = std::move(other.module);
     engine = std::move(other.engine);
     builder = std::move(other.builder);
-    pass_manager = std::move(other.pass_manager);
+ 
     other.module = nullptr;
     other.engine = nullptr;
     other.builder = nullptr;
-    other.pass_manager = nullptr;
+    
 }
 
 IRRenderer &
@@ -66,12 +60,12 @@ IRRenderer::operator =(IRRenderer other) {
     std::swap(module, other.module);
     std::swap(engine, other.engine);
     std::swap(builder, other.builder);
-    std::swap(pass_manager, other.pass_manager);
+   
     return *this;
 }
 
 IRRenderer::~IRRenderer() {
-    pass_manager.reset();
+    
     builder.reset();
     engine.reset();
     module.reset();

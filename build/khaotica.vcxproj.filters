@@ -6,103 +6,22 @@
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\ast">
-      <UniqueIdentifier>{faed5b1c-f95f-4370-846f-14b703e3ae65}</UniqueIdentifier>
+      <UniqueIdentifier>{b2ff655c-ce2e-4d92-b038-d60def72056c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\codegen">
-      <UniqueIdentifier>{3470c801-4533-4be8-939a-d02612603945}</UniqueIdentifier>
+      <UniqueIdentifier>{731975ae-3486-49b0-afc9-c6f10c19c509}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\parsing">
-      <UniqueIdentifier>{0bdab1c1-0ab2-411d-926d-d25dfa88240a}</UniqueIdentifier>
+      <UniqueIdentifier>{2f6e9981-cf9d-4e3e-ae1a-2acb5cb7bd60}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\khaotica.cpp">
+    <ClInclude Include="..\src\ast.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\binary.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\call.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\for.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\function.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\if.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\number.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\prototype.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\unary.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\var.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\ast\variable.cc">
-      <Filter>Source Files\ast</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\binary.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\call.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\for.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\function.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\if.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\number.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\prototype.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\unary.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\var.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\variable.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\parsing\lexer.cc">
-      <Filter>Source Files\parsing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\parsing\tree.cc">
-      <Filter>Source Files\parsing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\errors.cc">
+    </ClInclude>
+    <ClInclude Include="..\src\errors.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\parsing\flex_lexer.cc">
-      <Filter>Source Files\parsing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\parsing\grammar.tab.cc">
-      <Filter>Source Files\parsing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\renderer.cc">
-      <Filter>Source Files\codegen</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\src\grammar\lexer.l" />
-    <None Include="..\src\grammar\parser.y" />
-  </ItemGroup>
-  <ItemGroup>
+    </ClInclude>
     <ClInclude Include="..\src\ast\binary.h">
       <Filter>Source Files\ast</Filter>
     </ClInclude>
@@ -139,23 +58,78 @@
     <ClInclude Include="..\src\codegen\renderer.h">
       <Filter>Source Files\codegen</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\parsing\lexer.h">
+    <ClInclude Include="..\src\parsing\FlexLexer.h">
       <Filter>Source Files\parsing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\parsing\tree.h">
-      <Filter>Source Files\parsing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ast.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\errors.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\parsing\grammar.tab.hh">
+      <Filter>Source Files\parsing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\parsing\lexer.h">
       <Filter>Source Files\parsing</Filter>
     </ClInclude>
     <ClInclude Include="..\src\parsing\stack.hh">
       <Filter>Source Files\parsing</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\parsing\tree.h">
+      <Filter>Source Files\parsing</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\errors.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\khaotica.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\binary.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\call.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\for.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\function.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\if.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\number.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\prototype.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\unary.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\var.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ast\variable.cc">
+      <Filter>Source Files\ast</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\codegen\renderer.cc">
+      <Filter>Source Files\codegen</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\flex_lexer.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\grammar.tab.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\lexer.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\parsing\tree.cc">
+      <Filter>Source Files\parsing</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\parsing\lexer.ll">
+      <Filter>Source Files\parsing</Filter>
+    </None>
   </ItemGroup>
 </Project>

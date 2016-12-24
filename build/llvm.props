@@ -3,11 +3,12 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <LLVM>d:\work\env\llvm\3.9.0\</LLVM>
+    <LLVM_SRC>d:\work\src\llvm\llvm\</LLVM_SRC>
   </PropertyGroup>
   <PropertyGroup>
     <IncludePath>$(LLVM)\include;$(IncludePath);</IncludePath>
     <LibraryPath>$(LLVM)\lib;$(LibraryPath)</LibraryPath>
-    <SourcePath>d:\work\src\llvm\llvm\lib\;$(SourcePath)</SourcePath>
+    <SourcePath>${LLVM_SRC};${LLVM_SRC}\lib;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
@@ -17,6 +18,9 @@
   <ItemGroup>
     <BuildMacro Include="LLVM">
       <Value>$(LLVM)</Value>
+    </BuildMacro>
+    <BuildMacro Include="LLVM_SRC">
+      <Value>$(LLVM_SRC)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>

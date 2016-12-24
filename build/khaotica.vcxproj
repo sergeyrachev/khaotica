@@ -10,6 +10,49 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\ast.h" />
+    <ClInclude Include="..\src\ast\binary.h" />
+    <ClInclude Include="..\src\ast\call.h" />
+    <ClInclude Include="..\src\ast\for.h" />
+    <ClInclude Include="..\src\ast\function.h" />
+    <ClInclude Include="..\src\ast\if.h" />
+    <ClInclude Include="..\src\ast\node.h" />
+    <ClInclude Include="..\src\ast\number.h" />
+    <ClInclude Include="..\src\ast\prototype.h" />
+    <ClInclude Include="..\src\ast\unary.h" />
+    <ClInclude Include="..\src\ast\var.h" />
+    <ClInclude Include="..\src\ast\variable.h" />
+    <ClInclude Include="..\src\codegen\renderer.h" />
+    <ClInclude Include="..\src\errors.h" />
+    <ClInclude Include="..\src\parsing\FlexLexer.h" />
+    <ClInclude Include="..\src\parsing\grammar.tab.hh" />
+    <ClInclude Include="..\src\parsing\lexer.h" />
+    <ClInclude Include="..\src\parsing\stack.hh" />
+    <ClInclude Include="..\src\parsing\tree.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\ast\binary.cc" />
+    <ClCompile Include="..\src\ast\call.cc" />
+    <ClCompile Include="..\src\ast\for.cc" />
+    <ClCompile Include="..\src\ast\function.cc" />
+    <ClCompile Include="..\src\ast\if.cc" />
+    <ClCompile Include="..\src\ast\number.cc" />
+    <ClCompile Include="..\src\ast\prototype.cc" />
+    <ClCompile Include="..\src\ast\unary.cc" />
+    <ClCompile Include="..\src\ast\var.cc" />
+    <ClCompile Include="..\src\ast\variable.cc" />
+    <ClCompile Include="..\src\codegen\renderer.cc" />
+    <ClCompile Include="..\src\errors.cc" />
+    <ClCompile Include="..\src\khaotica.cpp" />
+    <ClCompile Include="..\src\parsing\flex_lexer.cc" />
+    <ClCompile Include="..\src\parsing\grammar.tab.cc" />
+    <ClCompile Include="..\src\parsing\lexer.cc" />
+    <ClCompile Include="..\src\parsing\tree.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\src\parsing\lexer.ll" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E887D0E0-7B78-4C00-BE0E-77FA29B147CD}</ProjectGuid>
     <RootNamespace>khaotica</RootNamespace>
@@ -64,61 +107,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\ast\binary.cc" />
-    <ClCompile Include="..\src\ast\call.cc" />
-    <ClCompile Include="..\src\ast\for.cc" />
-    <ClCompile Include="..\src\ast\function.cc" />
-    <ClCompile Include="..\src\ast\if.cc" />
-    <ClCompile Include="..\src\ast\number.cc" />
-    <ClCompile Include="..\src\ast\prototype.cc" />
-    <ClCompile Include="..\src\ast\unary.cc" />
-    <ClCompile Include="..\src\ast\var.cc" />
-    <ClCompile Include="..\src\ast\variable.cc" />
-    <ClCompile Include="..\src\codegen\binary.cc" />
-    <ClCompile Include="..\src\codegen\call.cc" />
-    <ClCompile Include="..\src\codegen\for.cc" />
-    <ClCompile Include="..\src\codegen\function.cc" />
-    <ClCompile Include="..\src\codegen\if.cc" />
-    <ClCompile Include="..\src\codegen\number.cc" />
-    <ClCompile Include="..\src\codegen\prototype.cc" />
-    <ClCompile Include="..\src\codegen\renderer.cc">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\src\codegen\unary.cc" />
-    <ClCompile Include="..\src\codegen\var.cc" />
-    <ClCompile Include="..\src\codegen\variable.cc" />
-    <ClCompile Include="..\src\errors.cc" />
-    <ClCompile Include="..\src\khaotica.cpp" />
-    <ClCompile Include="..\src\parsing\flex_lexer.cc" />
-    <ClCompile Include="..\src\parsing\grammar.tab.cc" />
-    <ClCompile Include="..\src\parsing\lexer.cc" />
-    <ClCompile Include="..\src\parsing\tree.cc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\src\grammar\lexer.l" />
-    <None Include="..\src\grammar\parser.y" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\src\ast.h" />
-    <ClInclude Include="..\src\ast\binary.h" />
-    <ClInclude Include="..\src\ast\call.h" />
-    <ClInclude Include="..\src\ast\for.h" />
-    <ClInclude Include="..\src\ast\function.h" />
-    <ClInclude Include="..\src\ast\if.h" />
-    <ClInclude Include="..\src\ast\node.h" />
-    <ClInclude Include="..\src\ast\number.h" />
-    <ClInclude Include="..\src\ast\prototype.h" />
-    <ClInclude Include="..\src\ast\unary.h" />
-    <ClInclude Include="..\src\ast\var.h" />
-    <ClInclude Include="..\src\ast\variable.h" />
-    <ClInclude Include="..\src\codegen\renderer.h" />
-    <ClInclude Include="..\src\errors.h" />
-    <ClInclude Include="..\src\parsing\grammar.tab.hh" />
-    <ClInclude Include="..\src\parsing\lexer.h" />
-    <ClInclude Include="..\src\parsing\stack.hh" />
-    <ClInclude Include="..\src\parsing\tree.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
