@@ -1,4 +1,4 @@
-project(FoundationTimer)
+project(khaotica)
 cmake_minimum_required(VERSION 3.0)
 
 include(conanbuildinfo.cmake)
