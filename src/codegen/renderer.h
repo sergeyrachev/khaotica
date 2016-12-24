@@ -6,6 +6,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassManager.h"
+#include "llvm/IR/LLVMContext.h"
 
 #include <map>
 #include <string>
@@ -14,6 +15,7 @@ using ::std::map;
 using ::std::string;
 using ::std::unique_ptr;
 
+using ::llvm::LLVMContext;
 using ::llvm::AllocaInst;
 using ::llvm::ExecutionEngine;
 using ::llvm::Function;
@@ -36,10 +38,10 @@ public:
     IRRenderer();
     ~IRRenderer();
 
+    LLVMContext Context;
     unique_ptr<Module> module;
     unique_ptr<ExecutionEngine> engine;
     unique_ptr<IRBuilder<> > builder;
-    unique_ptr<FunctionPassManager> pass_manager;
 
     LLVMContext &llvm_context();
 
