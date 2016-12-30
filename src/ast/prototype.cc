@@ -31,9 +31,9 @@ void
 PrototypeNode::create_argument_allocas(IRRenderer *renderer, Function *func) {
     Function::arg_iterator iterator = func->arg_begin();
     for( auto &arg : args ) {
-        Value val = iterator++;
+        Value& val = *iterator++;
         AllocaInst *alloca = renderer->create_entry_block_alloca(func, arg);
-        renderer->builder->CreateStore(val, alloca);
+        renderer->builder->CreateStore(&val, alloca);
         renderer->set_named_value(arg, alloca);
     }
 }
@@ -68,8 +68,8 @@ PrototypeNode::codegen(IRRenderer *renderer) {
 
     Function::arg_iterator iterator = func->arg_begin();
     for( auto &arg : args ) {
-        Value *val = iterator++;
-        val->setName(arg);
+        Value& val = *iterator++;
+        val.setName(arg);
     }
 
     return func;

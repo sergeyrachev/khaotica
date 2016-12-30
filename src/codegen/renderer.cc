@@ -1,14 +1,22 @@
 #include "llvm/Analysis/Passes.h"
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/MCJIT.h"
+#include "llvm/ExecutionEngine/ObjectCache.h"
+#include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/IR/DataLayout.h"
 #include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Instructions.h"
 #include "llvm/IR/IRBuilder.h"
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/Value.h"
-#include "llvm/IR/PassManager.h"
-#include "llvm/Transforms/Utils/Cloning.h"
+#include "llvm/IR/Verifier.h"
+#include "llvm/IRReader/IRReader.h"
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
+#include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/Scalar.h"
 
 #include <string>
@@ -16,7 +24,6 @@
 #include "renderer.h"
 
 using ::llvm::AllocaInst;
-using ::llvm::CloneModule;
 using ::llvm::DataLayout;
 using ::llvm::ExecutionEngine;
 using ::llvm::EngineBuilder;
@@ -28,44 +35,17 @@ using ::llvm::Module;
 using ::llvm::Type;
 
 
-IRRenderer::IRRenderer() : IRRenderer(new Module("my cool jit", llvm::LLVMContext())) {
-
-}
-
-IRRenderer::IRRenderer(const IRRenderer &other)
-    : IRRenderer(CloneModule(other.module.get()).get()) {}
-
-IRRenderer::IRRenderer(Module *m)
-    : module(unique_ptr<Module>(m)),
-      engine(EngineBuilder().create()),
+IRRenderer::IRRenderer()
+    : module(unique_ptr<Module>(new Module("my cool jit", context))),
+      engine(unique_ptr<ExecutionEngine>(EngineBuilder(unique_ptr<Module>(module.get())).create())),
       builder(unique_ptr<IRBuilder<> >(new IRBuilder<>(module->getContext())))
 {
 
-    module->setDataLayout(engine->getTargetMachine()->createDataLayout());
 }
 
-IRRenderer::IRRenderer(IRRenderer &&other) {
-    module = std::move(other.module);
-    engine = std::move(other.engine);
-    builder = std::move(other.builder);
- 
-    other.module = nullptr;
-    other.engine = nullptr;
-    other.builder = nullptr;
-    
-}
-
-IRRenderer &
-IRRenderer::operator =(IRRenderer other) {
-    std::swap(module, other.module);
-    std::swap(engine, other.engine);
-    std::swap(builder, other.builder);
-   
-    return *this;
-}
 
 IRRenderer::~IRRenderer() {
-    
+   
     builder.reset();
     engine.reset();
     module.reset();
