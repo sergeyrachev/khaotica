@@ -5,8 +5,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
-#include "llvm/IR/PassManager.h"
-#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 
 #include <map>
 #include <string>
@@ -15,11 +14,9 @@ using ::std::map;
 using ::std::string;
 using ::std::unique_ptr;
 
-using ::llvm::LLVMContext;
 using ::llvm::AllocaInst;
 using ::llvm::ExecutionEngine;
 using ::llvm::Function;
-using ::llvm::FunctionPassManager;
 using ::llvm::IRBuilder;
 using ::llvm::LLVMContext;
 using ::llvm::Module;
@@ -28,17 +25,11 @@ using ::llvm::Module;
 class IRRenderer {
     map<string, AllocaInst*> named_values;
 
-    IRRenderer(const IRRenderer &other);
-    IRRenderer(Module *module);
-    IRRenderer(IRRenderer &&other);
-
-    IRRenderer &operator =(IRRenderer other);
-
 public:
     IRRenderer();
     ~IRRenderer();
 
-    LLVMContext Context;
+    LLVMContext context;
     unique_ptr<Module> module;
     unique_ptr<ExecutionEngine> engine;
     unique_ptr<IRBuilder<> > builder;
