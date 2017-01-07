@@ -40,7 +40,7 @@ IRRenderer::IRRenderer()
       engine(unique_ptr<ExecutionEngine>(EngineBuilder(unique_ptr<Module>(module.get())).create())),
       builder(unique_ptr<IRBuilder<> >(new IRBuilder<>(module->getContext())))
 {
-
+    module->setDataLayout(EngineBuilder().selectTarget()->createDataLayout());
 }
 
 

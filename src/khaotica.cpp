@@ -171,6 +171,8 @@ int main( int argc, char* argv[] ) {
 //     auto ret = execution_engine->runFunctionAsMain(F, std::vector<std::string>(), nullptr);
 
     llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
 
     IRRenderer *renderer = new IRRenderer();
 
@@ -187,7 +189,9 @@ int main( int argc, char* argv[] ) {
                 if( func->getName() == "" ) {
                     void *func_ptr = renderer->engine->getPointerToFunction(func);
                     double(*func_pointer)() = (double(*)())(intptr_t)func_ptr;
-                    fprintf(stderr, "Evaluated to: %f\n", func_pointer());
+                    break;
+
+                    //fprintf(stderr, "Evaluated to: %f\n", func_pointer());
                 }
             }
         }
