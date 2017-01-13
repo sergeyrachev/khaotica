@@ -28,7 +28,6 @@ using ::llvm::DataLayout;
 using ::llvm::ExecutionEngine;
 using ::llvm::EngineBuilder;
 using ::llvm::Function;
-using ::llvm::FunctionPassManager;
 using ::llvm::IRBuilder;
 using ::llvm::LLVMContext;
 using ::llvm::Module;
@@ -36,23 +35,18 @@ using ::llvm::Type;
 
 
 IRRenderer::IRRenderer()
-    : module(unique_ptr<Module>(new Module("my cool jit", context))),
-      engine(unique_ptr<ExecutionEngine>(EngineBuilder(unique_ptr<Module>(module.get())).create())),
-      builder(unique_ptr<IRBuilder<> >(new IRBuilder<>(module->getContext())))
 {
-    module->setDataLayout(EngineBuilder().selectTarget()->createDataLayout());
+    engine = unique_ptr<ExecutionEngine>(EngineBuilder(unique_ptr<Module>(new Module("my cool jit", context))).create());
+    builder = unique_ptr<IRBuilder<>>(new IRBuilder<>(context));
 }
 
 
 IRRenderer::~IRRenderer() {
-   
-    builder.reset();
-    engine.reset();
-    module.reset();
+
 }
 
 llvm::LLVMContext &
-IRRenderer::llvm_context() { return module->getContext(); }
+IRRenderer::llvm_context() { return context; }
 
 llvm::AllocaInst *
 IRRenderer::get_named_value (const std::string &name){
@@ -79,7 +73,7 @@ IRRenderer::create_entry_block_alloca(Function *func, const std::string &name) {
     IRBuilder<> tmp_builder(&func->getEntryBlock(),
                             func->getEntryBlock().begin());
 
-    return tmp_builder.CreateAlloca(Type::getDoubleTy(module->getContext()),
+    return tmp_builder.CreateAlloca(Type::getDoubleTy(context),
                                     0,
                                     name.c_str());
 }

@@ -11,24 +11,6 @@
 #include <boost/algorithm/hex.hpp>
 #include <boost/chrono.hpp>
 
-#include <clang/AST/ASTConsumer.h>
-#include <clang/AST/ASTContext.h>
-#include <clang/AST/DeclVisitor.h>
-#include <clang/Basic/Builtins.h>
-#include <clang/Basic/Diagnostic.h>
-#include <clang/Basic/FileManager.h>
-#include <clang/Basic/IdentifierTable.h>
-#include <clang/Basic/SourceManager.h>
-#include <clang/Basic/TargetInfo.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Frontend/FrontendActions.h>
-#include <clang/Frontend/TextDiagnosticBuffer.h>
-#include <clang/Lex/HeaderSearch.h>
-#include <clang/Lex/Preprocessor.h>
-#include <clang/Parse/ParseAST.h>
-#include <clang/Parse/Parser.h>
-#include <clang/Sema/Sema.h>
-
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -170,9 +152,11 @@ int main( int argc, char* argv[] ) {
 //     auto execution_engine = llvm::EngineBuilder(std::move(M)).create();
 //     auto ret = execution_engine->runFunctionAsMain(F, std::vector<std::string>(), nullptr);
 
-    llvm::InitializeNativeTarget();
-    llvm::InitializeNativeTargetAsmPrinter();
-    llvm::InitializeNativeTargetAsmParser();
+    llvm::InitializeAllTargetInfos();
+    llvm::InitializeAllTargets();
+    llvm::InitializeAllTargetMCs();
+    llvm::InitializeAllAsmParsers();
+    llvm::InitializeAllAsmPrinters();
 
     IRRenderer *renderer = new IRRenderer();
 
@@ -198,7 +182,7 @@ int main( int argc, char* argv[] ) {
         fprintf(stderr, "ready> ");
     }
 
-    renderer->module->dump();
+    //renderer->module->dump();
 
 
     return 0;
