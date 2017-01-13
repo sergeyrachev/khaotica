@@ -582,7 +582,7 @@ typedef bison::Parser::token token;
 #define COMMENT 1
 
 /*windows compatibility case*/
-#include <io.h>
+#include <stdio.h>
 #define isatty _isatty
 #define fileno _fileno
     
