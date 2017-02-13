@@ -1,59 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-#include <boost/program_options.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/date_time.hpp>
-#include <boost/rational.hpp>
-#include <boost/limits.hpp>
-#include <boost/foreach.hpp>
-#include <boost/uuid/string_generator.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/locks.hpp>
-#include <boost/algorithm/hex.hpp>
-#include <boost/chrono.hpp>
-
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/Support/Casting.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/Support/TargetSelect.h>
-#include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/Passes.h"
-#include "llvm/IR/DIBuilder.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Support/raw_ostream.h"
-
-
 // #include "llvm/ExecutionEngine/JIT.h"
 // #include "llvm/Support/TargetSelect.h"
 
-#include <iostream>
-#include <sstream>
-#include <string>
+#include "khaotica.h"
 
 #include "codegen/renderer.h"
 #include "parsing/tree.h"
-
-
 
 #include <cctype>
 #include <cstdio>
@@ -61,6 +15,10 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <iostream>
+#include <sstream>
+#include <string>
+
 
 bool is_args_valid( int argc, char* argv[], const boost::program_options::options_description& opt_desc, const boost::program_options::positional_options_description& pos_opt_desc, boost::program_options::variables_map& varmap ) {
     namespace po = boost::program_options;
