@@ -62,56 +62,6 @@ int main( int argc, char* argv[] ) {
 
     const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
     std::cout << input_definition_filename << std::endl;
-//     using namespace clang;
-//     using namespace llvm;
-// 
-//     auto compiler(std::make_shared<CompilerInstance>());
-//     compiler->createDiagnostics(); // to stdout
-//     assert(compiler->hasDiagnostics());
-// 
-//     compiler->getFrontendOpts().Inputs.push_back({ "microuniverse.cpp", IK_CXX });
-//     compiler->getFrontendOpts().OutputFile = "ast.xml";
-//     compiler->getTargetOpts().Triple = "i686"; // x86, alpha, ppc, ppc64, ...
-//     compiler->getLangOpts().CPlusPlus = 1;
-//     
-//     std::shared_ptr<FrontendAction> action(std::make_shared<ASTDeclListAction>());
-// 
-//     bool actionSuccessful = compiler->ExecuteAction(*action);
-//     assert(actionSuccessful);   
-// 
-// 
-// 
-//     llvm::InitializeNativeTarget();
-//     llvm::InitializeNativeTargetAsmPrinter();
-//     llvm::InitializeNativeTargetAsmParser();
-// 
-//     llvm::LLVMContext Context;
-// 
-//     // Create the "module" or "program" or "translation unit" to hold the
-//     // function
-//     auto M = std::make_unique<llvm::Module>("test", Context);
-// 
-//     Function *F = cast<Function>(M->getOrInsertFunction("main", llvm::Type::getInt32Ty(Context), llvm::Type::getInt32Ty(Context), nullptr));
-//     // Add a basic block to the function... again, it automatically inserts
-//     // because of the last argument.
-//     llvm::BasicBlock *BB = llvm::BasicBlock::Create(Context, "EntryBlock", F);
-// 
-//     // Get pointers to the constant integers...
-//     llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 2);
-//     llvm::Value *Three = llvm::ConstantInt::get(llvm::Type::getInt32Ty(Context), 3);
-// 
-//     // Create the add instruction... does not insert...
-//     llvm::Instruction *Add = llvm::BinaryOperator::Create(llvm::Instruction::Add, Two, Three, "addresult", BB);
-// 
-// 
-//     // Create the return instruction and add it to the basic block
-//     BB->getInstList().push_back(ReturnInst::Create(Context, Add));
-// 
-//     M->dump();
-//     
-//         
-//     auto execution_engine = llvm::EngineBuilder(std::move(M)).create();
-//     auto ret = execution_engine->runFunctionAsMain(F, std::vector<std::string>(), nullptr);
 
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();
@@ -125,14 +75,16 @@ int main( int argc, char* argv[] ) {
 
     std::string input;
     fprintf(stderr, "ready> ");
-    while( std::getline(std::cin, input, ';') ) {
+    std::ifstream f(input_definition_filename);
+
+    while( std::getline(f, input, ';') ) {
         std::istringstream iss(input);
 
         tree->parse(iss);
         if( tree->root != 0 ) {
             if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
                 if( func->getName() == "" ) {
-                    void *func_ptr = renderer->engine->getPointerToFunction(func);
+                    void *func_ptr = renderer->engine()->getPointerToFunction(func);
                     double(*func_pointer)() = (double(*)())(intptr_t)func_ptr;
                     break;
 
