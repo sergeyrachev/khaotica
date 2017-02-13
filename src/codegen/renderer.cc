@@ -39,13 +39,19 @@ using ::llvm::Type;
 
 IRRenderer::IRRenderer()
 {
-    engine = unique_ptr<ExecutionEngine>(EngineBuilder(unique_ptr<Module>(new Module("my cool jit", context))).create());
+    module = unique_ptr<Module>(new Module("my cool jit", context));
+    //
     builder = unique_ptr<IRBuilder<>>(new IRBuilder<>(context));
 }
 
 
 IRRenderer::~IRRenderer() {
 
+}
+
+unique_ptr<ExecutionEngine> IRRenderer::engine()
+{
+    return unique_ptr<ExecutionEngine>(EngineBuilder(std::move(module)).create());
 }
 
 llvm::LLVMContext &
