@@ -25,6 +25,7 @@
     <ClInclude Include="..\src\ast\variable.h" />
     <ClInclude Include="..\src\codegen\renderer.h" />
     <ClInclude Include="..\src\errors.h" />
+    <ClInclude Include="..\src\khaotica.h" />
     <ClInclude Include="..\src\parsing\FlexLexer.h" />
     <ClInclude Include="..\src\parsing\grammar.tab.hh" />
     <ClInclude Include="..\src\parsing\lexer.h" />

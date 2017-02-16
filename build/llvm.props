@@ -8,7 +8,7 @@
   <PropertyGroup>
     <IncludePath>$(LLVM)\include;$(IncludePath);</IncludePath>
     <LibraryPath>$(LLVM)\lib;$(LibraryPath)</LibraryPath>
-    <SourcePath>${LLVM_SRC};${LLVM_SRC}\lib;$(SourcePath)</SourcePath>
+    <SourcePath>${LLVM_SRC}\lib;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link>
