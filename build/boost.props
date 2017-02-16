@@ -3,22 +3,21 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros">
     <BOOST>d:\work\env\boost\1.60\</BOOST>
-    <BOOST_LINK_LIB>$(BOOST)/stage32/lib</BOOST_LINK_LIB>
+    <BOOST_LIBS>$(BOOST)\stage\shared\x86\lib\</BOOST_LIBS>
   </PropertyGroup>
   <PropertyGroup>
     <IncludePath>$(BOOST);$(IncludePath);</IncludePath>
-    <LibraryPath>$(BOOST_LINK_LIB);$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(BOOST_LIBS);$(LibraryPath)</LibraryPath>
     <SourcePath>$(BOOST);$(SourcePath)</SourcePath>
-    <ExecutablePath>$(BOOST_LINK_LIB);$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <ExecutablePath>$(BOOST)\stage\shared\x86\lib\;$(VC_ExecutablePath_x86);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup />
   <ItemGroup>
     <BuildMacro Include="BOOST">
       <Value>$(BOOST)</Value>
     </BuildMacro>
-    <BuildMacro Include="BOOST_LINK_LIB">
-      <Value>$(BOOST_LINK_LIB)</Value>
-      <EnvironmentVariable>true</EnvironmentVariable>
+    <BuildMacro Include="BOOST_LIBS">
+      <Value>$(BOOST_LIBS)</Value>
     </BuildMacro>
   </ItemGroup>
 </Project>
