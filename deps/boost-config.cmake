@@ -1,13 +1,12 @@
-set(BOOST_ROOT d:/work/env/boost/1.60/)
-set(BOOST_LIBRARYDIR d:/work/env/boost/1.60/stage/shared/x86/lib)
+set(BOOST_ROOT /home/sergey.rachev/data/opt/boost/1.63)
 
-#set(Boost_USE_STATIC_LIBS OFF) 
-#set(Boost_USE_MULTITHREADED ON)  
-#set(Boost_USE_STATIC_RUNTIME OFF) 
-#find_package(Boost 1.60)
+set(Boost_DEBUG ON)
+
+find_package(Boost COMPONENTS program_options system)
 
 if(Boost_FOUND)
-    #set(boost_COMPILE_DEFINITIONS ${Boost_LIB_DIAGNOSTIC_DEFINITIONS} -DBOOST_AL)
-    #set(boost_LIBRARIES ${Boost_LIBRARIES})
-    #set(boost_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
+    set(boost_COMPILE_DEFINITIONS ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+    message(>> ${Boost_LIBRARIES})
+    set(boost_LIBRARIES ${Boost_LIBRARIES})
+    set(boost_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS})
 endif()
