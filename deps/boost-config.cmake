@@ -1,6 +1,8 @@
-set(BOOST_ROOT /home/sergey.rachev/data/opt/boost/1.63)
+set(BOOST_ROOT "" CACHE PATH "")
+set(Boost_DEBUG ON)
+set(Boost_USE_STATIC_LIBS ON)
 
-find_package(Boost COMPONENTS program_options system)
+find_package(Boost 1.60 COMPONENTS program_options system)
 
 if(Boost_FOUND)
     set(boost_COMPILE_DEFINITIONS ${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
