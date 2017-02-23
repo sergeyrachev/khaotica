@@ -1,4 +1,4 @@
-set(LLVM_ROOT /home/sergey.rachev/data/opt/llvm/3.9)
+set(LLVM_ROOT "" CACHE PATH "")
 
 find_package(LLVM 3.9.0 PATHS ${LLVM_ROOT})
 
