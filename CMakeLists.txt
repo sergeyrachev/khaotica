@@ -1,8 +1,8 @@
 project(khaotica)
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.6)
 
-find_package(llvm CONFIG PATHS deps/llvm)
-find_package(boost CONFIG PATHS deps/boost)
+find_package(llvm CONFIG PATHS deps)
+find_package(boost CONFIG PATHS deps)
 
 set(SOURCES
         src/ast/binary.cc
@@ -24,7 +24,8 @@ set(SOURCES
         )
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES})
-set_property(TARGET khaotica PROPERTY CXX_STANDARD 11)
+
+target_compile_features(khaotica PUBLIC cxx_nullptr)
 
 target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES})
 target_include_directories(khaotica PRIVATE src/ast src/parsing src/codegen src PRIVATE ${llvm_INCLUDE_DIRECTORIES} ${boost_INCLUDE_DIRECTORIES})
