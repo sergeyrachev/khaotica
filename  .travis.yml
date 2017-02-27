@@ -1,0 +1,8 @@
+language: cpp
+os:
+- linux
+- windows
+
+before_script:
+- echo $LANG
+- echo $LC_ALL
