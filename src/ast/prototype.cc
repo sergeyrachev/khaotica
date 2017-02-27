@@ -53,7 +53,7 @@ PrototypeNode::codegen(IRRenderer *renderer) {
     Function *func = Function::Create(func_type,
         Function::ExternalLinkage,
         name,
-        renderer->module.get());
+        renderer->module);
 
     if( func->getName() != name ) {
         func->eraseFromParent();

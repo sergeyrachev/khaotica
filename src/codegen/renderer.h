@@ -30,10 +30,11 @@ public:
     ~IRRenderer();
 
     LLVMContext context;
-    unique_ptr<Module> module;
+    Module* module;
     unique_ptr<IRBuilder<> > builder;
+    unique_ptr<ExecutionEngine> eng;
 
-    unique_ptr<ExecutionEngine> engine();
+    unique_ptr<ExecutionEngine>& engine();
     LLVMContext &llvm_context();
 
     AllocaInst *get_named_value(const std::string &name);
