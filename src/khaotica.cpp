@@ -84,8 +84,8 @@ int main( int argc, char* argv[] ) {
         if( tree->root != 0 ) {
             if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
                 if( func->getName() == "" ) {
-                    void *func_ptr = renderer->engine()->getPointerToFunction(func);
-                    double(*func_pointer)() = (double(*)())(intptr_t)func_ptr;
+         
+                    double(*func_pointer)() = (double(*)())(intptr_t)(renderer->engine()->getFunctionAddress(func->getName()));
                     break;
 
                     //fprintf(stderr, "Evaluated to: %f\n", func_pointer());

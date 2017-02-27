@@ -39,9 +39,10 @@ using ::llvm::Type;
 
 IRRenderer::IRRenderer()
 {
-    module = unique_ptr<Module>(new Module("my cool jit", context));
-    //
-    builder = unique_ptr<IRBuilder<>>(new IRBuilder<>(context));
+    auto M = std::make_unique<Module>("my cool jit", context);
+    module = M.get();
+    builder = std::make_unique<IRBuilder<>>(context);
+    eng.reset(EngineBuilder(std::move(M)).create());
 }
 
 
@@ -49,16 +50,17 @@ IRRenderer::~IRRenderer() {
 
 }
 
-unique_ptr<ExecutionEngine> IRRenderer::engine()
+unique_ptr<ExecutionEngine>& IRRenderer::engine()
 {
-    return unique_ptr<ExecutionEngine>(EngineBuilder(std::move(module)).create());
+    return eng; 
 }
 
-llvm::LLVMContext &
-IRRenderer::llvm_context() { return context; }
+llvm::LLVMContext & IRRenderer::llvm_context() {
+    return context;
+}
 
 llvm::AllocaInst *
-IRRenderer::get_named_value (const std::string &name){
+IRRenderer::get_named_value(const std::string &name) {
     return named_values[name];
 }
 
@@ -80,9 +82,9 @@ IRRenderer::clear_all_named_values() {
 AllocaInst *
 IRRenderer::create_entry_block_alloca(Function *func, const std::string &name) {
     IRBuilder<> tmp_builder(&func->getEntryBlock(),
-                            func->getEntryBlock().begin());
+        func->getEntryBlock().begin());
 
     return tmp_builder.CreateAlloca(Type::getDoubleTy(context),
-                                    0,
-                                    name.c_str());
+        0,
+        name.c_str());
 }
