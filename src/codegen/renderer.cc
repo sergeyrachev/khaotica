@@ -39,9 +39,9 @@ using ::llvm::Type;
 
 IRRenderer::IRRenderer()
 {
-    auto M = std::make_unique<Module>("my cool jit", context);
+    auto M = llvm::make_unique<Module>("my cool jit", context);
     module = M.get();
-    builder = std::make_unique<IRBuilder<>>(context);
+    builder = llvm::make_unique<IRBuilder<>>(context);
     eng.reset(EngineBuilder(std::move(M)).create());
 }
 
