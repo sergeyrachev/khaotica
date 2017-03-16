@@ -1,5 +1,5 @@
 %{
-#include "grammar.hpp"
+#include "bison_parser.hpp"
 #include "lexer.h"
 
 typedef bison::Parser::token token;
@@ -14,7 +14,6 @@ typedef bison::Parser::token token;
 %option c++
 %option yyclass="Lexer"
 %option noyywrap
-%option outfile="flex_lexer.cc"
 
 blank      [ \t]
 identifier [a-zA-Z_][a-zA-Z_0-9]*

@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include "grammar.hpp"
+#include "bison_parser.hpp"
 
 
 Lexer::Lexer(std::istream *in)
