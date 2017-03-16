@@ -7,7 +7,7 @@
 #undef  YY_DECL
 #define YY_DECL int Lexer::yylex()
 
-#include "grammar.tab.hh"
+#include "grammar.hpp"
 
 
 class Lexer : public yyFlexLexer {

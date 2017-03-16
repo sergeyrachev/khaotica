@@ -1,5 +1,5 @@
 %{
-#include "bison_parser.hh"
+#include "grammar.hpp"
 #include "lexer.h"
 
 typedef bison::Parser::token token;

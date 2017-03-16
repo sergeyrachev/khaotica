@@ -1,5 +1,5 @@
 #include "lexer.h"
-#include "grammar.tab.hh"
+#include "grammar.hpp"
 
 
 Lexer::Lexer(std::istream *in)
