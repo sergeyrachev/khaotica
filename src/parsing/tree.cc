@@ -2,7 +2,7 @@
 #include "tree.h"
 
 #include "lexer.h"
-#include "grammar.tab.hh"
+#include "grammar.hpp"
 
 
 STree::STree() : root(nullptr) {}
@@ -26,7 +26,7 @@ void
 STree::parse(std::istream &input) {
     root.release();
 
-    Lexer lexer = Lexer(&input);
+    Lexer lexer(&input);
     bison::Parser *parser = new bison::Parser(lexer,
                                               *this);
 
