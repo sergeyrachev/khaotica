@@ -2,7 +2,7 @@
 #include "tree.h"
 
 #include "lexer.h"
-#include "grammar.hpp"
+#include "bison_parser.hpp"
 
 
 STree::STree() : root(nullptr) {}
