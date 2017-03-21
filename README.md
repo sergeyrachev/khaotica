@@ -28,8 +28,7 @@ Let's assume Boost is unpacked and build with b2 in <BOOST_DIRECTORY>. Usually, 
 	
 Currently only 32bit build Unix\Windows supported out-of-the-box. Pull\Merge requests are welcome.
 
-	cmake -DLLVM_ROOT=<LLVM_INSTALLATION_DIRECTORY> -DBOOST_ROOT=<BOOST_DIRECTORY> ..\khaotica\
-
+    cmake -G "Visual Studio 14 2015" -DLLVM_ROOT=d:/work/env/llvm/static/x86/release -DBOOST_ROOT=d:/work/env/boost/boost_1_63_0 ..\khaotica\
 #### Usage:
 
 	Under construction...
