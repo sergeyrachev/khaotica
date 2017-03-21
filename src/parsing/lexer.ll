@@ -14,6 +14,7 @@ typedef bison::Parser::token token;
 %option c++
 %option yyclass="Lexer"
 %option noyywrap
+%option nounistd
 
 blank      [ \t]
 identifier [a-zA-Z_][a-zA-Z_0-9]*
