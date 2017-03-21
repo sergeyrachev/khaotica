@@ -33,6 +33,10 @@ ADD_CUSTOM_COMMAND(
             ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll
 )
 
+add_custom_target(dummy 
+	echo "Dummy target to show Bison/Flex files in projects"
+    SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy)
+
 set(SOURCES
         src/ast/binary.cc
         src/ast/call.cc
