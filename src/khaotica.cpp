@@ -83,20 +83,16 @@ int main( int argc, char* argv[] ) {
         tree->parse(iss);
         if( tree->root != 0 ) {
             if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
-                if( func->getName() == "" ) {
+                if( func->getName() == "anon" ) {
          
-                    double(*func_pointer)() = (double(*)())(intptr_t)(renderer->engine()->getFunctionAddress(func->getName()));
-                    break;
-
-                    //fprintf(stderr, "Evaluated to: %f\n", func_pointer());
+					renderer->module->dump();
+                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer->engine()->getFunctionAddress("anon"));
+                    fprintf(stderr, "Evaluated to: %f\n", func_pointer());
                 }
             }
         }
         fprintf(stderr, "ready> ");
     }
-
-    //renderer->module->dump();
-
 
     return 0;
 
