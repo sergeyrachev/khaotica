@@ -1,4 +1,7 @@
-set(BOOST_ROOT "" CACHE PATH "")
+if(NOT BOOST_ROOT)
+message("Set BOOST_ROOT to BOOST root folder")
+endif()
+
 #set(Boost_DEBUG ON)
 set(Boost_USE_STATIC_LIBS ON)
 
