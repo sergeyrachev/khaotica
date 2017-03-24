@@ -2,6 +2,7 @@
 %require "3.0"
 
 %verbose
+%define parse.error verbose
 
 %defines
 %define parser_class_name {Parser}
