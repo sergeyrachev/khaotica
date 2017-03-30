@@ -34,9 +34,16 @@ ADD_CUSTOM_COMMAND(
 )
 
 add_custom_target(dummy 
-	echo "Dummy target to show Bison/Flex files in projects"
-    SOURCES ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy)
+	echo "Dummy target to show Bison/Flex/Flavor files in projects"
+    SOURCES 
+    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll 
+    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+    ${CMAKE_CURRENT_LIST_DIR}/test/test.fl)
 
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+add_library(export SHARED src/export.cpp)
+target_include_directories(export PRIVATE src)
+    
 set(SOURCES
         src/ast/binary.cc
         src/ast/call.cc
@@ -52,14 +59,14 @@ set(SOURCES
         src/parsing/lexer.cc
         src/codegen/renderer.cc
         src/errors.cc
-
+        
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
         )
 
-add_executable(khaotica src/khaotica.cpp ${SOURCES})
+add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
 target_compile_features(khaotica PUBLIC cxx_nullptr)
-target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES})
-target_include_directories(khaotica PRIVATE src/ast src/parsing src/codegen src PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
+target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES} export)
+target_include_directories(khaotica PRIVATE src/ast src/parsing src/codegen src/ PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
 target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_COMPILE_DEFINITIONS})

@@ -19,6 +19,10 @@
 #include <sstream>
 #include <string>
 
+#include "export.h"
+void dummy() {
+    _sinn(1);
+}
 
 bool is_args_valid( int argc, char* argv[], const boost::program_options::options_description& opt_desc, const boost::program_options::positional_options_description& pos_opt_desc, boost::program_options::variables_map& varmap ) {
     namespace po = boost::program_options;
