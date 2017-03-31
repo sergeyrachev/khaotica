@@ -1,8 +1,20 @@
 language: cpp
 os:
-- linux
-- windows
+    - linux
 
+before_install:
+    - echo "Before Install step"
+
+install:
+    - echo "Install step"
+     
 before_script:
-- echo $LANG
-- echo $LC_ALL
+    - echo $LANG
+    - echo $LC_ALL
+
+script:
+    - echo "Build script"
+
+after_script:
+    - echo "After build script"
+
