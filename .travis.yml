@@ -2,6 +2,8 @@ language: cpp
 os:
     - linux
 
+dist: trusty
+
 before_install:
     - mkdir -p build
     - mkdir -p build/llvm
