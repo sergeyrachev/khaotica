@@ -1,9 +1,9 @@
 #include "export.h"
 
-extern "C" double _sinn(double X) {
+extern "C" double _nextbyte(double X) {
     return 123;
 }
 
-extern "C" double sinn(double X) {
+extern "C" __attribute__((cdecl)) double nextbyte(double X) {
     return 432;
 }

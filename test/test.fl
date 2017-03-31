@@ -1,3 +1,3 @@
-extern sinn(x)
+extern nextbyte(x)
 ;
-sinn(40);
+nextbyte(1);
