@@ -67,6 +67,8 @@ int yyparse();
 
 %}
 
+%option nounistd
+
 DIGIT           [0-9]
 LETTER          [a-zA-Z]
 ALPHANUM        {LETTER}|{DIGIT}
