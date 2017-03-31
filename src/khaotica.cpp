@@ -9,6 +9,8 @@
 #include "codegen/renderer.h"
 #include "parsing/tree.h"
 
+#include "logging.h"
+
 #include <cctype>
 #include <cstdio>
 #include <map>
@@ -80,7 +82,7 @@ int main( int argc, char* argv[] ) {
     std::string input;
     fprintf(stderr, "ready> ");
     std::ifstream f(input_definition_filename);
-
+    
     while( std::getline(f, input, ';') ) {
         std::istringstream iss(input);
 
