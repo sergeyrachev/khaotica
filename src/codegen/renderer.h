@@ -26,7 +26,7 @@ class IRRenderer {
     map<string, AllocaInst*> named_values;
 
 public:
-    IRRenderer();
+    IRRenderer(uint32_t THIS);
     ~IRRenderer();
 
     LLVMContext context;
@@ -43,4 +43,6 @@ public:
     void clear_all_named_values();
 
     AllocaInst *create_entry_block_alloca(Function *func, const std::string &name);
+
+    uint32_t THIS;
 };

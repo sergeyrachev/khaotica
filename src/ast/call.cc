@@ -27,7 +27,7 @@ CallNode::codegen(IRRenderer *renderer) {
         return ErrorV("Unknown function referenced");
     }
 
-    if( callee_func->arg_size() != args.size() ) {
+    if( callee_func->arg_size() != args.size() + 1 ) {
         return ErrorV("Incorrect number of arguments passed");
     }
 
@@ -38,6 +38,8 @@ CallNode::codegen(IRRenderer *renderer) {
             return 0;
         }
     }
+
+    arg_values.push_back(llvm::ConstantInt::get(renderer->llvm_context(), llvm::APInt(32, renderer->THIS)));
 
     return renderer->builder->CreateCall(callee_func, arg_values, "calltmp");
 }

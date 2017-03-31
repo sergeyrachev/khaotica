@@ -43,8 +43,11 @@ PrototypeNode::create_argument_allocas(IRRenderer *renderer, Function *func) {
 
 Function *
 PrototypeNode::codegen(IRRenderer *renderer) {
-    std::vector<Type*> doubles(args.size(),
+    std::vector<Type*> doubles(args.size()+1,
         Type::getDoubleTy(renderer->llvm_context()));
+
+    doubles[args.size()] = Type::getInt32Ty(renderer->llvm_context());
+
     FunctionType *func_type = FunctionType::get(
         Type::getDoubleTy(renderer->llvm_context()),
         doubles,
