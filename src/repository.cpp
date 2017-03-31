@@ -12,16 +12,24 @@ void destroy_repository(repository * p) {
     delete p;
 }
 
-double read_repository(uint64_t handle) {
-    return reinterpret_cast<repository*>(handle)->read();
-}
-
 repository::repository(const std::string &filename) : _bistream(filename.c_str()){
 
 }
 
-double repository::read() {
+double repository::readdouble() {
     double d;
+    _bistream >> d;
+    return d;
+}
+
+double repository::readint() {
+    int d;
+    _bistream >> d;
+    return d;
+}
+
+double repository::readchar() {
+    char d;
     _bistream >> d;
     return d;
 }

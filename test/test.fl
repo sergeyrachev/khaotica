@@ -1,3 +1,13 @@
-extern nextbyte(x)
+extern readdouble(x);
+extern readint(x);
+extern readchar(x);
+
+def payload1(x)
+    readint(0) + readchar(0) + readint(0)
 ;
-nextbyte(1);
+
+def payload2(x)
+    readdouble(0)
+;
+
+payload1(0);

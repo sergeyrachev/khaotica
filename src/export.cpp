@@ -2,10 +2,17 @@
 
 #include "repository.h"
 
-extern "C" double _nextbyte(double X, uint64_t that) {
-    return that - X;
+extern "C" double readdouble(double x, uint64_t that){
+    repository *r = reinterpret_cast<repository *>(that);
+    return r->readdouble();
 }
 
-extern "C" double nextbyte(double X, uint64_t that) {
-    return X + read_repository(that);
+extern "C" double readint(double x, uint64_t that){
+    repository *r = reinterpret_cast<repository *>(that);
+    return r->readint();
+}
+
+extern "C" double readchar(double x, uint64_t that){
+    repository *r = reinterpret_cast<repository *>(that);
+    return r->readchar();
 }
