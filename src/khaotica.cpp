@@ -23,11 +23,11 @@
 #include <string>
 
 #include "export.h"
+#include "repository.h"
+
 void dummy() {
     _nextbyte(1, 4);
 }
-
-
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -57,7 +57,9 @@ int main( int argc, char* argv[] ) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    IRRenderer *renderer = new IRRenderer(1099);
+    intptr_t r = reinterpret_cast<intptr_t>(create_repository(input_bitstream_filename.c_str()));
+
+    IRRenderer *renderer = new IRRenderer(r);
 
     STree *tree = new STree();
 

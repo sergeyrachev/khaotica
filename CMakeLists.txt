@@ -41,9 +41,10 @@ add_custom_target(dummy
     ${CMAKE_CURRENT_LIST_DIR}/test/test.fl)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(export SHARED src/export.cpp)
+add_library(export SHARED src/export.cpp src/repository.cpp src/repository.h )
 target_include_directories(export PRIVATE src)
-    
+target_compile_features(export PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type)
+
 set(SOURCES
         src/ast/binary.cc
         src/ast/call.cc
@@ -62,7 +63,7 @@ set(SOURCES
         
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
-		src/logging.cpp src/options.cpp src/options.h)
+		src/logging.cpp src/options.cpp src/options.h )
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 

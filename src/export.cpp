@@ -1,9 +1,11 @@
 #include "export.h"
 
-extern "C" double _nextbyte(double X, int that) {
+#include "repository.h"
+
+extern "C" double _nextbyte(double X, uint64_t that) {
     return that - X;
 }
 
-extern "C" double nextbyte(double X, int that) {
-    return that + X;
+extern "C" double nextbyte(double X, uint64_t that) {
+    return X + read_repository(that);
 }
