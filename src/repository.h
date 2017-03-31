@@ -15,12 +15,13 @@
 class repository {
 public:
     repository(const std::string& filename);
-    double read();
+    double readdouble();
+    double readint();
+    double readchar();
 private:
     std::ifstream _bistream;
 };
 
-extern "C" double read_repository(uint64_t handle);
 extern "C" repository* create_repository(const char* bitstream);
 extern "C" void destroy_repository(repository*);
 

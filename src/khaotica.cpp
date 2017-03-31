@@ -25,10 +25,6 @@
 #include "export.h"
 #include "repository.h"
 
-void dummy() {
-    _nextbyte(1, 4);
-}
-
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
 
@@ -64,7 +60,9 @@ int main( int argc, char* argv[] ) {
     STree *tree = new STree();
 
     std::string input;
-    
+
+    logging::debug() << "Bitstream content: " << "0" <<static_cast<int>('.') << "1";
+
     std::ifstream f(input_definition_filename);
     while( std::getline(f, input, ';') ) {
         std::istringstream iss(input);
