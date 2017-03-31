@@ -10,6 +10,7 @@
 #include "parsing/tree.h"
 
 #include "logging.h"
+#include "options.h"
 
 #include <cctype>
 #include <cstdio>
@@ -26,28 +27,7 @@ void dummy() {
     _sinn(1);
 }
 
-bool is_args_valid( int argc, char* argv[], const boost::program_options::options_description& opt_desc, const boost::program_options::positional_options_description& pos_opt_desc, boost::program_options::variables_map& varmap ) {
-    namespace po = boost::program_options;
-    try {
-        po::store( po::command_line_parser( argc, argv )
-            .style(po::command_line_style::unix_style)
-            .options(opt_desc )
-            .positional( pos_opt_desc )
-            .run( ), varmap );
-        po::notify( varmap );
-    } catch( const po::error &err ) {
-        std::cerr << "Error parsing command line: " << err.what( ) << std::endl << std::endl;
-        std::cerr << opt_desc << std::endl;
-        return false;
-    }
 
-    if( varmap.count( "help" ) || varmap.empty() ) {
-        std::cout << opt_desc << std::endl;
-        return false;
-    }
-
-    return true;
-}
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -62,7 +42,7 @@ int main( int argc, char* argv[] ) {
     pos_opt_desc.add( "input", 1 );
 
     po::variables_map varmap;
-    if( !is_args_valid(argc, argv, opt_desc, pos_opt_desc, varmap ) ) {
+    if( !options::is_args_valid(argc, argv, opt_desc, pos_opt_desc, varmap, std::cerr, std::cout ) ) {
         return 1;
     }
 
@@ -80,9 +60,8 @@ int main( int argc, char* argv[] ) {
     STree *tree = new STree();
 
     std::string input;
-    fprintf(stderr, "ready> ");
-    std::ifstream f(input_definition_filename);
     
+    std::ifstream f(input_definition_filename);
     while( std::getline(f, input, ';') ) {
         std::istringstream iss(input);
 
@@ -97,7 +76,6 @@ int main( int argc, char* argv[] ) {
                 }
             }
         }
-        fprintf(stderr, "ready> ");
     }
 
     return 0;

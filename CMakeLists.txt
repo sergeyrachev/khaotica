@@ -62,7 +62,7 @@ set(SOURCES
         
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
-		src/logging.cpp )
+		src/logging.cpp src/options.cpp src/options.h)
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
