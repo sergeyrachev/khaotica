@@ -53,16 +53,13 @@ int main( int argc, char* argv[] ) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    intptr_t r = reinterpret_cast<intptr_t>(create_repository(input_bitstream_filename.c_str()));
+    auto r = create_repository(input_bitstream_filename.c_str());
 
-    IRRenderer *renderer = new IRRenderer(r);
+    IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
 
     STree *tree = new STree();
 
     std::string input;
-
-    logging::debug() << "Bitstream content: " << "0" <<static_cast<int>('.') << "1";
-
     std::ifstream f(input_definition_filename);
     while( std::getline(f, input, ';') ) {
         std::istringstream iss(input);
@@ -74,11 +71,13 @@ int main( int argc, char* argv[] ) {
          
 					renderer->module->dump();
                     double(*func_pointer)() = (double(*)()) (intptr_t) (renderer->engine()->getFunctionAddress("anon"));
-                    fprintf(stderr, "Evaluated to: %f\n", func_pointer());
+                    fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
                 }
             }
         }
     }
+
+    destroy_repository(r);
 
     return 0;
 
