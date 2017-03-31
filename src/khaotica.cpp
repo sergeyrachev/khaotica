@@ -36,6 +36,7 @@ int main( int argc, char* argv[] ) {
     opt_desc.add_options( )
         ( "help,h", "Produce this message" )
         ( "input-definition,i", po::value<std::string>( )->required(), "Flavor definition for input bitstream" )
+        ( "input-bitstream,I", po::value<std::string>()->required(), "input bitstream")
        ;
 
     po::positional_options_description pos_opt_desc;
@@ -47,7 +48,8 @@ int main( int argc, char* argv[] ) {
     }
 
     const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
-    std::cout << input_definition_filename << std::endl;
+    const std::string &input_bitstream_filename = varmap.at("input-bitstream").as<std::string>();
+    std::cout << input_definition_filename << std::endl << input_bitstream_filename << std::endl;
 
     llvm::InitializeAllTargetInfos();
     llvm::InitializeAllTargets();
