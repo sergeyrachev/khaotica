@@ -24,7 +24,7 @@
 
 #include "export.h"
 void dummy() {
-    _sinn(1);
+    _nextbyte(1);
 }
 
 
