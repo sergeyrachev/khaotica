@@ -1,1 +1,3 @@
-/build/*.db
+/build
+/.idea
+/cmake-build-*
