@@ -15,8 +15,8 @@ before_install:
 
 install:
     - pushd build
-    - tar -xzf boost_1_63_0.tar.gz
-    - tar -xzfJ llvm-3.9.1.src.tar.xz
+    - tar xvfz boost_1_63_0.tar.gz
+    - tar xvfJ llvm-3.9.1.src.tar.xz
     - pushd llvm
     - cmake -DCMAKE_INSTALL_PREFIX=root -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  ../llvm-3.9.1.src 
     - cmake --build . --target install 
