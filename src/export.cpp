@@ -1,9 +1,9 @@
 #include "export.h"
 
-extern "C" double _nextbyte(double X) {
-    return 123;
+extern "C" double _nextbyte(double X, int that) {
+    return that - X;
 }
 
-extern "C" double nextbyte(double X) {
-    return 432;
+extern "C" double nextbyte(double X, int that) {
+    return that + X;
 }

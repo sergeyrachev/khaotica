@@ -24,7 +24,7 @@
 
 #include "export.h"
 void dummy() {
-    _nextbyte(1);
+    _nextbyte(1, 4);
 }
 
 
@@ -57,7 +57,7 @@ int main( int argc, char* argv[] ) {
     llvm::InitializeAllAsmParsers();
     llvm::InitializeAllAsmPrinters();
 
-    IRRenderer *renderer = new IRRenderer();
+    IRRenderer *renderer = new IRRenderer(1099);
 
     STree *tree = new STree();
 
