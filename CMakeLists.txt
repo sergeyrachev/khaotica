@@ -72,6 +72,6 @@ target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES} export)
 target_include_directories(khaotica PRIVATE src/ast src/parsing src/codegen src/ flex/ PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
 target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_COMPILE_DEFINITIONS})
 
-install(TARGET khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
+install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 
 add_subdirectory(flavor)
