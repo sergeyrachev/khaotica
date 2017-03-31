@@ -31,5 +31,11 @@ double repository::readint() {
 double repository::readchar() {
     char d;
     _bistream >> d;
-    return d;
+    return 0;
+}
+
+repository::~repository() {
+    if(!_bistream.eof()){
+        std::cerr << "Input was read incompletely" << std::endl;
+    }
 }

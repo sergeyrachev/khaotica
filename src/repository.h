@@ -6,6 +6,8 @@
 #ifndef KHAOTICA_REPOSITORY_H
 #define KHAOTICA_REPOSITORY_H
 
+#include "logging.h"
+
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -15,6 +17,7 @@
 class repository {
 public:
     repository(const std::string& filename);
+    ~repository();
     double readdouble();
     double readint();
     double readchar();
