@@ -37,7 +37,7 @@ using ::llvm::Module;
 using ::llvm::Type;
 
 
-IRRenderer::IRRenderer(uint32_t THIS):THIS(THIS)
+IRRenderer::IRRenderer(uint64_t THIS):THIS(THIS)
 {
     auto M = llvm::make_unique<Module>("my cool jit", context);
     module = M.get();

@@ -39,7 +39,7 @@ CallNode::codegen(IRRenderer *renderer) {
         }
     }
 
-    arg_values.push_back(llvm::ConstantInt::get(renderer->llvm_context(), llvm::APInt(32, renderer->THIS)));
+    arg_values.push_back(llvm::ConstantInt::get(renderer->llvm_context(), llvm::APInt(64, renderer->THIS)));
 
     return renderer->builder->CreateCall(callee_func, arg_values, "calltmp");
 }
