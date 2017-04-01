@@ -35,17 +35,6 @@ if(LLVM_FOUND)
 	ProfileData  
 	Support  
 	TableGen 
-	AArch64 
-	AMDGPU
-	ARM
-	BPF
-	Hexagon
-	Mips
-	MSP430
-	NVPTX
-	PowerPC
-	Sparc
-	SystemZ
 	X86
 	XCore 
 )
