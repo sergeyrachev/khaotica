@@ -1,6 +1,5 @@
-//
-// Created by sergey.rachev on 3/31/17.
-//
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "logging.h"
 
