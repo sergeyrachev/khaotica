@@ -13,6 +13,15 @@ notifications:
   
 before_install:
     - sudo add-apt-repository ppa:josh-bialkowski/cmake -y 
+    - |
+      sudo cat > /etc/apt/sources.list.d/yakkety.list <<EOF
+      deb http://archive.ubuntu.com/ubuntu/ yakkety main universe restricted multiverse
+      deb-src http://archive.ubuntu.com/ubuntu/ yakkety main universe restricted multiverse
+      deb http://security.ubuntu.com/ubuntu yakkety-security main universe restricted multiverse
+      deb-src http://security.ubuntu.com/ubuntu yakkety-security main universe restricted multiverse
+      deb http://archive.ubuntu.com/ubuntu/ yakkety-updates main universe restricted multiverse
+      deb-src http://archive.ubuntu.com/ubuntu/ yakkety-updates main universe restricted multiverse
+      EOF
     - sudo apt-get update -qq 
     - sudo apt-get install -y bison flex cmake
 
