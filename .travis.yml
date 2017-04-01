@@ -27,7 +27,7 @@ install:
         
             pushd llvm
                 cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-3.9.1.src
-                travis_wait 90 cmake --build . --target install -- -j12
+                travis_wait 45 cmake --build . --target install -- -j12
             popd
         
             wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
@@ -35,7 +35,7 @@ install:
         
             pushd boost_1_63_0
                 bootstrap
-                travis_wait 90 b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+                travis_wait 45 b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
             popd
         popd    
         touch ${HOME}/deps/cached.marker
