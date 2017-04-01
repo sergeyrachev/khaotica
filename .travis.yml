@@ -44,7 +44,7 @@ install:
       fi
 
 script:
-    - cmake -DLLVM_ROOT=${HOME}/deps/llvm -DBOOST_DIR=${HOME}/deps/boost -DCMAKE_PREFIX_INSTALL=$HOME/khaotica .
+    - cmake -DLLVM_ROOT=${HOME}/deps/llvm -DBOOST_ROOT=${HOME}/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
     - cmake --build . --target install -- -j12
 
 deploy:
