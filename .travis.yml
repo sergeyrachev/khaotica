@@ -4,52 +4,55 @@ os:
 
 dist: trusty
 
+cache:
+  directories:
+  - $HOME/deps/
+
+notifications:
+  email: false
+  
 before_install:
-    - sudo add-apt-repository ppa:josh-bialkowski/cmake -y
-    - sudo apt-get update -qq
+    - sudo add-apt-repository ppa:josh-bialkowski/cmake -y 
+    - sudo apt-get update -qq 
     - sudo apt-get install -y bison flex cmake
-    - mkdir -p build/llvm
-    - mkdir -p build/khaotica
-    - pushd build
-    - wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
-    - wget http://releases.llvm.org/3.9.1/llvm-3.9.1.src.tar.xz
-    - popd    
 
 install:
-    - pushd build
-    - tar xfz boost_1_63_0.tar.gz
-    - tar xfJ llvm-3.9.1.src.tar.xz
-    - pushd llvm
-    - cmake -DCMAKE_INSTALL_PREFIX=root -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  ../llvm-3.9.1.src 
-    - cmake --build . --target install -- -j12
-    - popd
-    - pushd boost_1_63_0
-    - bootstrap 
-    - b2 -j12 stage
-    - popd
-
-before_script:
-    - ls -la build
-    - ls -la build/boost_1_63_0
-    - ls -la build/usr
+    - |
+      if [ ! -f "${HOME}/deps/cached.marker" ]; then
+        mkdir -p $HOME/deps/llvm && mkdir -p $HOME/deps/boost
+        mkdir -p build/llvm && mkdir -p build/boost
+        
+        pushd build
+            wget http://releases.llvm.org/3.9.1/llvm-3.9.1.src.tar.xz
+            tar xfJ llvm-3.9.1.src.tar.xz
+        
+            pushd llvm-3.9.1.src
+                cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  .
+                travis_wait 90 cmake --build . --target install -- -j12
+            popd
+        
+            wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
+            tar xfz boost_1_63_0.tar.gz
+        
+            pushd boost_1_63_0
+                bootstrap
+                travis_wait 90 b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+            popd
+        popd    
+        touch ${HOME}/deps/cached.marker
+      else
+        echo 'Using cached Boost and LLVM libraries.'
+      fi
 
 script:
-    - pushd build
-    - cmake -DLLVM_ROOT=build/llvm/root -DBOOST_DIR=build/boost_1_63_0 -DCMAKE_PREFIX_INSTALL=../install ..
+    - cmake -DLLVM_ROOT=${HOME}/deps/llvm -DBOOST_DIR=${HOME}/deps/boost -DCMAKE_PREFIX_INSTALL=$HOME/khaotica .
     - cmake --build . --target install -- -j12
-    - popd
-
-after_script:
-    - echo "After build script"
 
 deploy:
   provider: releases
   api_key: $DEPLOY_TOKEN
   file_glob: true
-  file: install/*
+  file: $HOME/khaotica/*
   skip_cleanup: true
   on:
     tags: true
-
-notifications:
-  email: false
