@@ -3,6 +3,7 @@ message("Set BOOST_ROOT to BOOST root folder")
 endif()
 
 #set(Boost_DEBUG ON)
+SET(Boost_NO_BOOST_CMAKE ON)
 set(Boost_USE_STATIC_LIBS ON)
 
 find_package(Boost 1.60 COMPONENTS system log log_setup thread date_time filesystem program_options )
