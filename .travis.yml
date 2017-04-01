@@ -34,7 +34,7 @@ install:
             tar xfz boost_1_63_0.tar.gz
         
             pushd boost_1_63_0
-                ./bootstrap
+                ./bootstrap.sh
                 travis_wait 49 ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
             popd
         popd    
@@ -44,7 +44,7 @@ install:
       fi
 
 script:
-    - cmake -DLLVM_ROOT=${HOME}/deps/llvm -DBOOST_ROOT=${HOME}/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
+    - cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
     - cmake --build . --target install -- -j12
 
 deploy:
