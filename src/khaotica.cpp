@@ -46,12 +46,8 @@ int main( int argc, char* argv[] ) {
     const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
     const std::string &input_bitstream_filename = varmap.at("input-bitstream").as<std::string>();
     std::cout << input_definition_filename << std::endl << input_bitstream_filename << std::endl;
-
-    llvm::InitializeAllTargetInfos();
-    llvm::InitializeAllTargets();
-    llvm::InitializeAllTargetMCs();
-    llvm::InitializeAllAsmParsers();
-    llvm::InitializeAllAsmPrinters();
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmParser();
 
     auto r = create_repository(input_bitstream_filename.c_str());
 
