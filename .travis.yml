@@ -44,10 +44,10 @@ install:
         echo 'Using cached Boost and LLVM libraries.'
       fi
     - |
-      ls -la 
+      mkdir -p build
       pushd build
-        git clone https://github.com/westes/flex.git 
-        pushd flex 
+        git clone https://github.com/westes/flex.git
+        pushd flex
             ./autogen.sh && ./configure && make && make install
         popd  
       popd
