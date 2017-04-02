@@ -49,7 +49,7 @@ install:
         wget https://github.com/westes/flex/releases/download/v2.6.3/flex-2.6.3.tar.gz
         tar xfz flex-2.6.3.tar.gz
         pushd flex-2.6.3
-            ./configure && make && make install
+            ./configure && make && sudo make install
         popd
       popd
 
