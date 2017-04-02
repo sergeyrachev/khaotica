@@ -38,12 +38,13 @@ install:
                 ./bootstrap.sh
                 travis_wait 49 ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
             popd
-        popd    
+        popd
         touch ${HOME}/deps/cached.marker
       else
         echo 'Using cached Boost and LLVM libraries.'
       fi
     - |
+      ls -la 
       pushd build
         git clone https://github.com/westes/flex.git 
         pushd flex 
