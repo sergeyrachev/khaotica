@@ -1,3 +1,14 @@
+Here's a branch specific shield:
+
+```{r, echo=FALSE, eval=TRUE, results="asis"}
+travis_url <- "https://travis-ci.org/sergeyrachev/khaotica.svg?branch="
+shield <- paste0("[![Build Status](",
+                 travis_url,
+                 system("git rev-parse --abbrev-ref HEAD", intern = TRUE),
+                 ")](https://travis-ci.org/sergeyrachev/khaotica)")
+cat(shield)
+```
+
 [![Build Status](https://travis-ci.org/sergeyrachev/khaotica.svg?branch=master)](https://travis-ci.org/sergeyrachev/khaotica)
 
 # Khaotica
