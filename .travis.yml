@@ -14,7 +14,8 @@ notifications:
 before_install:
     - sudo add-apt-repository ppa:josh-bialkowski/cmake -y 
     - sudo apt-get update -qq 
-    - sudo apt-get install -y bison flex cmake
+    - sudo apt-get remove flex
+    - sudo apt-get install -y bison cmake m4 autoconf automake
 
 install:
     - |
@@ -42,6 +43,13 @@ install:
       else
         echo 'Using cached Boost and LLVM libraries.'
       fi
+    - |
+      pushd build
+        git clone https://github.com/westes/flex.git 
+        pushd flex 
+            ./autogen.sh && ./configure && make && make install
+        popd  
+      popd
 
 script:
     - cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
