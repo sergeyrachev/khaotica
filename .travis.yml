@@ -61,7 +61,9 @@ deploy:
   provider: releases
   api_key: $DEPLOY_TOKEN
   file_glob: true
-  file: $HOME/khaotica/*
+  file:
+    - $HOME/khaotica/bin/*
+    - $HOME/khaotica/lib/*
   skip_cleanup: true
   on:
     tags: true
