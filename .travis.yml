@@ -57,13 +57,14 @@ script:
     - cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
     - cmake --build . --target install -- -j12
 
+after_success:
+    - tar -zcvf $HOME/khaotica~$(git log --pretty=format:'%h' -n 1).tar.gz -C $HOME/khaotica/ .
+
 deploy:
   provider: releases
   api_key: $DEPLOY_TOKEN
   file_glob: true
-  file:
-    - $HOME/khaotica/bin/*
-    - $HOME/khaotica/lib/*
+  file: $HOME/khaotica~*.tar.gz
   skip_cleanup: true
   on:
     tags: true
