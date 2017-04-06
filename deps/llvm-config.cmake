@@ -1,5 +1,5 @@
 if(NOT LLVM_ROOT)
-message("Set LLVM_ROOT to LLVM root folder")
+message(FATAL_ERROR "Set LLVM_ROOT to LLVM root folder")
 endif()
 find_package(LLVM 3.9 PATHS ${LLVM_ROOT})
 
