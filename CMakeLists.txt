@@ -1,6 +1,7 @@
 project(khaotica)
 cmake_minimum_required(VERSION 3.6)
 
+find_package(gtest CONFIG PATHS deps)
 find_package(llvm CONFIG PATHS deps)
 find_package(boost CONFIG PATHS deps)
 find_package(BISON)
@@ -38,7 +39,9 @@ add_custom_target(dummy
     SOURCES 
     ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll 
     ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
-    ${CMAKE_CURRENT_LIST_DIR}/test/test.fl)
+    ${CMAKE_CURRENT_LIST_DIR}/res/test.fl
+    ${CMAKE_CURRENT_LIST_DIR}/res/test.bin
+        )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(export SHARED src/export.cpp src/repository.cpp src/repository.h )
@@ -75,3 +78,8 @@ target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_
 install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 
 add_subdirectory(flavor)
+
+
+add_executable(khaotica_gtest test/dummy.cpp)
+target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )
+
