@@ -12,6 +12,9 @@ configuration:
 build:
   verbosity: minimal
 
+install:
+  - ps: choco install msys2
+
 before_build:
   - ps: |
       Write-Output "Configuration: $env:CONFIGURATION"
