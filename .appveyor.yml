@@ -13,8 +13,8 @@ build:
   verbosity: minimal
 
 install:
-  - ps: choco install msys2
-  - cmd: pacman -Sy bison
+  - cmd: choco install msys2
+  - cmd: bash -c 'pacman --noconfirm -S bison flex'
 
 before_build:
   - ps: |
