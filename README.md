@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/sergeyrachev/khaotica.svg?branch=master)](https://travis-ci.org/sergeyrachev/khaotica)
+Build for Linux: [![Build Status](https://travis-ci.org/sergeyrachev/khaotica.svg?branch=master)](https://travis-ci.org/sergeyrachev/khaotica)
+
+Build for Windows: [![Build status](https://ci.appveyor.com/api/projects/status/2mgxm4i8c29v1ilw?svg=true)](https://ci.appveyor.com/project/sergeyrachev/khaotica)
 
 # Khaotica
 
