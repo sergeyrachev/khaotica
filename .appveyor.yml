@@ -1,0 +1,37 @@
+os: Visual Studio 2015
+platform:
+  - Win32
+#  - x64
+
+configuration:
+  - Release
+#  - Debug
+
+build:
+  verbosity: minimal
+
+before_build:
+  - ps: |
+    Write-Output "Configuration: $env:CONFIGURATION"
+    Write-Output "Platform: $env:PLATFORM"
+    $generator = switch ($env:TOOLSET)
+    {
+        "v140" {"Visual Studio 14 2015"}
+    }
+    if ($env:PLATFORM -eq "x64")
+    {
+        $generator = "$generator Win64"
+    }
+
+build_script:
+  - ps: |
+      md _build -Force | Out-Null
+      cd _build
+      & cmake -G "$generator" -DCMAKE_INSTALL_PREFIX=_build/khaotica -DLLVM_ROOT=C:\Libraries\llvm-4.0.0 -DBOOST_ROOT=C:\Libraries\boost_1_63_0 ..
+      if ($LastExitCode -ne 0) {
+          throw "Exec: $ErrorMessage"
+      }
+      & cmake --build . --target install
+      if ($LastExitCode -ne 0) {
+          throw "Exec: $ErrorMessage"
+      }
