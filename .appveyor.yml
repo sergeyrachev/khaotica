@@ -14,15 +14,14 @@ build:
 
 before_build:
   - ps: |
-    Write-Output "Configuration: $env:CONFIGURATION"
-    Write-Output "Platform: $env:PLATFORM"
-    $generator = "Visual Studio 14 2015"
-    if ($env:PLATFORM -eq "x64")
-    {
+      Write-Output "Configuration: $env:CONFIGURATION"
+      Write-Output "Platform: $env:PLATFORM"
+      $generator = "Visual Studio 14 2015"
+      if ($env:PLATFORM -eq "x64")
+      {
         $generator = "$generator Win64"
-    }
+      }
 
-build_script:
   - ps: |
       md _build -Force | Out-Null
       cd _build
