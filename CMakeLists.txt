@@ -1,6 +1,8 @@
 project(khaotica)
 cmake_minimum_required(VERSION 3.6)
 
+add_subdirectory(flavor)
+
 find_package(gtest CONFIG PATHS deps)
 find_package(llvm CONFIG PATHS deps)
 find_package(boost CONFIG PATHS deps)
@@ -77,9 +79,7 @@ target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_
 
 install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 
-add_subdirectory(flavor)
-
-
 add_executable(khaotica_gtest test/dummy.cpp)
+target_include_directories(khaotica_gtest PRIVATE src/ test/)
 target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )
 
