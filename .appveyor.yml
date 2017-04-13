@@ -27,7 +27,7 @@ before_build:
 
   - ps: |
       md _build -Force | Out-Null
-      cd _build
+      cd _build & refreshenv & msystem.bat MSYS
       & cmake -G "$generator" -DCMAKE_INSTALL_PREFIX=_build/khaotica -DLLVM_ROOT=C:\Libraries\llvm-4.0.0 -DBOOST_ROOT=C:\Libraries\boost_1_63_0 ..
       if ($LastExitCode -ne 0) {
           throw "Exec: $ErrorMessage"
