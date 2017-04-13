@@ -13,10 +13,7 @@ build:
   verbosity: minimal
 
 install:
-  - cmd: choco install msys2
-  - cmd: msystem.bat MSYS
-  - cmd: pacman -Syu
-  - cmd: pacman --noconfirm -S bison flex
+  - cmd: choco install msys2 && refreshenv && msystem.bat MSYS && pacman -Syu && pacman --noconfirm -S bison flex
 
 before_build:
   - ps: |
