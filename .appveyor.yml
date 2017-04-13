@@ -14,7 +14,9 @@ build:
 
 install:
   - cmd: choco install msys2
-  - cmd: bash -c 'pacman --noconfirm -S bison flex'
+  - cmd: msystem.bat MSYS
+  - cmd: pacman -Syu
+  - cmd: pacman --noconfirm -S bison flex
 
 before_build:
   - ps: |
