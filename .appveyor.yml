@@ -26,4 +26,4 @@ build_script:
       cmake --build . --target install
       
 artifacts:
-  - path: _build/khaotica/*
+  - path: _build/khaotica
