@@ -21,6 +21,6 @@ before_build:
       mkdir _build 
       cd _build 
       msystem.bat MSYS
-      cmake -G "Visual Studio 14 2015" -DCMAKE_INSTALL_PREFIX=_build/khaotica -DCMAKE_BUILD_TYPE=Release -DLLVM_ROOT=C:\Libraries\llvm-4.0.0 -DBOOST_ROOT=C:\Libraries\boost_1_63_0 ..
-      cmake --build . --target install --config Release
+      cmake -G "Visual Studio 14 2015" -DCMAKE_INSTALL_PREFIX=_build/khaotica -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT=C:\Libraries\llvm-4.0.0 -DBOOST_ROOT=C:\Libraries\boost_1_63_0 ..
+      cmake --build . --target install --config Debug
       
