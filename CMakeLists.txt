@@ -80,6 +80,6 @@ target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_
 install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 
 add_executable(khaotica_gtest test/dummy.cpp)
-target_include_directories(khaotica_gtest PRIVATE src/ test/)
+target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})
 target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )
 
