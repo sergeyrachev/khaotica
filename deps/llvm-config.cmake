@@ -1,7 +1,11 @@
 if(NOT LLVM_ROOT)
 message(FATAL_ERROR "Set LLVM_ROOT to LLVM root folder")
 endif()
-find_package(LLVM PATHS ${LLVM_ROOT})
+find_package(LLVM HINTS ${LLVM_ROOT})
+
+if(LLVM_VERSION VERSION_LESS "3.9")
+    message(FATAL_ERROR "Use LLVM v3.9 and greater")
+endif()
 
 if(LLVM_FOUND)
     #all works bad in Windows-> LTO-NOTFOUND 
