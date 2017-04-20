@@ -29,8 +29,9 @@ install:
         
             pushd llvm
                 cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
+                travis_wait 50 cmake --build . --target LLVMCodegen -- -j12
                 travis_wait 50 cmake --build . -- -j12
-                travis_wait 50 cmake --build . --target install
+                cmake --build . --target install
             popd
         popd
         touch ${HOME}/deps/llvm/cached.marker
