@@ -21,7 +21,6 @@ before_install:
 install:
     - mkdir -p build
     - |
-      travis_wait 50 '
       if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         mkdir -p $HOME/deps/llvm && mkdir -p build/llvm
         pushd build
@@ -39,7 +38,6 @@ install:
       else
         echo 'Using cached LLVM libraries.'
       fi
-      '
 
     - |
       if [ ! -f "${HOME}/deps/boost/cached.marker" ]; then
@@ -50,7 +48,7 @@ install:
 
           pushd boost_1_63_0
             ./bootstrap.sh
-            travis_wait 50 ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+            ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
           popd
         popd
         touch ${HOME}/deps/boost/cached.marker
