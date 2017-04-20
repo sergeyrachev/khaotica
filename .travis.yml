@@ -6,7 +6,8 @@ dist: trusty
 
 cache:
   directories:
-  - $HOME/deps/
+  - $HOME/deps/llvm
+  - $HOME/deps/boost
 
 notifications:
   email: false
@@ -18,10 +19,10 @@ before_install:
     - sudo apt-get install -y bison cmake m4 autoconf automake
 
 install:
+    - mkdir -p build
     - |
-      if [ ! -f "${HOME}/deps/cached.marker" ]; then
-        mkdir -p $HOME/deps/llvm && mkdir -p $HOME/deps/boost && mkdir -p build/llvm
-        
+      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
+        mkdir -p $HOME/deps/llvm && mkdir -p build/llvm
         pushd build
             wget http://releases.llvm.org/4.0.0/llvm-4.0.0.src.tar.xz
             tar xfJ llvm-4.0.0.src.tar.xz
@@ -30,21 +31,30 @@ install:
                 cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
                 travis_wait 49 cmake --build . --target install -- -j12
             popd
-        
-            wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
-            tar xfz boost_1_63_0.tar.gz
-        
-            pushd boost_1_63_0
-                ./bootstrap.sh
-                travis_wait 49 ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
-            popd
         popd
-        touch ${HOME}/deps/cached.marker
+        touch ${HOME}/deps/llvm/cached.marker
       else
-        echo 'Using cached Boost and LLVM libraries.'
+        echo 'Using cached LLVM libraries.'
       fi
+
     - |
-      mkdir -p build
+      if [ ! -f "${HOME}/deps/boost/cached.marker" ]; then
+        mkdir -p $HOME/deps/boost
+        pushd build
+          wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
+          tar xfz boost_1_63_0.tar.gz
+
+          pushd boost_1_63_0
+            ./bootstrap.sh
+            travis_wait 49 ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+          popd
+        popd
+        touch ${HOME}/deps/boost/cached.marker
+      else
+        echo 'Using cached Boost libraries.'
+      fi
+
+    - |
       pushd build
         wget https://github.com/westes/flex/releases/download/v2.6.3/flex-2.6.3.tar.gz
         tar xfz flex-2.6.3.tar.gz
