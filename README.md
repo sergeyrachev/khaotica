@@ -9,30 +9,38 @@ FLAVOR-inspired bitstream processing tool.
 See more about FLAVOR:
 http://flavor.sourceforge.net/
 
-#### Preparation:
+### Preparation:
 
-_Cmake >= 3.6_
+* CMake >= 3.6
+* LLVM == 4.0
+* Boost >= 1.63
 
-Project build is cmake-based and rely on prebuilt LLVM and Boost libraries. I prefer out-sourcetree build. All commands below are executed from temporal build directory.
+Project supports CMake-based build process and relies on prebuilt LLVM and Boost libraries. It would be nice to use not in-source build so all commands below are executed from temporal build directory.
 
-_LLVM == 3.9_
+**LLVM**
 
-I started with Exception Handling and RTTI enabled LLVM build. 
+Performance and portability are not issues not so Exception Handling and RTTI enabled in LLVM. To build LLVM: 
 		
-	cmake -DCMAKE_INSTALL_PREFIX=<LLVM_INSTALLATION_DIRECTORY> -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  ../llvm 
-	cmake --build . --target install
+	cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src && cmake --build . --target install    
+
+**Boost**
+
+Let's assume Boost is unpacked and to /boost_1_63_0/ change working directory into that folder and execute:
+	
+	./bootstrap.sh && ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+
+### Build:
+
+Pull requests are welcome. There are Travis-CI and Appveyor support in the project dir. You can look at its build scriptsin project root folder to solve build issues.
+
+    cmake -G "Visual Studio 14 2015" -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost ..\khaotica\
+    
+### Usage:
+
+'res' subfolder contains sample simulated with text file bitstream test.bin and its declaration in test.fl. Execute application as shown below to process "bitstream" accordingly its declaration.
+ 
+    khaotica -i test.fl -I test.bin
    
-_Boost >= 1.60_
-	
-Let's assume Boost is unpacked and build with b2 in <BOOST_DIRECTORY>. Usually, <BOOST_DIRECTORY> equal .../boost_1_63_0/
-	
-	bootstrap && b2 -j12 stage
 
-#### Build:
-	
-Currently only 32bit build Unix\Windows supported out-of-the-box. Pull\Merge requests are welcome.
-
-    cmake -G "Visual Studio 14 2015" -DLLVM_ROOT=d:/work/env/llvm/static/x86/release -DBOOST_ROOT=d:/work/env/boost/boost_1_63_0 ..\khaotica\
-#### Usage:
-
-	Under construction...
+   
+ 
