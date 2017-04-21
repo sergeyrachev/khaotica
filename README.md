@@ -29,13 +29,13 @@ Let's assume Boost is unpacked and to /boost_1_63_0/ change working directory in
 	
 	./bootstrap.sh && ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
     
-    OR 
+OR 
     
-    bootstrap.bat && b2 -j12 --prefix=d:\work\env\boost\prebuilt\x64\ --build-dir=d:\work\env\boost\build\x64\ variant=debug,release threading=multi link=static toolset=msvc address-model=64 install
+	bootstrap.bat && b2 -j12 --prefix=d:\work\env\boost\prebuilt\x64\ --build-dir=d:\work\env\boost\build\x64\ variant=debug,release threading=multi link=static toolset=msvc address-model=64 install
     
-    OR 
-    
-bootstrap.bat && b2 -j12 --prefix=d:\work\env\boost\prebuilt\x86\ --build-dir=d:\work\env\boost\build\x86\ variant=debug,release threading=multi link=static toolset=msvc install
+OR
+
+	bootstrap.bat && b2 -j12 --prefix=d:\work\env\boost\prebuilt\x86\ --build-dir=d:\work\env\boost\build\x86\ variant=debug,release threading=multi link=static toolset=msvc install
 
 ### Build:
 
