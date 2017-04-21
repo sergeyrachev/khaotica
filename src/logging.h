@@ -15,13 +15,13 @@ namespace logging{
         debug();
         ~debug();
     };
-}
 
-const logging::debug &operator<<(const logging::debug &i, const std::string&);
-const logging::debug &operator<<(const logging::debug &i, const int32_t&);
-const logging::debug &operator<<(const logging::debug &i, const int64_t&);
-const logging::debug &operator<<(const logging::debug &i, const uint32_t &);
-const logging::debug &operator<<(const logging::debug &i, const uint64_t &);
-const logging::debug &operator<<(const logging::debug &i, const double&);
+    const logging::debug& operator<<(const logging::debug &i, const std::string&);
+    const logging::debug& operator<<(const logging::debug &i, const int32_t&);
+    const logging::debug& operator<<(const logging::debug &i, const int64_t&);
+    const logging::debug& operator<<(const logging::debug &i, const uint32_t &);
+    const logging::debug& operator<<(const logging::debug &i, const uint64_t &);
+    const logging::debug& operator<<(const logging::debug &i, const double&);
+}
 
 #endif //KHAOTICA_LOGGING_H

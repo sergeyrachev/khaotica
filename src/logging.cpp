@@ -13,27 +13,27 @@ namespace {
     }
 }
 
-const logging::debug& operator<<(const logging::debug& i, const std::string & v) {
+const logging::debug& logging::operator<<(const logging::debug& i, const std::string & v) {
     return impl(i, v);
 }
 
-const logging::debug &operator<<(const logging::debug &i, const int32_t& v){
+const logging::debug &logging::operator<<(const logging::debug &i, const int32_t& v) {
     return impl(i, v);
 }
 
-const logging::debug &operator<<(const logging::debug &i, const int64_t &v) {
+const logging::debug &logging::operator<<(const logging::debug &i, const int64_t &v) {
     return impl(i, v);
 }
 
-const logging::debug &operator<<(const logging::debug &i, const uint32_t &v) {
+const logging::debug &logging::operator<<(const logging::debug &i, const uint32_t &v) {
     return impl(i, v);
 }
 
-const logging::debug &operator<<(const logging::debug &i, const uint64_t &v) {
+const logging::debug &logging::operator<<(const logging::debug &i, const uint64_t &v) {
     return impl(i, v);
 }
 
-const logging::debug &operator<<(const logging::debug &i, const double& v) {
+const logging::debug &logging::operator<<(const logging::debug &i, const double& v) {
     return impl(i, v);
 }
 
@@ -44,3 +44,4 @@ logging::debug::debug() {
 logging::debug::~debug() {
     (*this) << "\n";
 }
+
