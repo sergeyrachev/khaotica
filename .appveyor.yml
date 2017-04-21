@@ -14,7 +14,7 @@ build:
 
 install:
   - cmd: choco install msys2 && refreshenv
-  - cmd: refreshenv && msystem.bat MSYS && pacman -Syu && pacman-key --init && pacman-key --populate msys2 && pacman-key --refresh-keys && pacman --noconfirm -S bison flex
+  - cmd: refreshenv && msystem.bat MSYS && pacman -Syu && bash pacman-key --init && bash pacman-key --populate msys2 && bash pacman-key --refresh-keys && pacman --noconfirm -S bison flex
 
 build_script:
   - cmd: |
