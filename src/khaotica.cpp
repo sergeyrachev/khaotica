@@ -36,7 +36,8 @@ int main( int argc, char* argv[] ) {
        ;
 
     po::positional_options_description pos_opt_desc;
-    pos_opt_desc.add( "input", 1 );
+    pos_opt_desc.add( "input-definition", 1 );
+    pos_opt_desc.add("input-bitstream", 1);
 
     po::variables_map varmap;
     if( !options::is_args_valid(argc, argv, opt_desc, pos_opt_desc, varmap, std::cerr, std::cout ) ) {
@@ -44,8 +45,10 @@ int main( int argc, char* argv[] ) {
     }
 
     const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
-    const std::string &input_bitstream_filename = varmap.at("input-bitstream").as<std::string>();
-    std::cout << input_definition_filename << std::endl << input_bitstream_filename << std::endl;
+    const std::string& input_bitstream_filename = varmap.at("input-bitstream").as<std::string>();
+    logging::debug() << "Flavor Definition file: " << input_definition_filename;
+    logging::debug() << "Bitstream file: " << input_bitstream_filename;
+
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
 
