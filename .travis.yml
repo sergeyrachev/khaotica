@@ -20,10 +20,8 @@ before_install:
 
 install:
     - mkdir -p build
-    - test -f "${HOME}/deps/llvm/cached.marker"
-    - export LLVM_MARKER=$?
     - |
-      if [ $LLVM_MARKER -ne 0]; then
+      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         pushd build
             wget http://releases.llvm.org/4.0.0/llvm-4.0.0.src.tar.xz
             tar xfJ llvm-4.0.0.src.tar.xz
@@ -31,7 +29,7 @@ install:
       fi
       
     - |
-      if [ $LLVM_MARKER -ne 0 ]; then
+      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         mkdir -p build/llvm
         pushd build/llvm
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
@@ -39,25 +37,22 @@ install:
       fi
 
     - |
-      if [ $LLVM_MARKER -ne 0 ]; then
+      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         pushd build/llvm
           cmake --build . -- j8
         popd
       fi
 
     - |
-      if [ $LLVM_MARKER -ne 0 ]; then
+      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         pushd build/llvm
           cmake --build . --target install
           touch ${HOME}/deps/llvm/cached.marker
         popd
       fi
 
-    - test -f "${HOME}/deps/boost/cached.marker"
-    - export BOOST_MARKER=$?
-
     - |
-      if [ $BOOST_MARKER -ne 0 ]; then
+      if [ ! -f "${HOME}/deps/boost/cached.marker" ]; then
         mkdir -p $HOME/deps/boost
         pushd build
           wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
@@ -69,8 +64,6 @@ install:
           popd
         popd
         touch ${HOME}/deps/boost/cached.marker
-      else
-        echo 'Using cached Boost libraries.'
       fi
 
     - |
