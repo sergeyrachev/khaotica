@@ -40,9 +40,14 @@ add_custom_target(dummy
 	echo "Dummy target to show Bison/Flex/Flavor files in projects"
     SOURCES 
     ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll 
+    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll 
     ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
     ${CMAKE_CURRENT_LIST_DIR}/res/test.fl
     ${CMAKE_CURRENT_LIST_DIR}/res/test.bin
+    ${GRAMMAR_DIR}/${BisonOutput}
+    ${GRAMMAR_DIR}/${FlexOutput}
+    ${CMAKE_CURRENT_LIST}
         )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
