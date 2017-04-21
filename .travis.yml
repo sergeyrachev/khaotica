@@ -15,32 +15,50 @@ notifications:
 before_install:
     - sudo add-apt-repository ppa:josh-bialkowski/cmake -y 
     - sudo apt-get update -qq 
-    - sudo apt-get remove flex
-    - sudo apt-get install -y bison cmake m4 autoconf automake
+    - sudo apt-get remove -qq flex
+    - sudo apt-get install -y -qq bison cmake m4 autoconf automake
 
 install:
     - mkdir -p build
+    - test ! -f "${HOME}/deps/llvm/cached.marker")
+    - export LLVM_MARKER=$?
     - |
-      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
-        mkdir -p $HOME/deps/llvm && mkdir -p build/llvm
+      if [ $LLVM_MARKER ]; then
         pushd build
             wget http://releases.llvm.org/4.0.0/llvm-4.0.0.src.tar.xz
             tar xfJ llvm-4.0.0.src.tar.xz
-        
-            pushd llvm
-                cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
-                cmake --build . --target LLVMAsmPrinter -- -j12
-                cmake --build . -- -j12
-                cmake --build . --target install
-            popd
         popd
-        touch ${HOME}/deps/llvm/cached.marker
-      else
-        echo 'Using cached LLVM libraries.'
+        echo "LLVM Downloaded"
+      fi
+      
+    - |
+      if [ $LLVM_MARKER ]; then
+        mkdir -p build/llvm
+        pushd build/llvm
+          cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
+        popd
       fi
 
     - |
-      if [ ! -f "${HOME}/deps/boost/cached.marker" ]; then
+      if [ $LLVM_MARKER ]; then
+        pushd build/llvm
+          cmake --build . -- j9
+        popd
+      fi
+
+    - |
+      if [ $LLVM_MARKER ]; then
+        pushd build/llvm
+          cmake --build . --target install
+          touch ${HOME}/deps/llvm/cached.marker
+        popd
+      fi
+
+    - test ! -f "${HOME}/deps/boost/cached.marker")
+    - export BOOST_MARKER=$?
+
+    - |
+      if [ $BOOST_MARKER ]; then
         mkdir -p $HOME/deps/boost
         pushd build
           wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
