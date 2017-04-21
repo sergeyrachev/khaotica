@@ -20,7 +20,7 @@ before_install:
 
 install:
     - mkdir -p build
-    - test -f "${HOME}/deps/llvm/cached.marker")
+    - test -f "${HOME}/deps/llvm/cached.marker"
     - export LLVM_MARKER=$?
     - |
       if [ $LLVM_MARKER -ne 0]; then
@@ -53,7 +53,7 @@ install:
         popd
       fi
 
-    - test -f "${HOME}/deps/boost/cached.marker")
+    - test -f "${HOME}/deps/boost/cached.marker"
     - export BOOST_MARKER=$?
 
     - |
