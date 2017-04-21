@@ -4,9 +4,6 @@
 
 
 class STree {
-    STree(STree &&other);
-    STree &operator =(STree other);
-
 public:
     STree();
     ~STree();

@@ -10,17 +10,6 @@
 
 STree::STree() : root(nullptr) {}
 
-STree::STree(STree &&other) {
-    root = std::move(other.root);
-    other.root = nullptr;
-}
-
-STree &
-STree::operator =(STree other) {
-    std::swap(root, other.root);
-    return *this;
-}
-
 STree::~STree() {
     root.reset();
 }
