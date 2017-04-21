@@ -12,6 +12,8 @@
 #define YY_DECL flavor::Parser::symbol_type flavor::Scanner::next_token()
 
 #include "parser.hpp"
+#include "location.hh"
+#include "position.hh"
 
 namespace flavor{
     class Interpreter;
@@ -24,6 +26,8 @@ namespace flavor{
 
     private:
         Interpreter &_driver;
+        flavor::location _location;
+            
     };
 }
 

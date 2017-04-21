@@ -2,6 +2,7 @@
 %require "3.0"
 
 %verbose
+%debug
 
 %defines
 
@@ -13,7 +14,6 @@
 %define api.token.prefix {TOKEN_}
 
 %define parse.assert
-%define parse.trace
 %define parse.error verbose
 
 %code requires{
@@ -44,7 +44,7 @@
 
 %destructor {
     if ($$)  { delete ($$); ($$) = nullptr; }
-} <ASTNode *> <PrototypeNode *> <FunctionNode *> <std::vector<std::string> *>
+} <ASTNode *> <PrototypeNode *> <FunctionNode *>
 
 %token END 0
 %token DEF "def"
@@ -74,13 +74,13 @@
 %token COMMA ","
 
 %type <ASTNode *> expr number_literal binary_op call variable
-%type <std::vector<ASTNode*> *> call_args
+%type <std::vector<ASTNode*>> call_args
 %type <ASTNode *> if_then for_loop var_declare
 %type <PrototypeNode *> prototype extern
-%type <std::vector<std::string> *> arg_names
+%type <std::vector<std::string>> arg_names
 %type <FunctionNode *> definition
-%type <std::vector<std::pair<std::string, ASTNode*> > *> declarations
-%type <std::pair<std::string, ASTNode*> *> declaration
+%type <std::vector<std::pair<std::string, ASTNode*> > > declarations
+%type <std::pair<std::string, ASTNode*> > declaration
 
 %%
 %start top;
@@ -125,18 +125,18 @@ binary_op :
 
 call :
 IDENTIFIER "(" call_args ")" {
-  $$ = new CallNode($1, *$3);
+  $$ = new CallNode($1, $3);
 }
 
 call_args :
-  { $$ = new std::vector<ASTNode*>(); }
+  { $$ = std::vector<ASTNode*>(); }
 | call_args "," expr {
     $$ = $1;
-    $$->push_back($3);
+    $$.push_back($3);
   }
 | expr {
-    $$ = new std::vector<ASTNode*>();
-    $$->push_back($1);
+    $$ = std::vector<ASTNode*>();
+    $$.push_back($1);
   }
 
 extern :
@@ -149,18 +149,18 @@ definition :
 
 prototype :
 IDENTIFIER "(" arg_names ")" {
-    $$ = new PrototypeNode($1, *$3);
+    $$ = new PrototypeNode($1, $3);
 }
 
 arg_names:
-  { $$ = new std::vector<std::string>(); }
+  { $$ = std::vector<std::string>(); }
 | arg_names "," IDENTIFIER {
     $$ = $1;
-    $$->push_back($3);
+    $$.push_back($3);
   }
 | IDENTIFIER {
-    $$ = new std::vector<std::string>();
-    $$->push_back($1);
+    $$ = std::vector<std::string>();
+    $$.push_back($1);
   }
 
 %left "else" "then";
@@ -182,34 +182,34 @@ for_loop :
 
 var_declare :
   "var" declarations "in" expr {
-    $$ = new VarNode(*$2, $4);
+    $$ = new VarNode($2, $4);
   }
 
 declarations :
   {
-    $$ = new std::vector<std::pair<std::string, ASTNode*> >();
+    $$ = std::vector<std::pair<std::string, ASTNode*> >();
   }
 | declarations "," declaration {
     $$ = $1;
-    $$->push_back(*$3);
+    $$.push_back($3);
   }
 | declaration {
-    $$ = new std::vector<std::pair<std::string, ASTNode*> >();
-    $$->push_back(*$1);
+    $$ = std::vector<std::pair<std::string, ASTNode*> >();
+    $$.push_back($1);
   }
 
 
 declaration :
   IDENTIFIER "=" expr {
-    $$ = new std::pair<std::string, ASTNode*>($1, $3);
+    $$ = std::pair<std::string, ASTNode*>($1, $3);
   }
 | IDENTIFIER {
-    $$ = new std::pair<std::string, ASTNode*>($1, 0);
+    $$ = std::pair<std::string, ASTNode*>($1, 0);
   }
 
 %%
 #include "logging.h"
 void flavor::Parser::error( const location &loc, const std::string &err_message )
 {
-    //logging::debug() << "Parsing error: '" << err_message << "'\n";
+    logging::debug() << "Parsing error: " << err_message;
 }
