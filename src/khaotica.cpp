@@ -25,6 +25,8 @@
 #include "export.h"
 #include "repository.h"
 
+#include "interpreter.h"
+
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
 
@@ -52,31 +54,37 @@ int main( int argc, char* argv[] ) {
     llvm::InitializeNativeTarget();
     llvm::InitializeNativeTargetAsmParser();
 
-    auto r = create_repository(input_bitstream_filename.c_str());
-
-    IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
-
-    STree *tree = new STree();
-
-    std::string input;
     std::ifstream f(input_definition_filename);
-    while( std::getline(f, input, ';') ) {
-        std::istringstream iss(input);
 
-        tree->parse(iss);
-        if( tree->root != 0 ) {
-            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
-                if( func->getName() == "anon" ) {
-         
-					renderer->module->dump();
-                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer->engine()->getFunctionAddress("anon"));
-                    fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
-                }
-            }
-        }
-    }
+    flavor::Interpreter driver;
+    auto ast = driver.parse(f);
 
-    destroy_repository(r);
+
+
+    //auto r = create_repository(input_bitstream_filename.c_str());
+
+    //IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
+
+//    STree *tree = new STree();
+//
+//    std::string input;
+//    while( std::getline(f, input, ';') ) {
+//        std::istringstream iss(input);
+//
+//        tree->parse(iss);
+//        if( tree->root != 0 ) {
+//            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
+//                if( func->getName() == "anon" ) {
+//
+//					renderer->module->dump();
+//                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer->engine()->getFunctionAddress("anon"));
+//                    fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
+//                }
+//            }
+//        }
+//    }
+//
+//    destroy_repository(r);
 
     return 0;
 

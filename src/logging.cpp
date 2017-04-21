@@ -36,3 +36,11 @@ const logging::debug &operator<<(const logging::debug &i, const uint64_t &v) {
 const logging::debug &operator<<(const logging::debug &i, const double& v) {
     return impl(i, v);
 }
+
+logging::debug::debug() {
+
+}
+
+logging::debug::~debug() {
+    (*this) << "\n";
+}

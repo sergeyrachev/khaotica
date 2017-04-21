@@ -13,27 +13,27 @@ set(GRAMMAR_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 
 FIND_PACKAGE(BISON 3.0 REQUIRED)
-set(BisonOutput bison_parser.cpp)
+set(BisonOutput parser.cpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${BISON_EXECUTABLE}
         ARGS
             --output=${BisonOutput}
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
 )
 
 FIND_PACKAGE(FLEX REQUIRED)
-SET(FlexOutput flex_lexer.cpp)
+SET(FlexOutput scanner.cpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll ${GRAMMAR_DIR}/${BisonOutput}
+        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll ${GRAMMAR_DIR}/${BisonOutput}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${FLEX_EXECUTABLE}
         ARGS
             --outfile=${FlexOutput}
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll
+            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll
 )
 
 add_custom_target(dummy 
@@ -51,6 +51,9 @@ target_include_directories(export PRIVATE src)
 target_compile_features(export PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type)
 
 set(SOURCES
+        ${GRAMMAR_DIR}/${BisonOutput}
+        ${GRAMMAR_DIR}/${FlexOutput}
+
         src/ast/binary.cc
         src/ast/call.cc
         src/ast/for.cc
@@ -61,14 +64,13 @@ set(SOURCES
         src/ast/unary.cc
         src/ast/var.cc
         src/ast/variable.cc
-        src/parsing/tree.cc
-        src/parsing/lexer.cc
         src/codegen/renderer.cc
         src/errors.cc
-        
-        ${GRAMMAR_DIR}/${BisonOutput}
-        ${GRAMMAR_DIR}/${FlexOutput}
-		src/logging.cpp src/options.cpp src/options.h )
+
+		src/logging.cpp
+		src/options.cpp
+        src/parsing/interpreter.cpp
+        )
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 

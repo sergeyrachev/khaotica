@@ -12,7 +12,8 @@
 namespace logging{
     class debug {
     public:
-        debug(){}
+        debug();
+        ~debug();
     };
 }
 
