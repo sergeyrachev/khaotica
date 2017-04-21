@@ -20,19 +20,18 @@ before_install:
 
 install:
     - mkdir -p build
-    - test ! -f "${HOME}/deps/llvm/cached.marker")
+    - test -f "${HOME}/deps/llvm/cached.marker")
     - export LLVM_MARKER=$?
     - |
-      if [ $LLVM_MARKER ]; then
+      if [ $LLVM_MARKER -ne 0]; then
         pushd build
             wget http://releases.llvm.org/4.0.0/llvm-4.0.0.src.tar.xz
             tar xfJ llvm-4.0.0.src.tar.xz
         popd
-        echo "LLVM Downloaded"
       fi
       
     - |
-      if [ $LLVM_MARKER ]; then
+      if [ $LLVM_MARKER -ne 0 ]; then
         mkdir -p build/llvm
         pushd build/llvm
           cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
@@ -40,25 +39,25 @@ install:
       fi
 
     - |
-      if [ $LLVM_MARKER ]; then
+      if [ $LLVM_MARKER -ne 0 ]; then
         pushd build/llvm
-          cmake --build . -- j9
+          cmake --build . -- j8
         popd
       fi
 
     - |
-      if [ $LLVM_MARKER ]; then
+      if [ $LLVM_MARKER -ne 0 ]; then
         pushd build/llvm
           cmake --build . --target install
           touch ${HOME}/deps/llvm/cached.marker
         popd
       fi
 
-    - test ! -f "${HOME}/deps/boost/cached.marker")
+    - test -f "${HOME}/deps/boost/cached.marker")
     - export BOOST_MARKER=$?
 
     - |
-      if [ $BOOST_MARKER ]; then
+      if [ $BOOST_MARKER -ne 0 ]; then
         mkdir -p $HOME/deps/boost
         pushd build
           wget https://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz
@@ -66,7 +65,7 @@ install:
 
           pushd boost_1_63_0
             ./bootstrap.sh
-            ./b2 -j12 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
+            ./b2 -j8 -d0 --prefix=$HOME/deps/boost variant=release threading=multi link=static install
           popd
         popd
         touch ${HOME}/deps/boost/cached.marker
@@ -85,7 +84,7 @@ install:
 
 script:
     - cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
-    - cmake --build . --target install -- -j12
+    - cmake --build . --target install -- -j8
 
 after_success:
     - tar -zcvf $HOME/khaotica~$(git log --pretty=format:'%h' -n 1).tar.gz -C $HOME/khaotica/ .
