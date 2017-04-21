@@ -37,11 +37,6 @@ const logging::debug &logging::operator<<(const logging::debug &i, const double&
     return impl(i, v);
 }
 
-logging::debug::debug() {
-
-}
-
-logging::debug::~debug() {
-    (*this) << "\n";
-}
+logging::debug::debug() = default;
+logging::debug::~debug() = default;
 

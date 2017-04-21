@@ -21,14 +21,16 @@ namespace flavor{
         ASTNode* parse(std::istream &in);
 
     private:
-        void ast(ASTNode * ast){
-            _ast = ast;
-        }
+        void ast(ASTNode * ast);
     private:
         Scanner _scanner;
         Parser _parser;
 
+        std::ostream& _out;
+
         ASTNode* _ast;
+
+
     };
 }
 
