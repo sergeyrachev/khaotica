@@ -39,7 +39,7 @@ install:
     - |
       if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
         pushd build/llvm
-          cmake --build . -- j8
+          cmake --build . -- -j8
         popd
       fi
 
