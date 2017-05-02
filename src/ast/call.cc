@@ -20,9 +20,8 @@ CallNode::CallNode(const std::string &callee, std::vector<ASTNode*> &args)
 
 #include <vector>
 
-llvm::Value *
-CallNode::codegen(IRRenderer *renderer) {
-    llvm::Function *callee_func = renderer->module->getFunction(callee);
+llvm::Value * CallNode::codegen(IRRenderer& renderer) {
+    llvm::Function *callee_func = renderer.module->getFunction(callee);
     if( callee_func == 0 ) {
         return ErrorV("Unknown function referenced");
     }
@@ -39,7 +38,7 @@ CallNode::codegen(IRRenderer *renderer) {
         }
     }
 
-    arg_values.push_back(llvm::ConstantInt::get(renderer->llvm_context(), llvm::APInt(64, renderer->THIS)));
+    arg_values.push_back(llvm::ConstantInt::get(renderer.llvm_context(), llvm::APInt(64, renderer.THIS)));
 
-    return renderer->builder->CreateCall(callee_func, arg_values, "calltmp");
+    return renderer.builder->CreateCall(callee_func, arg_values, "calltmp");
 }

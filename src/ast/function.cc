@@ -21,24 +21,23 @@ using ::llvm::Function;
 using ::llvm::Value;
 
 
-Function *
-FunctionNode::codegen(IRRenderer *renderer) {
-    renderer->clear_all_named_values();
+llvm::Value * FunctionNode::codegen(IRRenderer& renderer) {
+    renderer.clear_all_named_values();
 
     Function *func = proto->codegen(renderer);
     if( func == 0 ) {
         return 0;
     }
 
-    BasicBlock *block = BasicBlock::Create(renderer->llvm_context(),
+    BasicBlock *block = BasicBlock::Create(renderer.llvm_context(),
         "entry",
         func);
-    renderer->builder->SetInsertPoint(block);
+    renderer.builder->SetInsertPoint(block);
 
     proto->create_argument_allocas(renderer, func);
 
     if( Value *retval = body->codegen(renderer) ) {
-        renderer->builder->CreateRet(retval);
+        renderer.builder->CreateRet(retval);
         llvm::verifyFunction(*func);
 
         

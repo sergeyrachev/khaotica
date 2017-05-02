@@ -19,8 +19,7 @@ BinaryNode::BinaryNode(char op, ASTNode *lhs, ASTNode *rhs)
     : op(op), lhs(lhs), rhs(rhs) {}
     
 
-Value *
-BinaryNode::codegen(IRRenderer *renderer) {
+llvm::Value * BinaryNode::codegen(IRRenderer& renderer) {
     if( op == '=' ) {
         VariableNode *lhse = dynamic_cast<VariableNode*>(lhs);
         if( !lhse ) {
@@ -32,12 +31,12 @@ BinaryNode::codegen(IRRenderer *renderer) {
             return 0;
         }
 
-        Value *variable = renderer->get_named_value(lhse->getName());
+        Value *variable = renderer.get_named_value(lhse->getName());
         if( variable == 0 ) {
             return ErrorV("Unknown variable name");
         }
 
-        renderer->builder->CreateStore(val, variable);
+        renderer.builder->CreateStore(val, variable);
 
         return val;
     }
@@ -49,20 +48,20 @@ BinaryNode::codegen(IRRenderer *renderer) {
         return 0;
     }
 
-    Type *llvm_double_type = Type::getDoubleTy(renderer->llvm_context());
+    Type *llvm_double_type = Type::getDoubleTy(renderer.llvm_context());
 
     switch( op ) {
-    case '+': return renderer->builder->CreateFAdd(left, right, "addtmp");
-    case '-': return renderer->builder->CreateFSub(left, right, "subtmp");
-    case '*': return renderer->builder->CreateFMul(left, right, "multmp");
+    case '+': return renderer.builder->CreateFAdd(left, right, "addtmp");
+    case '-': return renderer.builder->CreateFSub(left, right, "subtmp");
+    case '*': return renderer.builder->CreateFMul(left, right, "multmp");
     case '<':
-        left = renderer->builder->CreateFCmpULT(left, right, "cmptmp");
-        return renderer->builder->CreateUIToFP(left,
+        left = renderer.builder->CreateFCmpULT(left, right, "cmptmp");
+        return renderer.builder->CreateUIToFP(left,
             llvm_double_type,
             "booltmp");
     case '>':
-        right = renderer->builder->CreateFCmpULT(right, left, "cmptmp");
-        return renderer->builder->CreateUIToFP(right,
+        right = renderer.builder->CreateFCmpULT(right, left, "cmptmp");
+        return renderer.builder->CreateUIToFP(right,
             llvm_double_type,
             "booltmp");
     default: break;

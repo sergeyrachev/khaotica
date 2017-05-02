@@ -18,17 +18,16 @@ using ::llvm::Value;
 using ::llvm::Function;
 
 
-Value *
-UnaryNode::codegen(IRRenderer *renderer) {
+llvm::Value * UnaryNode::codegen(IRRenderer& renderer) {
     Value *operand_value = operand->codegen(renderer);
     if( operand_value == 0 ) {
         return 0;
     }
 
-    Function *func = renderer->module->getFunction(std::string("unary") + opcode);
+    Function *func = renderer.module->getFunction(std::string("unary") + opcode);
     if( func == 0 ) {
         return ErrorV("Unknown unary operator");
     }
 
-    return renderer->builder->CreateCall(func, operand_value, "unop");
+    return renderer.builder->CreateCall(func, operand_value, "unop");
 }

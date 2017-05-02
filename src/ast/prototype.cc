@@ -31,36 +31,35 @@ using ::llvm::Value;
 
 
 void
-PrototypeNode::create_argument_allocas(IRRenderer *renderer, Function *func) {
+PrototypeNode::create_argument_allocas(IRRenderer &renderer, Function *func) {
     Function::arg_iterator iterator = func->arg_begin();
     for( auto &arg : args ) {
         Value& val = *iterator++;
-        AllocaInst *alloca = renderer->create_entry_block_alloca(func, arg);
-        renderer->builder->CreateStore(&val, alloca);
-        renderer->set_named_value(arg, alloca);
+        AllocaInst *alloca = renderer.create_entry_block_alloca(func, arg);
+        renderer.builder->CreateStore(&val, alloca);
+        renderer.set_named_value(arg, alloca);
     }
 }
 
-Function *
-PrototypeNode::codegen(IRRenderer *renderer) {
+llvm::Function * PrototypeNode::codegen(IRRenderer& renderer) {
     std::vector<Type*> doubles(args.size()+1,
-        Type::getDoubleTy(renderer->llvm_context()));
+        Type::getDoubleTy(renderer.llvm_context()));
 
-    doubles[args.size()] = Type::getInt64Ty(renderer->llvm_context());
+    doubles[args.size()] = Type::getInt64Ty(renderer.llvm_context());
 
     FunctionType *func_type = FunctionType::get(
-        Type::getDoubleTy(renderer->llvm_context()),
+        Type::getDoubleTy(renderer.llvm_context()),
         doubles,
         false);
 
     Function *func = Function::Create(func_type,
         Function::ExternalLinkage,
         name,
-        renderer->module);
+        renderer.module);
 
     if( func->getName() != name ) {
         func->eraseFromParent();
-        func = renderer->module->getFunction(name);
+        func = renderer.module->getFunction(name);
 
         if( !func->empty() ) {
             ErrorF("redefinition of function");

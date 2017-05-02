@@ -74,8 +74,8 @@ int main( int argc, char* argv[] ) {
 //            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
 //                if( func->getName() == "anon" ) {
 //
-//					renderer->module->dump();
-//                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer->engine()->getFunctionAddress("anon"));
+//					renderer.module->dump();
+//                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer.engine()->getFunctionAddress("anon"));
 //                    fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
 //                }
 //            }

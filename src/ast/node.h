@@ -7,5 +7,5 @@
 class ASTNode {
 public:
   virtual ~ASTNode() {};
-  virtual llvm::Value *codegen(IRRenderer *renderer) = 0;
+  virtual llvm::Value *codegen(IRRenderer& renderer) = 0;
 };

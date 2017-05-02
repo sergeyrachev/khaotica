@@ -14,5 +14,5 @@ class BinaryNode : public ASTNode {
 
 public:
   BinaryNode(char op, ASTNode *lhs, ASTNode *rhs);
-  virtual llvm::Value *codegen(IRRenderer *renderer) override final;
+  virtual llvm::Value *codegen(IRRenderer& renderer) override final;
 };

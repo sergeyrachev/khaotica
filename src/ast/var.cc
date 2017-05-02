@@ -33,11 +33,10 @@ using ::llvm::Function;
 using ::llvm::Value;
 
 
-Value *
-VarNode::codegen(IRRenderer *renderer) {
+llvm::Value * VarNode::codegen(IRRenderer& renderer) {
     std::vector<AllocaInst *> old_bindings;
 
-    Function *func = renderer->builder->GetInsertBlock()->getParent();
+    Function *func = renderer.builder->GetInsertBlock()->getParent();
 
     for( auto &var_pair : var_names ) {
         const std::string &var_name = var_pair.first;
@@ -50,14 +49,14 @@ VarNode::codegen(IRRenderer *renderer) {
                 return 0;
             }
         } else {
-            init_val = ConstantFP::get(renderer->llvm_context(), APFloat(0.0));
+            init_val = ConstantFP::get(renderer.llvm_context(), APFloat(0.0));
         }
 
-        AllocaInst *alloca = renderer->create_entry_block_alloca(func, var_name);
-        renderer->builder->CreateStore(init_val, alloca);
+        AllocaInst *alloca = renderer.create_entry_block_alloca(func, var_name);
+        renderer.builder->CreateStore(init_val, alloca);
 
-        old_bindings.push_back(renderer->get_named_value(var_name));
-        renderer->set_named_value(var_name, alloca);
+        old_bindings.push_back(renderer.get_named_value(var_name));
+        renderer.set_named_value(var_name, alloca);
     }
 
     Value *body_val = body->codegen(renderer);
@@ -67,7 +66,7 @@ VarNode::codegen(IRRenderer *renderer) {
 
     std::size_t index = 0;
     for( auto &var_pair : var_names ) {
-        renderer->set_named_value(var_pair.first, old_bindings[index]);
+        renderer.set_named_value(var_pair.first, old_bindings[index]);
         ++index;
     }
 
