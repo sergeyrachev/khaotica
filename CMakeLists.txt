@@ -14,6 +14,7 @@ file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 
 FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
+set(BisonOutputH parser.hpp)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput}
@@ -21,6 +22,7 @@ ADD_CUSTOM_COMMAND(
         COMMAND ${BISON_EXECUTABLE}
         ARGS
             --output=${BisonOutput}
+            --defines=${BisonOutputH}
             ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
 )
 
@@ -45,10 +47,8 @@ add_custom_target(dummy
     ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
     ${CMAKE_CURRENT_LIST_DIR}/res/test.fl
     ${CMAKE_CURRENT_LIST_DIR}/res/test.bin
-    ${GRAMMAR_DIR}/${BisonOutput}
-    ${GRAMMAR_DIR}/${FlexOutput}
     ${CMAKE_CURRENT_LIST}
-        )
+)
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 add_library(export SHARED src/export.cpp src/repository.cpp src/repository.h )
@@ -56,9 +56,10 @@ target_include_directories(export PRIVATE src)
 target_compile_features(export PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type)
 
 set(SOURCES
+        ${GRAMMAR_DIR}/${BisonOutputH}
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
-
+    
         src/ast/binary.cc
         src/ast/call.cc
         src/ast/for.cc
@@ -72,6 +73,18 @@ set(SOURCES
         src/codegen/renderer.cc
         src/errors.cc
 
+        src/ast/variable.h
+        src/ast/var.h
+        src/ast/unary.h
+        src/ast/prototype.h
+        src/ast/number.h
+        src/ast/node.h
+        src/ast/if.h
+        src/ast/function.h
+        src/ast/for.h
+        src/ast/call.h
+        src/ast/binary.h
+        
 		src/logging.cpp
 		src/options.cpp
         src/parsing/interpreter.cpp
