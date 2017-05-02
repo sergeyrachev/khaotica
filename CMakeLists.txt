@@ -17,7 +17,7 @@ set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
-        OUTPUT ${GRAMMAR_DIR}/${BisonOutput}
+        OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${BISON_EXECUTABLE}
         ARGS
@@ -48,6 +48,7 @@ add_custom_target(dummy
     ${CMAKE_CURRENT_LIST_DIR}/res/test.fl
     ${CMAKE_CURRENT_LIST_DIR}/res/test.bin
     ${CMAKE_CURRENT_LIST}
+    
 )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
