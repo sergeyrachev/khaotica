@@ -20,12 +20,11 @@ VariableNode::getName() const {
 #include "errors.h"
 
 
-llvm::Value *
-VariableNode::codegen(IRRenderer *renderer) {
-    llvm::Value *val = renderer->get_named_value(name);
+llvm::Value * VariableNode::codegen(IRRenderer& renderer) {
+    llvm::Value *val = renderer.get_named_value(name);
     if( !val ) {
         return ErrorV("Unknown variable name");
     }
 
-    return renderer->builder->CreateLoad(val, name.c_str());
+    return renderer.builder->CreateLoad(val, name.c_str());
 }

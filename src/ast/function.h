@@ -14,5 +14,5 @@ class FunctionNode : public ASTNode {
 
 public:
   FunctionNode(PrototypeNode *proto, ASTNode *body);
-  llvm::Function *codegen(IRRenderer *renderer);
+  llvm::Value *codegen(IRRenderer& renderer);
 };

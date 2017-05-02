@@ -17,6 +17,6 @@ public:
   PrototypeNode(const std::string &name,
                 const std::vector<std::string> &args);
 
-  llvm::Function *codegen(IRRenderer *renderer);
-  void create_argument_allocas(IRRenderer *renderer, llvm::Function *func);
+  llvm::Function *codegen(IRRenderer& renderer);
+  void create_argument_allocas(IRRenderer &renderer, llvm::Function *func);
 };
