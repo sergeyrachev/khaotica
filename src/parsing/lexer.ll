@@ -1,6 +1,6 @@
 %{
-#include "bison_parser.hpp"
-#include "lexer.h"
+#include "parser.hpp"
+#include "scanner.h"
 
 typedef bison::Parser::token token;
 
