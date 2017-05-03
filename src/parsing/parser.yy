@@ -1,10 +1,11 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-%verbose
-%debug
+%no-lines
 
-%defines
+%verbose
+%define parse.trace
+%define parse.error verbose
 
 %define parser_class_name {Parser}
 
@@ -12,9 +13,6 @@
 %define api.token.constructor
 %define api.value.type variant
 %define api.token.prefix {TOKEN_}
-
-%define parse.assert
-%define parse.error verbose
 
 %code requires{
     #include "ast.h"
@@ -86,8 +84,8 @@
 %start top;
 
 top :
-  definition END { driver.ast($1); }
-| extern END { driver.ast($1); }
+  definition STATEMENT_END { driver.ast($1); }
+| extern STATEMENT_END { driver.ast($1); }
 | expr END {
     PrototypeNode *proto = new PrototypeNode("anon", std::vector<std::string>());
     driver.ast(new FunctionNode(proto, $1));
@@ -209,7 +207,11 @@ declaration :
 
 %%
 #include "logging.h"
+#include <sstream>
+#include <iostream>
 void flavor::Parser::error( const location &loc, const std::string &err_message )
 {
-    logging::debug() << "Parsing error: " << err_message;
+    std::ostringstream ss;
+    ss << loc;
+    logging::debug() << "Parsing error: " << err_message << ss.str();
 }
