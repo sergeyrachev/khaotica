@@ -23,13 +23,14 @@ ADD_CUSTOM_COMMAND(
         ARGS
             --output=${BisonOutput}
             --defines=${BisonOutputH}
+			--graph
             ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
 )
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll ${GRAMMAR_DIR}/${BisonOutput}
+        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${FLEX_EXECUTABLE}
@@ -57,10 +58,9 @@ target_include_directories(export PRIVATE src)
 target_compile_features(export PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type)
 
 set(SOURCES
-        ${GRAMMAR_DIR}/${BisonOutputH}
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
-    
+
         src/ast/binary.cc
         src/ast/call.cc
         src/ast/for.cc
