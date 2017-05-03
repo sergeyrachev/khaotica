@@ -10,14 +10,14 @@
 
 %code requires{
     #include "ast.h"
-    #include "tree.h"
+    #include "interpreter.h"
 
     class Lexer;
-    class STree;
+    class Interpreter;
 }
 
 %param { Lexer &lexer }
-%parse-param { STree &tree }
+%parse-param { Interpreter &tree }
 
 %code{
 static int yylex(bison::Parser::semantic_type *yylval,
@@ -205,7 +205,7 @@ declaration :
   }
 
 %%
-#include "lexer.h"
+#include "scanner.h"
 
 static int yylex(bison::Parser::semantic_type *yylval,
                  Lexer &lexer) {

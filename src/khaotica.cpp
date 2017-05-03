@@ -7,7 +7,6 @@
 #include "khaotica.h"
 
 #include "codegen/renderer.h"
-#include "parsing/tree.h"
 
 #include "logging.h"
 #include "options.h"
@@ -56,20 +55,18 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    flavor::Interpreter driver;
-    auto ast = driver.parse(f);
-    
+    Interpreter driver;
     //auto r = create_repository(input_bitstream_filename.c_str());
 
     //IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
 
 //    STree *tree = new STree();
 //
-//    std::string input;
-//    while( std::getline(f, input, ';') ) {
-//        std::istringstream iss(input);
-//
-//        tree->parse(iss);
+    std::string input;
+    while( std::getline(f, input, ';') ) {
+        std::istringstream iss(input);
+
+        driver.parse(iss);
 //        if( tree->root != 0 ) {
 //            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
 //                if( func->getName() == "anon" ) {
@@ -80,7 +77,7 @@ int main( int argc, char* argv[] ) {
 //                }
 //            }
 //        }
-//    }
+    }
 //
 //    destroy_repository(r);
 
