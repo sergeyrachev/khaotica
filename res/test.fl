@@ -10,4 +10,4 @@ def payload2(x)
     readdouble(0)
 ;
 
-payload1(0);
+payload1(0)

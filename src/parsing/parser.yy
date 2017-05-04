@@ -84,8 +84,8 @@
 %start top;
 
 top :
-  definition END { driver.ast($1); }
-| extern END { driver.ast($1); }
+  definition STATEMENT_END top { driver.ast($1); }
+| extern STATEMENT_END top { driver.ast($1); }
 | expr END {
     std::shared_ptr<PrototypeNode> proto = std::make_shared<PrototypeNode>("anon", std::vector<std::string>());
     driver.ast(std::make_shared<FunctionNode>(proto, $1));
