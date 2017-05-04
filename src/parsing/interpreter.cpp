@@ -18,38 +18,3 @@ ASTNode *flavor::Interpreter::parse(std::istream &in) {
 void flavor::Interpreter::ast(std::shared_ptr<ASTNode> ast) {
     _ast = ast;
 }
-
-
-
-//#include "ast.h"
-//
-//#include "scanner.h"
-//#include "parser.hpp"
-//
-//using namespace flavor;
-//
-//Interpreter::Interpreter() : root(nullptr) {}
-//
-//Interpreter::~Interpreter() {
-//    root.reset();
-//}
-//
-//void
-//Interpreter::parse(std::istream &input) {
-//    root.release();
-//
-//    Lexer lexer(&input);
-//    bison::Parser *parser = new bison::Parser(lexer, *this);
-//
-//    parser->parse();
-//}
-//
-//void
-//Interpreter::set_root(FunctionNode *node) {
-//    root = unique_ptr<ASTNode>(node);
-//}
-//
-//void
-//Interpreter::set_root(PrototypeNode *node) {
-//    root = unique_ptr<ASTNode>(node);
-//}
