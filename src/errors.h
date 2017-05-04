@@ -2,9 +2,9 @@
 
 #include "llvm/IR/Value.h"
 
-#include "ast/node.h"
-#include "ast/prototype.h"
-#include "ast/function.h"
+#include "node.h"
+#include "prototype.h"
+#include "function.h"
 
 
 ASTNode *Error(const char *message);

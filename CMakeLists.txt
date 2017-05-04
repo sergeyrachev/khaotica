@@ -16,7 +16,7 @@ FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
+        DEPENDS src/parser.yy
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${BISON_EXECUTABLE}
@@ -24,32 +24,29 @@ ADD_CUSTOM_COMMAND(
             --output=${BisonOutput}
             --defines=${BisonOutputH}
 			--graph
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
+			${CMAKE_CURRENT_LIST_DIR}/src/parser.yy
 )
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
+        DEPENDS src/scanner.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${FLEX_EXECUTABLE}
         ARGS
             --outfile=${FlexOutput}
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll
+			${CMAKE_CURRENT_LIST_DIR}/src/scanner.ll
 )
 
 add_custom_target(dummy 
 	echo "Dummy target to show Bison/Flex/Flavor files in projects"
-    SOURCES 
-    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll 
-    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll 
-    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
-    ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
-    ${CMAKE_CURRENT_LIST_DIR}/res/test.fl
-    ${CMAKE_CURRENT_LIST_DIR}/res/test.bin
-    ${CMAKE_CURRENT_LIST}
-    
+    SOURCES
+		src/scanner.ll
+		src/parser.yy
+    	res/test.fl
+    	res/test.bin
+    	${CMAKE_CURRENT_LIST}
 )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -61,41 +58,41 @@ set(SOURCES
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
 
-        src/ast/binary.cc
-        src/ast/call.cc
-        src/ast/for.cc
-        src/ast/function.cc
-        src/ast/if.cc
-        src/ast/number.cc
-        src/ast/prototype.cc
-        src/ast/unary.cc
-        src/ast/var.cc
-        src/ast/variable.cc
-        src/codegen/renderer.cc
+        src/binary.cc
+        src/call.cc
+        src/for.cc
+        src/function.cc
+        src/if.cc
+        src/number.cc
+        src/prototype.cc
+        src/unary.cc
+        src/var.cc
+        src/variable.cc
+		src/renderer.cc
         src/errors.cc
 
-        src/ast/variable.h
-        src/ast/var.h
-        src/ast/unary.h
-        src/ast/prototype.h
-        src/ast/number.h
-        src/ast/node.h
-        src/ast/if.h
-        src/ast/function.h
-        src/ast/for.h
-        src/ast/call.h
-        src/ast/binary.h
+        src/variable.h
+        src/var.h
+        src/unary.h
+        src/prototype.h
+        src/number.h
+        src/node.h
+        src/if.h
+        src/function.h
+        src/for.h
+        src/call.h
+        src/binary.h
         
 		src/logging.cpp
 		src/options.cpp
-        src/parsing/interpreter.cpp
+		src/interpreter.cpp
         )
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
 target_compile_features(khaotica PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type )
 target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES} export)
-target_include_directories(khaotica PRIVATE src/ast src/parsing src/codegen src/ flex/ PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
+target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
 target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_COMPILE_DEFINITIONS})
 
 install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )

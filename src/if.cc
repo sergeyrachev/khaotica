@@ -15,7 +15,7 @@ IfNode::IfNode(std::shared_ptr<ASTNode> cond, std::shared_ptr<ASTNode> then, std
 #include "llvm/IR/Value.h"
 #include "llvm/IR/Type.h"
 
-#include "ast/if.h"
+#include "if.h"
 #include "renderer.h"
 
 using ::llvm::APFloat;

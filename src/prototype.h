@@ -6,7 +6,7 @@
 #include "llvm/IR/Module.h"
 
 #include "node.h"
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 
 class PrototypeNode : public ASTNode {

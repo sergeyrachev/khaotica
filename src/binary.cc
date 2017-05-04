@@ -4,8 +4,8 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/binary.h"
-#include "ast/variable.h"
+#include "binary.h"
+#include "variable.h"
 #include "renderer.h"
 #include "errors.h"
 

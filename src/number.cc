@@ -11,7 +11,7 @@ NumberNode::NumberNode(double val) : val(val) {}
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/number.h"
+#include "number.h"
 #include "renderer.h"
 
 

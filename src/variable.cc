@@ -15,7 +15,7 @@ VariableNode::getName() const {
 
 #include "llvm/IR/Value.h"
 
-#include "ast/variable.h"
+#include "variable.h"
 #include "renderer.h"
 #include "errors.h"
 

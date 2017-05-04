@@ -6,7 +6,7 @@
 
 #include "khaotica.h"
 
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 #include "logging.h"
 #include "options.h"

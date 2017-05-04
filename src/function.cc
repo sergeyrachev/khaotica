@@ -13,7 +13,7 @@ FunctionNode::FunctionNode(std::shared_ptr<PrototypeNode> proto, std::shared_ptr
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Value.h>
 
-#include "ast/function.h"
+#include "function.h"
 #include "renderer.h"
 
 using ::llvm::BasicBlock;
