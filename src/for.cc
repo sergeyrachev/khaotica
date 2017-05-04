@@ -21,7 +21,7 @@ ForNode::ForNode(const std::string &var_name,
 #include "llvm/IR/Value.h"
 #include "llvm/IR/Type.h"
 
-#include "ast/for.h"
+#include "for.h"
 #include "renderer.h"
 
 using ::llvm::AllocaInst;

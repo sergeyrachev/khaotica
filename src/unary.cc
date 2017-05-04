@@ -10,7 +10,7 @@ UnaryNode::UnaryNode(char opcode, ASTNode *operand)
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/unary.h"
+#include "unary.h"
 #include "renderer.h"
 #include "errors.h"
 

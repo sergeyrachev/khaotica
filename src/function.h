@@ -5,7 +5,7 @@
 
 #include "node.h"
 #include "prototype.h"
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 
 class FunctionNode : public ASTNode {

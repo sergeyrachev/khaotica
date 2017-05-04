@@ -18,8 +18,8 @@ VarNode::VarNode(const std::vector<std::pair<std::string, std::shared_ptr<ASTNod
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/node.h"
-#include "ast/var.h"
+#include "node.h"
+#include "var.h"
 #include "renderer.h"
 
 #include <cstddef>

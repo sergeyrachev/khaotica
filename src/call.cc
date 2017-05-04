@@ -14,7 +14,7 @@ CallNode::CallNode(const std::string &callee, std::vector<std::shared_ptr<ASTNod
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/call.h"
+#include "call.h"
 #include "renderer.h"
 #include "errors.h"
 

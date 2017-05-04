@@ -3,7 +3,7 @@
 #include "llvm/IR/Value.h"
 
 #include "node.h"
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 
 class UnaryNode : public ASTNode {

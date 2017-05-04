@@ -177,7 +177,6 @@ for_loop :
     $$ = std::make_shared<ForNode>($2, $4, $6, $8, $10);
   }
 
-
 var_declare :
   "var" declarations "in" expr {
     $$ = std::make_shared<VarNode>($2, $4);

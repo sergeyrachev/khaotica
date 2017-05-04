@@ -5,7 +5,7 @@
 #include <string>
 
 #include "node.h"
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 
 class NumberNode : public ASTNode {

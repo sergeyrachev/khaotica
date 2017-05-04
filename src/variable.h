@@ -5,7 +5,7 @@
 #include "llvm/IR/Value.h"
 
 #include "node.h"
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 
 class VariableNode : public ASTNode {

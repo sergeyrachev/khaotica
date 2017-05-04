@@ -17,7 +17,7 @@ PrototypeNode::PrototypeNode(const std::string &name,
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
 
-#include "ast/prototype.h"
+#include "prototype.h"
 #include "renderer.h"
 #include "errors.h"
 

@@ -2,7 +2,7 @@
 
 #include "llvm/IR/Value.h"
 
-#include "codegen/renderer.h"
+#include "renderer.h"
 
 #include <iostream>
 #include <memory>
