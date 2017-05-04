@@ -16,7 +16,7 @@ FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${BISON_EXECUTABLE}
@@ -24,19 +24,19 @@ ADD_CUSTOM_COMMAND(
             --output=${BisonOutput}
             --defines=${BisonOutputH}
 			--graph
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/grammar.yy
+            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/parser.yy
 )
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
 ADD_CUSTOM_COMMAND(
-        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
+        DEPENDS ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${FLEX_EXECUTABLE}
         ARGS
             --outfile=${FlexOutput}
-            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/lexer.ll
+            ${CMAKE_CURRENT_LIST_DIR}/src/parsing/scanner.ll
 )
 
 add_custom_target(dummy 

@@ -11,9 +11,9 @@
 
 class CallNode : public ASTNode {
   std::string callee;
-  std::vector<ASTNode*> args;
+  std::vector<std::shared_ptr<ASTNode>> args;
 
 public:
-  CallNode(const std::string &callee, std::vector<ASTNode*> &args);
+  CallNode(const std::string &callee, std::vector<std::shared_ptr<ASTNode>> &args);
   virtual llvm::Value *codegen(IRRenderer& renderer) override final;
 };

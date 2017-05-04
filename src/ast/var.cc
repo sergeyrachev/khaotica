@@ -8,8 +8,8 @@
 #include "var.h"
 
 
-VarNode::VarNode(const std::vector<std::pair<std::string, ASTNode*> > &var_names,
-                 ASTNode *body)
+VarNode::VarNode(const std::vector<std::pair<std::string, std::shared_ptr<ASTNode>> > &var_names,
+                 std::shared_ptr<ASTNode>body)
     : var_names(var_names), body(body) {}
 
 #include "llvm/ADT/APFloat.h"
@@ -40,7 +40,7 @@ llvm::Value * VarNode::codegen(IRRenderer& renderer) {
 
     for( auto &var_pair : var_names ) {
         const std::string &var_name = var_pair.first;
-        ASTNode *init = var_pair.second;
+        std::shared_ptr<ASTNode> init = var_pair.second;
 
         Value *init_val;
         if( init ) {

@@ -55,7 +55,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    Interpreter driver;
+    flavor::Interpreter driver;
     //auto r = create_repository(input_bitstream_filename.c_str());
 
     //IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));

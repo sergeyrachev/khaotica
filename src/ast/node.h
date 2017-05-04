@@ -5,6 +5,7 @@
 #include "codegen/renderer.h"
 
 #include <iostream>
+#include <memory>
 
 class ASTNode {
 public:

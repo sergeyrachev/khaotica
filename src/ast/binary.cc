@@ -15,13 +15,13 @@
 using ::llvm::Value;
 using ::llvm::Type;
 
-BinaryNode::BinaryNode(char op, ASTNode *lhs, ASTNode *rhs)
+BinaryNode::BinaryNode(char op, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs)
     : op(op), lhs(lhs), rhs(rhs) {}
     
 
 llvm::Value * BinaryNode::codegen(IRRenderer& renderer) {
     if( op == '=' ) {
-        VariableNode *lhse = dynamic_cast<VariableNode*>(lhs);
+        const VariableNode *lhse = dynamic_cast<VariableNode*>(lhs.get());
         if( !lhse ) {
             return ErrorV("destination of '=' must be a variable");
         }

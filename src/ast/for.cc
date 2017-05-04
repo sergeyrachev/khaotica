@@ -8,9 +8,9 @@
 
 
 ForNode::ForNode(const std::string &var_name,
-                 ASTNode *start, ASTNode *end,
-                 ASTNode *step,
-                 ASTNode *body)
+                 std::shared_ptr<ASTNode> start, std::shared_ptr<ASTNode> end,
+                 std::shared_ptr<ASTNode> step,
+                 std::shared_ptr<ASTNode> body)
     : var_name(var_name), start(start), end(end), step(step), body(body) {}
 
 #include "llvm/ADT/APFloat.h"

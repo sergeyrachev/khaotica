@@ -7,9 +7,9 @@
 
 
 class IfNode : public ASTNode {
-  ASTNode *condition, *then, *_else;
+    std::shared_ptr<ASTNode> condition, then, _else;
 
 public:
-  IfNode(ASTNode *cond, ASTNode *then, ASTNode *_else);
+  IfNode(std::shared_ptr<ASTNode> cond, std::shared_ptr<ASTNode> then, std::shared_ptr<ASTNode> _else);
   virtual llvm::Value *codegen(IRRenderer& renderer) override final;
 };
