@@ -9,10 +9,10 @@
 
 
 class FunctionNode : public ASTNode {
-  PrototypeNode *proto;
-  ASTNode *body;
+  std::shared_ptr<PrototypeNode> proto;
+  std::shared_ptr<ASTNode> body;
 
 public:
-  FunctionNode(PrototypeNode *proto, ASTNode *body);
+  FunctionNode(std::shared_ptr<PrototypeNode> proto, std::shared_ptr<ASTNode> body);
   llvm::Value *codegen(IRRenderer& renderer);
 };

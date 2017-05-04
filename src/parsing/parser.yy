@@ -41,8 +41,8 @@
 %locations
 
 %destructor {
-    if ($$)  { delete ($$); ($$) = nullptr; }
-} <ASTNode *> <PrototypeNode *> <FunctionNode *>
+    if ($$)  { ($$).reset(); ($$) = nullptr; }
+} <std::shared_ptr<ASTNode>> <std::shared_ptr<PrototypeNode>> <std::shared_ptr<FunctionNode>>
 
 %token END 0
 %token DEF "def"
@@ -71,24 +71,24 @@
 %token STATEMENT_END ";"
 %token COMMA ","
 
-%type <ASTNode *> expr number_literal binary_op call variable
-%type <std::vector<ASTNode*>> call_args
-%type <ASTNode *> if_then for_loop var_declare
-%type <PrototypeNode *> prototype extern
+%type <std::shared_ptr<ASTNode>> expr number_literal binary_op call variable
+%type <std::vector<std::shared_ptr<ASTNode>>> call_args
+%type <std::shared_ptr<ASTNode>> if_then for_loop var_declare
+%type <std::shared_ptr<PrototypeNode>> prototype extern
 %type <std::vector<std::string>> arg_names
-%type <FunctionNode *> definition
-%type <std::vector<std::pair<std::string, ASTNode*> > > declarations
-%type <std::pair<std::string, ASTNode*> > declaration
+%type <std::shared_ptr<FunctionNode>> definition
+%type <std::vector<std::pair<std::string, std::shared_ptr<ASTNode>> > > declarations
+%type <std::pair<std::string, std::shared_ptr<ASTNode>> > declaration
 
 %%
 %start top;
 
 top :
-  definition STATEMENT_END { driver.ast($1); }
-| extern STATEMENT_END { driver.ast($1); }
+  definition END { driver.ast($1); }
+| extern END { driver.ast($1); }
 | expr END {
-    PrototypeNode *proto = new PrototypeNode("anon", std::vector<std::string>());
-    driver.ast(new FunctionNode(proto, $1));
+    std::shared_ptr<PrototypeNode> proto = std::make_shared<PrototypeNode>("anon", std::vector<std::string>());
+    driver.ast(std::make_shared<FunctionNode>(proto, $1));
 }
 
 expr :
@@ -102,10 +102,10 @@ expr :
 | "(" expr ")" { $$ = $2; }
 
 variable:
-  IDENTIFIER { $$ = new VariableNode($1); }
+  IDENTIFIER { $$ = std::make_shared<VariableNode>($1); }
 
 number_literal :
-  NUMBER { $$ = new NumberNode($1); }
+  NUMBER { $$ = std::make_shared<NumberNode>($1); }
 
 %left "=";
 %left ">" "<";
@@ -113,27 +113,27 @@ number_literal :
 %left "*" "/";
 
 binary_op :
-  expr "=" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr "+" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr "-" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr "*" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr "/" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr "<" expr { $$ = new BinaryNode($2, $1, $3); }
-| expr ">" expr { $$ = new BinaryNode($2, $1, $3); }
+  expr "=" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr "+" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr "-" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr "*" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr "/" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr "<" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
+| expr ">" expr { $$ = std::make_shared<BinaryNode>($2, $1, $3); }
 
 call :
 IDENTIFIER "(" call_args ")" {
-  $$ = new CallNode($1, $3);
+  $$ = std::make_shared<CallNode>($1, $3);
 }
 
 call_args :
-  { $$ = std::vector<ASTNode*>(); }
+  { $$ = std::vector<std::shared_ptr<ASTNode>>(); }
 | call_args "," expr {
     $$ = $1;
     $$.push_back($3);
   }
 | expr {
-    $$ = std::vector<ASTNode*>();
+    $$ = std::vector<std::shared_ptr<ASTNode>>();
     $$.push_back($1);
   }
 
@@ -142,12 +142,12 @@ extern :
 
 definition :
 "def" prototype expr {
-    $$ = new FunctionNode($2, $3);
+    $$ = std::make_shared<FunctionNode>($2, $3);
 }
 
 prototype :
 IDENTIFIER "(" arg_names ")" {
-    $$ = new PrototypeNode($1, $3);
+    $$ = std::make_shared<PrototypeNode>($1, $3);
 }
 
 arg_names:
@@ -166,43 +166,43 @@ arg_names:
 
 if_then :
   "if" expr "then" expr "else" expr {
-    $$ = new IfNode($2, $4, $6);
+    $$ = std::make_shared<IfNode>($2, $4, $6);
   }
 
 for_loop :
   "for" IDENTIFIER "=" expr "," expr "in" expr {
-    $$ = new ForNode($2, $4, $6, 0, $8);
+    $$ = std::make_shared<ForNode>($2, $4, $6, nullptr, $8);
   }
 | "for" IDENTIFIER "=" expr "," expr "," expr "in" expr {
-    $$ = new ForNode($2, $4, $6, $8, $10);
+    $$ = std::make_shared<ForNode>($2, $4, $6, $8, $10);
   }
 
 
 var_declare :
   "var" declarations "in" expr {
-    $$ = new VarNode($2, $4);
+    $$ = std::make_shared<VarNode>($2, $4);
   }
 
 declarations :
   {
-    $$ = std::vector<std::pair<std::string, ASTNode*> >();
+    $$ = std::vector<std::pair<std::string, std::shared_ptr<ASTNode>> >();
   }
 | declarations "," declaration {
     $$ = $1;
     $$.push_back($3);
   }
 | declaration {
-    $$ = std::vector<std::pair<std::string, ASTNode*> >();
+    $$ = std::vector<std::pair<std::string, std::shared_ptr<ASTNode>> >();
     $$.push_back($1);
   }
 
 
 declaration :
   IDENTIFIER "=" expr {
-    $$ = std::pair<std::string, ASTNode*>($1, $3);
+    $$ = std::pair<std::string, std::shared_ptr<ASTNode>>($1, $3);
   }
 | IDENTIFIER {
-    $$ = std::pair<std::string, ASTNode*>($1, 0);
+    $$ = std::pair<std::string, std::shared_ptr<ASTNode>>($1, 0);
   }
 
 %%

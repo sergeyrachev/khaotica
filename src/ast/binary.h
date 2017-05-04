@@ -10,9 +10,9 @@
 
 class BinaryNode : public ASTNode {
   char op;
-  ASTNode *lhs, *rhs;
+  std::shared_ptr<ASTNode> lhs, rhs;
 
 public:
-  BinaryNode(char op, ASTNode *lhs, ASTNode *rhs);
+  BinaryNode(char op, std::shared_ptr<ASTNode> lhs, std::shared_ptr<ASTNode> rhs);
   virtual llvm::Value *codegen(IRRenderer& renderer) override final;
 };

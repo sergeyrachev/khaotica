@@ -5,7 +5,7 @@
 #include "prototype.h"
 #include "function.h"
 
-FunctionNode::FunctionNode(PrototypeNode *proto, ASTNode *body)
+FunctionNode::FunctionNode(std::shared_ptr<PrototypeNode> proto, std::shared_ptr<ASTNode> body)
     : proto(proto), body(body) {}
 
 #include <llvm/IR/Verifier.h>

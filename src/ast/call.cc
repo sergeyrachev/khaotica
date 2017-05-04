@@ -7,7 +7,7 @@
 #include "node.h"
 #include "call.h"
 
-CallNode::CallNode(const std::string &callee, std::vector<ASTNode*> &args)
+CallNode::CallNode(const std::string &callee, std::vector<std::shared_ptr<ASTNode>> &args)
     : callee(callee), args(args) {}
 
 

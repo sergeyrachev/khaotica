@@ -4,7 +4,7 @@
 #include "node.h"
 #include "if.h"
 
-IfNode::IfNode(ASTNode *cond, ASTNode *then, ASTNode *_else)
+IfNode::IfNode(std::shared_ptr<ASTNode> cond, std::shared_ptr<ASTNode> then, std::shared_ptr<ASTNode> _else)
     : condition(cond), then(then), _else(_else) {}
 
 #include "llvm/ADT/APFloat.h"
