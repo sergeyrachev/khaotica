@@ -40,20 +40,16 @@
 #endif
 
 #undef  YY_DECL
-#define YY_DECL int Lexer::yylex()
+#define YY_DECL bison::Parser::symbol_type Lexer::next_token()
 
 #include "parser.hpp"
 
 class Lexer : public yyFlexLexer {
-    int yylex();
+
     bison::Parser::semantic_type *yylval;
 
 public:
-    Lexer(std::istream *in)
-            : yyFlexLexer(*in, std::cerr), yylval(nullptr) {}
+    bison::Parser::symbol_type next_token();
 
-    int yylex(bison::Parser::semantic_type *l_val) {
-        yylval = l_val;
-        return yylex();
-    }
+    Lexer(std::istream *in) : yyFlexLexer(*in, std::cerr), yylval(nullptr) {}
 };

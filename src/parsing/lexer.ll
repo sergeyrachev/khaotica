@@ -24,38 +24,36 @@ numeric    [0-9]+(\.[0-9][0-9]?)?
 
 {blank}+  /* skip whitespace */
 
-"def"    return token::DEF;
-"extern" return token::EXTERN;
-"var"    return token::VAR;
-"if"     return token::IF;
-"then"   return token::THEN;
-"else"   return token::ELSE;
-"for"    return token::FOR;
-"in"     return token::IN;
+"def"    return bison::Parser::make_DEF();
+"extern" return bison::Parser::make_EXTERN();
+"var"    return bison::Parser::make_VAR();
+"if"     return bison::Parser::make_IF();
+"then"   return bison::Parser::make_THEN();
+"else"   return bison::Parser::make_ELSE();
+"for"    return bison::Parser::make_FOR();
+"in"     return bison::Parser::make_IN();
 
-"(" return token::OPEN_PAREN;
-")" return token::CLOSE_PAREN;
-";" return token::STATEMENT_END;
-"," return token::COMMA;
+"(" return bison::Parser::make_OPEN_PAREN();
+")" return bison::Parser::make_CLOSE_PAREN();
+";" return bison::Parser::make_STATEMENT_END();
+"," return bison::Parser::make_COMMA();
 
-"=" return token::ASSIGNMENT;
+"=" return bison::Parser::make_ASSIGNMENT(*yytext);
 
-"*" { yylval->chr = *yytext; return token::MULTIPLY; }
-"/" { yylval->chr = *yytext; return token::DIVIDE; }
-"+" { yylval->chr = *yytext; return token::ADD; }
-"-" { yylval->chr = *yytext; return token::SUBTRACT; }
-">" { yylval->chr = *yytext; return token::GREATER_THAN; }
-"<" { yylval->chr = *yytext; return token::LESS_THAN; }
+"*" { return bison::Parser::make_MULTIPLY(*yytext); }
+"/" { return bison::Parser::make_DIVIDE(*yytext); }
+"+" { return bison::Parser::make_ADD(*yytext); }
+"-" { return bison::Parser::make_SUBTRACT(*yytext); }
+">" { return bison::Parser::make_GREATER_THAN(*yytext); }
+"<" { return bison::Parser::make_LESS_THAN(*yytext); }
 
-{identifier} {
-    yylval->str = new std::string( yytext );
-    return token::IDENTIFIER;
-}
+
+{identifier} { const std::string* p = new std::string(yytext); return bison::Parser::make_IDENTIFIER(p); }
 
 {numeric} {
-    yylval->num = strtod(yytext, 0);
-    return token::NUMBER;
-}
+             uint64_t number = strtoull(yytext, 0, 10);
+             return bison::Parser::make_NUMBER(number);
+         }
 
 "#" BEGIN(COMMENT);
 

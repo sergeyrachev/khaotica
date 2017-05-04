@@ -4,8 +4,10 @@
 
 #include "codegen/renderer.h"
 
+#include <iostream>
+
 class ASTNode {
 public:
-  virtual ~ASTNode() {};
+  virtual ~ASTNode() { };
   virtual llvm::Value *codegen(IRRenderer& renderer) = 0;
 };
