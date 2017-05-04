@@ -1,12 +1,16 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
+%no-lines
+
 %verbose
+%define parse.trace
 %define parse.error verbose
 
-%defines
 %define parser_class_name {Parser}
 %define api.namespace {bison}
+%define api.value.type variant
+%define api.token.constructor
 
 %code requires{
     #include "ast.h"
@@ -16,47 +20,37 @@
     class Interpreter;
 }
 
-%param { Lexer &lexer }
+%lex-param { Lexer &lexer }
+%parse-param { Lexer &lexer }
 %parse-param { Interpreter &tree }
 
 %code{
-static int yylex(bison::Parser::semantic_type *yylval,
-                 Lexer &lexer);
-}
-
-%union {
-    std::string *str;
-    ASTNode *node;
-    PrototypeNode *proto;
-    FunctionNode *func;
-    double num;
-    char chr;
-    std::vector<std::string> *strs;
-    std::vector<ASTNode*> *nodes;
-    std::pair<std::string, ASTNode*> *declr;
-    std::vector<std::pair<std::string, ASTNode*> > *declrs;
+#include "scanner.h"
+static bison::Parser::symbol_type yylex(Lexer &scanner) {
+        return scanner.next_token();
+    }
 }
 
 %destructor {
     if ($$)  { delete ($$); ($$) = nullptr; }
-} <str> <node> <proto> <func> <strs>
+} <std::string *> <ASTNode *> <PrototypeNode *> <FunctionNode *> <std::vector<std::string> *>
 
 %define api.token.prefix {}
 
 %token END 0
 %token DEF "def"
 %token EXTERN "extern"
-%token <str> IDENTIFIER
-%token <num> NUMBER
+%token <std::string *> IDENTIFIER
+%token <double> NUMBER
 
-%token <chr> ASSIGNMENT "="
+%token <char> ASSIGNMENT "="
 
-%token <chr> MULTIPLY "*"
-%token <chr> DIVIDE "/"
-%token <chr> ADD "+"
-%token <chr> SUBTRACT "-"
-%token <chr> GREATER_THAN ">"
-%token <chr> LESS_THAN "<"
+%token <char> MULTIPLY "*"
+%token <char> DIVIDE "/"
+%token <char> ADD "+"
+%token <char> SUBTRACT "-"
+%token <char> GREATER_THAN ">"
+%token <char> LESS_THAN "<"
 
 %token IF "if"
 %token THEN "then"
@@ -70,14 +64,14 @@ static int yylex(bison::Parser::semantic_type *yylval,
 %token STATEMENT_END ";"
 %token COMMA ","
 
-%type <node> expr number_literal binary_op call variable
-%type <nodes> call_args
-%type <node> if_then for_loop var_declare
-%type <proto> prototype extern
-%type <strs> arg_names
-%type <func> definition
-%type <declrs> declarations
-%type <declr> declaration
+%type <ASTNode *> expr number_literal binary_op call variable
+%type <std::vector<ASTNode*> *> call_args
+%type <ASTNode *> if_then for_loop var_declare
+%type <PrototypeNode *> prototype extern
+%type <std::vector<std::string> *> arg_names
+%type <FunctionNode *> definition
+%type <std::vector<std::pair<std::string, ASTNode*> > *> declarations
+%type <std::pair<std::string, ASTNode*> *> declaration
 
 %%
 %start top;
@@ -137,7 +131,7 @@ call_args :
   }
 
 extern :
-"extern" prototype { $$ = $2; }
+"extern" IDENTIFIER "(" arg_names ")" { $$ = new PrototypeNode(*$2, *$4); }
 
 definition :
 "def" prototype expr {
@@ -205,15 +199,7 @@ declaration :
   }
 
 %%
-#include "scanner.h"
-
-static int yylex(bison::Parser::semantic_type *yylval,
-                 Lexer &lexer) {
-    return lexer.yylex(yylval);
-}
-
-void
-bison::Parser::error( const std::string &err_message )
+void bison::Parser::error( const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << "\n";
 }
