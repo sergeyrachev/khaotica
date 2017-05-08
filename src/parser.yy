@@ -19,14 +19,12 @@
 
     namespace flavor{
         class Scanner;
-        class Interpreter;
     }
 }
 
 %code top {
     #include "scanner.h"
     #include "parser.hpp"
-    #include "interpreter.h"
 
     static flavor::Parser::symbol_type yylex(flavor::Scanner &scanner) {
         return scanner.next_token();
@@ -35,8 +33,8 @@
 
 %lex-param {flavor::Scanner& scanner}
 
-%parse-param {flavor::Interpreter &driver}
 %parse-param {flavor::Scanner& scanner}
+%parse-param {std::vector<std::shared_ptr<ASTNode>>& asts}
 
 %locations
 
@@ -84,11 +82,11 @@
 %start top;
 
 top :
-  definition STATEMENT_END top { driver.ast($1); }
-| extern STATEMENT_END top { driver.ast($1); }
+  definition STATEMENT_END top { asts.push_back($1); }
+| extern STATEMENT_END top { asts.push_back($1); }
 | expr END {
     std::shared_ptr<PrototypeNode> proto = std::make_shared<PrototypeNode>("anon", std::vector<std::string>());
-    driver.ast(std::make_shared<FunctionNode>(proto, $1));
+    asts.push_back(std::make_shared<FunctionNode>(proto, $1));
 }
 
 expr :
