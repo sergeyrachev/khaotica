@@ -83,9 +83,9 @@ set(SOURCES
         src/call.h
         src/binary.h
         
-		src/logging.cpp
-		src/options.cpp
-		src/interpreter.cpp
+		src/logging.cpp src/logging.h
+		src/options.cpp src/options.h
+		src/interpreter.cpp src/interpreter.h
         )
 
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
