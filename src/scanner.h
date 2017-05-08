@@ -21,14 +21,13 @@ namespace flavor{
 
     class Scanner : public yyFlexLexer {
     public:
-        Scanner(Interpreter &driver) : _driver(driver) {}
+        explicit Scanner(std::istream& in, std::ostream& out):yyFlexLexer(in, out){
+
+        };
 
         flavor::Parser::symbol_type next_token();
-
     private:
-        Interpreter &_driver;
         flavor::location _location;
-
     };
 }
 

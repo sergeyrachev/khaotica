@@ -4,17 +4,19 @@
 
 #include "interpreter.h"
 
-flavor::Interpreter::Interpreter() :_scanner(*this), _parser(*this, _scanner), _out(std::cerr){}
+#include "scanner.h"
+#include "parser.hpp"
+#include "logging.h"
 
-ASTNode *flavor::Interpreter::parse(std::istream &in) {
-    _scanner.switch_streams(in, _out);
+flavor::Interpreter::Interpreter(){}
+
+void flavor::Interpreter::parse(std::istream &in, std::vector<std::shared_ptr<ASTNode> >& asts) const{
+
+    flavor::Scanner _scanner(in, std::cerr);
+    flavor::Parser _parser(_scanner, asts);
 
     _parser.set_debug_level(2);
-    _parser.set_debug_stream(_out);
-    _parser.parse();
-    return nullptr;
-}
-
-void flavor::Interpreter::ast(std::shared_ptr<ASTNode> ast) {
-    _ast = ast;
+    _parser.set_debug_stream(std::cerr);
+    int ret = _parser.parse();
+    logging::debug() << "Parsing has ended with code: " << ret;
 }

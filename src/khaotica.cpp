@@ -55,8 +55,9 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
+    std::vector<std::shared_ptr<ASTNode>> asts;
     flavor::Interpreter driver;
-    driver.parse(f);
+    driver.parse(f, asts);
     //auto r = create_repository(input_bitstream_filename.c_str());
 
     //IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
