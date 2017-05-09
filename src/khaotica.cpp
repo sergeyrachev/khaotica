@@ -52,15 +52,15 @@ int main( int argc, char* argv[] ) {
     std::shared_ptr<repository> r(create_repository(input_bitstream_filename.c_str()), [](repository* p){destroy_repository(p);});
     IRRenderer renderer(reinterpret_cast<intptr_t>(r.get()));
 
-    for(const auto& node : asts){
-        if( Function *func = static_cast<Function*>(node->codegen(renderer))){
-            if( func->getName() == "anon" ) {
+    std::for_each(asts.rbegin(), asts.rend(), [&renderer](std::shared_ptr<ASTNode> node ){
+        if( Function *func = dynamic_cast<Function*>(node->codegen(renderer))){
+            if( func && func->getName() == "anon" ) {
                 renderer.module->dump();
                 double(*func_pointer)() = (double(*)()) (intptr_t) (renderer.engine()->getFunctionAddress("anon"));
-                fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
+                logging::debug() << "Payload evaluated to: " << func_pointer();
             }
         }
-    }
+    });
     return 0;
 
 }
