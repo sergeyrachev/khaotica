@@ -11,20 +11,11 @@
 #include "logging.h"
 #include "options.h"
 
-#include <cctype>
-#include <cstdio>
-#include <map>
-#include <string>
-#include <vector>
-#include <iostream>
-#include <iostream>
-#include <sstream>
-#include <string>
-
 #include "export.h"
 #include "repository.h"
 
 #include "interpreter.h"
+#include "ast.h"
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -58,28 +49,18 @@ int main( int argc, char* argv[] ) {
     std::vector<std::shared_ptr<ASTNode>> asts;
     flavor::Interpreter driver;
     driver.parse(f, asts);
-    //auto r = create_repository(input_bitstream_filename.c_str());
+    std::shared_ptr<repository> r(create_repository(input_bitstream_filename.c_str()), [](repository* p){destroy_repository(p);});
+    IRRenderer renderer(reinterpret_cast<intptr_t>(r.get()));
 
-    //IRRenderer *renderer = new IRRenderer(reinterpret_cast<intptr_t>(r));
-
-//    STree *tree = new STree();
-//
-//    std::string input;
-//    while( std::getline(f, input, ';') ) {
-//        std::istringstream iss(input);
-//        if( tree->root != 0 ) {
-//            if( Function *func = static_cast<Function*>(tree->root->codegen(renderer)) ) {
-//                if( func->getName() == "anon" ) {
-//
-//					renderer.module->dump();
-//                    double(*func_pointer)() = (double(*)()) (intptr_t) (renderer.engine()->getFunctionAddress("anon"));
-//                    fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
-//                }
-//            }
-//        }
-//    }
-//    destroy_repository(r);
-
+    for(const auto& node : asts){
+        if( Function *func = static_cast<Function*>(node->codegen(renderer))){
+            if( func->getName() == "anon" ) {
+                renderer.module->dump();
+                double(*func_pointer)() = (double(*)()) (intptr_t) (renderer.engine()->getFunctionAddress("anon"));
+                fprintf(stderr, "Payload evaluated to: %f\n", func_pointer());
+            }
+        }
+    }
     return 0;
 
 }
