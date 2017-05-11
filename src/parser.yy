@@ -17,6 +17,8 @@
 %code requires{
     #include "ast.h"
 
+    #include "logging.h"
+
     namespace flavor{
         class Scanner;
     }
@@ -34,7 +36,7 @@
 %lex-param {flavor::Scanner& scanner}
 
 %parse-param {flavor::Scanner& scanner}
-%parse-param {std::vector<std::shared_ptr<ASTNode>>& asts}
+%parse-param {std::vector<ASTNode*>& asts}
 
 %locations
 
@@ -54,32 +56,44 @@
 %token CLOSE_PAREN ")"
 %token STATEMENT_END ";"
 
+%type <ASTNode*> field expr
+%type <std::vector<ASTNode*>> fields definition
+
 %%
 %start top;
 
 top :
-  definition STATEMENT_END top {  }
+  definition STATEMENT_END top { 
+    std::copy (($1).begin(), ($1).end(), std::back_inserter(asts)); 
+    logging::debug() << "append def";
+  }
 | expr END {
-
+    asts.push_back($1);
+    logging::debug() << "add expr";
 }
 
 expr :
-IDENTIFIER {  }
-
-number_literal :
-  NUMBER {  }
+IDENTIFIER { $$ = new CallNode($1); }
 
 definition :
-"def" IDENTIFIER OPEN_CURLY fields {
-
+"def" IDENTIFIER OPEN_CURLY fields CLOSE_CURLY{
+    std::copy (($4).begin(), ($4).end(), std::back_inserter($$)); 
+    logging::debug() << "def is fields";
 }
 
 fields:
-field fields
-| CLOSE_CURLY
+field fields { 
+    ($2).push_back($1);
+    $$ = $2;
+    logging::debug() << "Push field into def " << ($$).size();
+}
+|
 
 field:
-TYPE OPEN_PAREN number_literal CLOSE_PAREN IDENTIFIER STATEMENT_END {}
+TYPE OPEN_PAREN NUMBER CLOSE_PAREN IDENTIFIER STATEMENT_END {
+    $$ = new VariableNode($5, $3);
+    logging::debug() << "Create field";
+}
 
 %%
 #include "logging.h"

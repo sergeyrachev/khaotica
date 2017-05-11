@@ -5,7 +5,7 @@
 
 #include "variable.h"
 
-VariableNode::VariableNode(const std::string &name)
+VariableNode::VariableNode(const std::string &name, double length)
     : name(name) {}
 
 const std::string
