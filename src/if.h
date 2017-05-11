@@ -11,5 +11,5 @@ class IfNode : public ASTNode {
 
 public:
   IfNode(std::shared_ptr<ASTNode> cond, std::shared_ptr<ASTNode> then, std::shared_ptr<ASTNode> _else);
-  virtual llvm::Value *codegen(IRRenderer& renderer) override final;
+  virtual void codegen(IRRenderer& renderer) override final;
 };

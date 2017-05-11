@@ -24,6 +24,7 @@
 
 #include <string>
 
+#include <fstream>
 #include "renderer.h"
 
 using ::llvm::AllocaInst;
@@ -37,54 +38,16 @@ using ::llvm::Module;
 using ::llvm::Type;
 
 
-IRRenderer::IRRenderer(uint64_t THIS):THIS(THIS)
+IRRenderer::IRRenderer(std::ifstream&& in) :_bitstream(std::move(in)), cache(0), pos(8)
 {
-    auto M = llvm::make_unique<Module>("my cool jit", context);
-    module = M.get();
-    builder = llvm::make_unique<IRBuilder<>>(context);
-    eng.reset(EngineBuilder(std::move(M)).create());
+        uint8_t t;
+        _bitstream >> t;
+        cache = decltype(cache)(t);
+        pos = 8;
+
 }
 
 
 IRRenderer::~IRRenderer() {
 
-}
-
-unique_ptr<ExecutionEngine>& IRRenderer::engine()
-{
-    return eng; 
-}
-
-llvm::LLVMContext & IRRenderer::llvm_context() {
-    return context;
-}
-
-llvm::AllocaInst *
-IRRenderer::get_named_value(const std::string &name) {
-    return named_values[name];
-}
-
-void
-IRRenderer::set_named_value(const std::string &name, llvm::AllocaInst *value) {
-    named_values[name] = value;
-}
-
-void
-IRRenderer::clear_named_value(const std::string &name) {
-    named_values.erase(name);
-}
-
-void
-IRRenderer::clear_all_named_values() {
-    named_values.clear();
-}
-
-AllocaInst *
-IRRenderer::create_entry_block_alloca(Function *func, const std::string &name) {
-    IRBuilder<> tmp_builder(&func->getEntryBlock(),
-        func->getEntryBlock().begin());
-
-    return tmp_builder.CreateAlloca(Type::getDoubleTy(context),
-        0,
-        name.c_str());
 }

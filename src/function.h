@@ -14,5 +14,5 @@ class FunctionNode : public ASTNode {
 
 public:
   FunctionNode(std::shared_ptr<PrototypeNode> proto, std::shared_ptr<ASTNode> body);
-  llvm::Value *codegen(IRRenderer& renderer);
+  void codegen(IRRenderer& renderer);
 };

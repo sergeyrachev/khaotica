@@ -24,25 +24,6 @@ CallNode::CallNode(const std::string &callee) : callee(callee) {
 
 #include <vector>
 
-llvm::Value * CallNode::codegen(IRRenderer& renderer) {
-    llvm::Function *callee_func = renderer.module->getFunction(callee);
-    if( callee_func == 0 ) {
-        return ErrorV("Unknown function referenced");
-    }
-
-    if( callee_func->arg_size() != args.size() + 1 ) {
-        return ErrorV("Incorrect number of arguments passed");
-    }
-
-    std::vector<llvm::Value*> arg_values;
-    for( auto &arg : args ) {
-        arg_values.push_back(arg->codegen(renderer));
-        if( arg_values.back() == 0 ) {
-            return 0;
-        }
-    }
-
-    arg_values.push_back(llvm::ConstantInt::get(renderer.llvm_context(), llvm::APInt(64, renderer.THIS)));
-
-    return renderer.builder->CreateCall(callee_func, arg_values, "calltmp");
+void CallNode::codegen(IRRenderer& renderer) {
+ 
 }
