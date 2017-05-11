@@ -27,40 +27,19 @@ numeric    [0-9]+(\.[0-9][0-9]?)?
 {blank}+  /* skip whitespace */
 
 "def"    return flavor::Parser::make_DEF(_location);
-"extern" return flavor::Parser::make_EXTERN(_location);
-"var"    return flavor::Parser::make_VAR(_location);
-"if"     return flavor::Parser::make_IF(_location);
-"then"   return flavor::Parser::make_THEN(_location);
-"else"   return flavor::Parser::make_ELSE(_location);
-"for"    return flavor::Parser::make_FOR(_location);
-"in"     return flavor::Parser::make_IN(_location);
 
+";" return flavor::Parser::make_STATEMENT_END(_location);
+"{" return flavor::Parser::make_OPEN_CURLY(_location);
+"}" return flavor::Parser::make_CLOSE_CURLY(_location);
 "(" return flavor::Parser::make_OPEN_PAREN(_location);
 ")" return flavor::Parser::make_CLOSE_PAREN(_location);
-";" return flavor::Parser::make_STATEMENT_END(_location);
-"," return flavor::Parser::make_COMMA(_location);
-
-"=" return flavor::Parser::make_ASSIGNMENT(*yytext, _location);
-
-"*" { return flavor::Parser::make_MULTIPLY(*yytext, _location); }
-"/" { return flavor::Parser::make_DIVIDE(*yytext, _location); }
-"+" { return flavor::Parser::make_ADD(*yytext, _location); }
-"-" { return flavor::Parser::make_SUBTRACT(*yytext, _location); }
-">" { return flavor::Parser::make_GREATER_THAN(*yytext, _location); }
-"<" { return flavor::Parser::make_LESS_THAN(*yytext, _location); }
+"uint" return flavor::Parser::make_TYPE(_location);
 
 {identifier} { return flavor::Parser::make_IDENTIFIER(yytext, _location); }
 
 {numeric} {
     uint64_t number = strtoull(yytext, 0, 10);
     return flavor::Parser::make_NUMBER(number, _location);
-}
-
-"#" BEGIN(COMMENT);
-
-<COMMENT>{
-    [^\n]+
-    \n   { yylineno++; BEGIN(INITIAL); }
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);
