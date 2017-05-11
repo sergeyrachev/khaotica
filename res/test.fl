@@ -1,13 +1,7 @@
-extern readdouble(x);
-extern readint(x);
-extern readchar(x);
+def packet {
+  uint(8) byte;
+  uint(1) bit;
+  uint(1) otherbit;
+};
 
-def payload1(x)
-    readint(0) + readchar(0) + readint(0)
-;
-
-def payload2(x)
-    readdouble(0)
-;
-
-payload1(0)
+packet
