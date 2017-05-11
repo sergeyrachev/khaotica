@@ -5,8 +5,10 @@
 
 #include "variable.h"
 
+#include "logging.h"
+
 VariableNode::VariableNode(const std::string &name, double length)
-    : name(name) {}
+    : name(name), length(length){}
 
 const std::string
 VariableNode::getName() const {
@@ -20,11 +22,7 @@ VariableNode::getName() const {
 #include "errors.h"
 
 
-llvm::Value * VariableNode::codegen(IRRenderer& renderer) {
-    llvm::Value *val = renderer.get_named_value(name);
-    if( !val ) {
-        return ErrorV("Unknown variable name");
-    }
-
-    return renderer.builder->CreateLoad(val, name.c_str());
+void VariableNode::codegen(IRRenderer& renderer) {
+    uint32_t value = renderer.read_bits(length);
+    logging::debug() << "Variable: " << name << " Length: " << length << " Value: " << value;
 }

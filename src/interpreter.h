@@ -10,7 +10,7 @@ namespace flavor{
     class Interpreter {
     public:
         Interpreter();
-        void parse(std::istream &in, std::vector<std::shared_ptr<ASTNode>>& asts) const;
+        void parse(std::istream &in, std::vector<ASTNode*>& asts) const;
     };
 }
 

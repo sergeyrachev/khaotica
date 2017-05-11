@@ -13,5 +13,5 @@ class NumberNode : public ASTNode {
 
 public:
     NumberNode(double val);
-    virtual llvm::Value *codegen(IRRenderer& renderer) override final;
+    virtual void codegen(IRRenderer& renderer) override final;
 };

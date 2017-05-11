@@ -9,6 +9,9 @@
 
 #include <map>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <bitset>
 
 using ::std::map;
 using ::std::string;
@@ -23,26 +26,31 @@ using ::llvm::Module;
 
 
 class IRRenderer {
-    map<string, AllocaInst*> named_values;
 
+    std::ifstream _bitstream;
+    std::bitset<8> cache;
+    uint8_t pos;
 public:
-    IRRenderer(uint64_t THIS);
+    IRRenderer(std::ifstream&&);
     ~IRRenderer();
 
-    LLVMContext context;
-    Module* module;
-    unique_ptr<IRBuilder<> > builder;
-    unique_ptr<ExecutionEngine> eng;
+    uint8_t read_bits(size_t count) {
 
-    unique_ptr<ExecutionEngine>& engine();
-    LLVMContext &llvm_context();
+        std::bitset<8> ret(0);
+       
+        for (int i = 1; i <= count; i++)
+        {
+            ret[count - i] = cache[pos-1];
+            pos--;
 
-    AllocaInst *get_named_value(const std::string &name);
-    void set_named_value(const std::string &name, AllocaInst* value);
-    void clear_named_value(const std::string &name);
-    void clear_all_named_values();
-
-    AllocaInst *create_entry_block_alloca(Function *func, const std::string &name);
-
-    uint64_t THIS;
+            if (pos == 0) {
+                uint8_t t;
+                _bitstream >> t;
+                cache = decltype(cache)(t);
+                pos = 8;
+            }
+        }
+               
+        return ret.to_ulong();
+    }
 };

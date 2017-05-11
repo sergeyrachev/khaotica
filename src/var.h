@@ -16,5 +16,5 @@ class VarNode : public ASTNode {
 public:
   VarNode(const std::vector<std::pair<std::string, std::shared_ptr<ASTNode>> > &var_names,
           std::shared_ptr<ASTNode> body);
-  virtual llvm::Value *codegen(IRRenderer& renderer) override final;
+  virtual void codegen(IRRenderer& renderer) override final;
 };

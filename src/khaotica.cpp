@@ -46,20 +46,13 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    std::vector<std::shared_ptr<ASTNode>> asts;
+    std::vector<ASTNode*> asts;
     flavor::Interpreter driver;
     driver.parse(f, asts);
     std::shared_ptr<repository> r(create_repository(input_bitstream_filename.c_str()), [](repository* p){destroy_repository(p);});
-    IRRenderer renderer(reinterpret_cast<intptr_t>(r.get()));
-
-    std::for_each(asts.rbegin(), asts.rend(), [&renderer](std::shared_ptr<ASTNode> node ){
-        if( Function *func = dynamic_cast<Function*>(node->codegen(renderer))){
-            if( func && func->getName() == "anon" ) {
-                renderer.module->dump();
-                double(*func_pointer)() = (double(*)()) (intptr_t) (renderer.engine()->getFunctionAddress("anon"));
-                logging::debug() << "Payload evaluated to: " << func_pointer();
-            }
-        }
+    IRRenderer renderer((std::ifstream(input_bitstream_filename)));
+    std::for_each(asts.rbegin(), asts.rend(), [&renderer](ASTNode* node ){
+        node->codegen(renderer);
     });
     return 0;
 

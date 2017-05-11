@@ -16,5 +16,5 @@ public:
   ForNode(const std::string &var_name,
           std::shared_ptr<ASTNode> start, std::shared_ptr<ASTNode> end, std::shared_ptr<ASTNode> step,
           std::shared_ptr<ASTNode> body);
-  virtual llvm::Value *codegen(IRRenderer& renderer) override final;
+  virtual void codegen(IRRenderer& renderer) override final;
 };

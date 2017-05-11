@@ -15,6 +15,6 @@ NumberNode::NumberNode(double val) : val(val) {}
 #include "renderer.h"
 
 
-llvm::Value * NumberNode::codegen(IRRenderer& renderer) {
-    return llvm::ConstantFP::get(renderer.llvm_context(), llvm::APFloat(val));
+void NumberNode::codegen(IRRenderer& renderer) {
+
 }
