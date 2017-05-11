@@ -11,6 +11,10 @@ CallNode::CallNode(const std::string &callee, std::vector<std::shared_ptr<ASTNod
     : callee(callee), args(args) {}
 
 
+CallNode::CallNode(const std::string &callee) : callee(callee) {
+
+}
+
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Value.h"
 

@@ -12,7 +12,7 @@ class VariableNode : public ASTNode {
   std::string name;
 
 public:
-  VariableNode(const std::string &name);
+  VariableNode(const std::string &name, double length);
   const std::string getName() const;
   virtual llvm::Value *codegen(IRRenderer& renderer) override final;
 };
