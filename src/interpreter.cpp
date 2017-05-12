@@ -14,6 +14,7 @@ void flavor::Interpreter::parse(std::istream &in) const{
 
     std::ostringstream serr;
     flavor::Scanner _scanner(in, serr);
+    _scanner.set_debug(1);
     flavor::Parser _parser(_scanner);
     _parser.set_debug_level(1);
     _parser.set_debug_stream(std::cerr);
