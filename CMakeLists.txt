@@ -4,7 +4,6 @@ cmake_minimum_required(VERSION 3.6)
 add_subdirectory(flavor)
 
 find_package(gtest CONFIG PATHS deps)
-find_package(llvm CONFIG PATHS deps)
 find_package(boost CONFIG PATHS deps)
 find_package(BISON)
 find_package(FLEX)
@@ -49,40 +48,18 @@ add_custom_target(dummy
     	${CMAKE_CURRENT_LIST}
 )
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-add_library(export SHARED src/export.cpp src/repository.cpp src/repository.h )
-target_include_directories(export PRIVATE src)
-target_compile_features(export PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type)
-
 set(SOURCES
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
 
-        src/binary.cc
-        src/call.cc
-        src/for.cc
-        src/function.cc
-        src/if.cc
-        src/number.cc
-        src/prototype.cc
-        src/unary.cc
-        src/var.cc
-        src/variable.cc
+		src/call.cc
+		src/variable.cc
 		src/renderer.cc
-        src/errors.cc
 
-        src/variable.h
-        src/var.h
-        src/unary.h
-        src/prototype.h
-        src/number.h
-        src/node.h
-        src/if.h
-        src/function.h
-        src/for.h
-        src/call.h
-        src/binary.h
-        
+		src/variable.h
+		src/node.h
+		src/call.h
+
 		src/logging.cpp src/logging.h
 		src/options.cpp src/options.h
 		src/interpreter.cpp src/interpreter.h
@@ -91,11 +68,11 @@ set(SOURCES
 add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
 target_compile_features(khaotica PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type )
-target_link_libraries(khaotica ${llvm_LIBRARIES} ${boost_LIBRARIES} export)
-target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE ${llvm_INCLUDE_DIRECTORIES} PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
-target_compile_definitions(khaotica PRIVATE ${llvm_COMPILE_DEFINITIONS} ${boost_COMPILE_DEFINITIONS})
+target_link_libraries(khaotica ${boost_LIBRARIES})
+target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR})
+target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
 
-install(TARGETS khaotica export RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
+install(TARGETS khaotica RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 
 add_executable(khaotica_gtest test/dummy.cpp)
 target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})

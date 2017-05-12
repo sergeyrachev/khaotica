@@ -1,29 +1,10 @@
 #pragma once
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/LegacyPassManager.h"
-
 #include <map>
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <bitset>
-
-using ::std::map;
-using ::std::string;
-using ::std::unique_ptr;
-
-using ::llvm::AllocaInst;
-using ::llvm::ExecutionEngine;
-using ::llvm::Function;
-using ::llvm::IRBuilder;
-using ::llvm::LLVMContext;
-using ::llvm::Module;
-
 
 class IRRenderer {
 
