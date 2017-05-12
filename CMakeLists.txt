@@ -14,8 +14,9 @@ file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
+set(BisonInput src/parser.yy)
 ADD_CUSTOM_COMMAND(
-        DEPENDS src/parser.yy
+        DEPENDS ${BisonInput}
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${BISON_EXECUTABLE}
@@ -23,27 +24,28 @@ ADD_CUSTOM_COMMAND(
             --output=${BisonOutput}
             --defines=${BisonOutputH}
 			--graph
-			${CMAKE_CURRENT_LIST_DIR}/src/parser.yy
+			${CMAKE_CURRENT_LIST_DIR}/${BisonInput}
 )
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
+set(FlexInput src/scanner.ll)
 ADD_CUSTOM_COMMAND(
-        DEPENDS src/scanner.ll ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
+        DEPENDS ${FlexInput} ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
         WORKING_DIRECTORY ${GRAMMAR_DIR}
         COMMAND ${FLEX_EXECUTABLE}
         ARGS
             --outfile=${FlexOutput}
-			${CMAKE_CURRENT_LIST_DIR}/src/scanner.ll
+			${CMAKE_CURRENT_LIST_DIR}/${FlexInput}
 )
 
 add_custom_target(dummy 
 	echo "Dummy target to show Bison/Flex/Flavor files in projects"
     SOURCES
-		src/scanner.ll
-		src/parser.yy
-    	res/test.fl
+        ${FlexInput}
+        ${BisonInput}
+        res/test.fl
     	res/test.bin
     	${CMAKE_CURRENT_LIST}
 )
