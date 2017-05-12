@@ -10,11 +10,11 @@
 
 flavor::Interpreter::Interpreter(){}
 
-void flavor::Interpreter::parse(std::istream &in, std::vector<ASTNode*>& asts) const{
+void flavor::Interpreter::parse(std::istream &in) const{
 
     std::ostringstream serr;
     flavor::Scanner _scanner(in, serr);
-    flavor::Parser _parser(_scanner, asts);
+    flavor::Parser _parser(_scanner);
     _parser.set_debug_level(1);
     _parser.set_debug_stream(std::cerr);
 

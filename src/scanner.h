@@ -10,7 +10,7 @@
 #include <FlexLexer.h>
 #endif
 #undef  YY_DECL
-#define YY_DECL flavor::Parser::symbol_type flavor::Scanner::next_token()
+#define YY_DECL int flavor::Scanner::next_token(flavor::Parser::semantic_type& yylval)
 
 #include "parser.hpp"
 #include "location.hh"
@@ -25,7 +25,7 @@ namespace flavor{
 
         };
 
-        flavor::Parser::symbol_type next_token();
+        int next_token(flavor::Parser::semantic_type& yylval);
     private:
         flavor::location _location;
     };

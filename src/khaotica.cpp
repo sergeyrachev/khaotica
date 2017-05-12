@@ -12,7 +12,6 @@
 #include "options.h"
 
 #include "interpreter.h"
-#include "ast.h"
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -40,15 +39,12 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    std::vector<ASTNode*> asts;
     flavor::Interpreter driver;
-    driver.parse(f, asts);
+    driver.parse(f);
 
     std::ifstream bitstream(input_bitstream_filename);
     IRRenderer renderer(bitstream);
-    std::for_each(asts.rbegin(), asts.rend(), [&renderer](ASTNode* node ){
-        node->codegen(renderer);
-    });
+
     return 0;
 
 }
