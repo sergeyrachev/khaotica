@@ -50,7 +50,9 @@ int main( int argc, char* argv[] ) {
     flavor::Interpreter driver;
     driver.parse(f, asts);
     std::shared_ptr<repository> r(create_repository(input_bitstream_filename.c_str()), [](repository* p){destroy_repository(p);});
-    IRRenderer renderer((std::ifstream(input_bitstream_filename)));
+
+    std::ifstream bitstream(input_bitstream_filename);
+    IRRenderer renderer(bitstream);
     std::for_each(asts.rbegin(), asts.rend(), [&renderer](ASTNode* node ){
         node->codegen(renderer);
     });
