@@ -1,4 +1,3 @@
-
 #include <boost/uuid/uuid_io.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/date_time.hpp>
@@ -10,30 +9,3 @@
 #include <boost/thread/locks.hpp>
 #include <boost/algorithm/hex.hpp>
 #include <boost/chrono.hpp>
-
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/Support/Casting.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/IRBuilder.h>
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/ExecutionEngine/GenericValue.h>
-#include <llvm/Support/TargetSelect.h>
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Analysis/BasicAliasAnalysis.h"
-#include "llvm/Analysis/Passes.h"
-#include "llvm/IR/DIBuilder.h"
-#include "llvm/IR/IRBuilder.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/LegacyPassManager.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Transforms/Scalar.h"
-#include "llvm/Support/raw_ostream.h"

@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "llvm/IR/Value.h"
-
 #include "node.h"
 #include "renderer.h"
 
