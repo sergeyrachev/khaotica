@@ -14,7 +14,7 @@ file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
-set(BisonInput src/parser.yy)
+set(BisonInput src/parser.y)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${BisonInput}
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
@@ -29,7 +29,7 @@ ADD_CUSTOM_COMMAND(
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
-set(FlexInput src/scanner.ll)
+set(FlexInput src/lexer.l)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${FlexInput} ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
@@ -54,15 +54,9 @@ set(SOURCES
         ${GRAMMAR_DIR}/${BisonOutput}
         ${GRAMMAR_DIR}/${FlexOutput}
 
-		src/call.cc
-		src/variable.cc
-		src/renderer.cc
+        src/renderer.cc src/renderer.h
 
-		src/variable.h
-		src/node.h
-		src/call.h
-
-		src/logging.cpp src/logging.h
+        src/logging.cpp src/logging.h
 		src/options.cpp src/options.h
 		src/interpreter.cpp src/interpreter.h
         )

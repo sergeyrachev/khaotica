@@ -5,12 +5,11 @@
 #include <memory>
 #include <vector>
 
-class ASTNode;
 namespace flavor{
     class Interpreter {
     public:
         Interpreter();
-        void parse(std::istream &in, std::vector<ASTNode*>& asts) const;
+        void parse(std::istream &in) const;
     };
 }
 
