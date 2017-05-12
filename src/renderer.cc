@@ -38,7 +38,7 @@ using ::llvm::Module;
 using ::llvm::Type;
 
 
-IRRenderer::IRRenderer(std::ifstream&& in) :_bitstream(std::move(in)), cache(0), pos(8)
+IRRenderer::IRRenderer(std::ifstream& in) :_bitstream(in), cache(0), pos(8)
 {
         uint8_t t;
         _bitstream >> t;

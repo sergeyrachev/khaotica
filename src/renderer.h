@@ -27,11 +27,11 @@ using ::llvm::Module;
 
 class IRRenderer {
 
-    std::ifstream _bitstream;
+    std::ifstream& _bitstream;
     std::bitset<8> cache;
     uint8_t pos;
 public:
-    IRRenderer(std::ifstream&&);
+    IRRenderer(std::ifstream&);
     ~IRRenderer();
 
     uint8_t read_bits(size_t count) {
