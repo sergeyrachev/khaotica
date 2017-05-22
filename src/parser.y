@@ -43,7 +43,7 @@
 #pragma warning(disable : 4102)
 #endif
 
-static int yylex(flavor::Parser::semantic_type* yylval, flavor::Scanner &scanner) {
+static int yylex(flavor::Parser::semantic_type* yylval,  flavor::Parser::location_type* loc, flavor::Scanner &scanner) {
     return scanner.next_token(*yylval);
 }
 
@@ -75,6 +75,7 @@ static int yylex(flavor::Parser::semantic_type* yylval, flavor::Scanner &scanner
 
 %lex-param {flavor::Scanner& scanner}
 %parse-param {flavor::Scanner& scanner}
+%locations
 
 %union{
     char            *string;
@@ -1295,7 +1296,7 @@ bac_statement
 %%
 
 void
-flavor::Parser::error( const std::string &err_message )
+flavor::Parser::error( const location_type& loc, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << "\n";
 }
