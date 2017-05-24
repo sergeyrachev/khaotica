@@ -25,7 +25,7 @@ build_script:
       cmake --build . --config Debug
       cmake --build . --target install
       
-on_success:
+after_build:
   - git describe --tags > _build/version.txt
   - set /p VERSION= < _build/version.txt
   - 7z a -t7z _build/khaotica-%VERSION%.7z _build/khaotica/*
