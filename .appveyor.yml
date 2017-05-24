@@ -20,15 +20,15 @@ build_script:
       refreshenv 
       mkdir _build 
       cd _build 
+      git describe --tags > version.txt
       msystem.bat MSYS
       cmake -G "Visual Studio 14 2015" -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Debug -DLLVM_ROOT=C:/Libraries/llvm-4.0.0 -DBOOST_ROOT=C:/Libraries/boost_1_63_0 ..
       cmake --build . --config Debug
       cmake --build . --target install
       
 after_build:
-  - git describe --tags > _build/version.txt
-  - set /p VERSION= < _build/version.txt
-  - 7z a -t7z _build/khaotica-%VERSION%.7z _build/khaotica/*
+  - set /p VERSION= < "_build/version.txt"
+  - 7z a -t7z _build/khaotica-%VERSION%.7z "_build/khaotica/*"
   
 artifacts:
   - path: _build/khaotica-$(VERSION).7z
