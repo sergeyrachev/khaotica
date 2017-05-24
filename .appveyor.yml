@@ -28,8 +28,9 @@ build_script:
       cmake --build . --target install
       
 after_build:
-  - set /p VERSION= < "_build/version.txt"
-  - 7z a -t7z _build/khaotica-%VERSION%.7z "_build/khaotica/*"
+  - cd
+  - set /p VERSION= < ./_build/version.txt
+  - 7z a -t7z _build/khaotica-%VERSION%.7z ./_build/khaotica/*
   
 artifacts:
   - path: _build/khaotica-$(VERSION).7z
