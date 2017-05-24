@@ -1,5 +1,3 @@
-version: '0.0.1.{build}~{branch}'
-
 os: Visual Studio 2015
 platform:
   - Win32
@@ -13,8 +11,9 @@ build:
   verbosity: minimal
 
 install:
-  - cmd: choco install msys2 && refreshenv
-  - cmd: refreshenv && msystem.bat MSYS && pacman -Syu && bash pacman-key --init && bash pacman-key --populate msys2 && pacman --noconfirm -S bison flex
+  - cmd: cinst msys2
+  - cmd: refreshenv 
+  - cmd: msystem.bat MSYS && bash pacman-key --init && bash pacman-key --populate msys2 && pacman -Syu && pacman --noconfirm -S bison flex
 
 build_script:
   - cmd: |
@@ -26,5 +25,21 @@ build_script:
       cmake --build . --config Debug
       cmake --build . --target install
       
+on_success:
+  - git describe --tags > _build/version.txt
+  - set /p VERSION= < _build/version.txt
+  - 7z a -t7z _build/khaotica-%VERSION%.7z _build/khaotica/*
+  
 artifacts:
-  - path: _build/khaotica
+  - path: _build/khaotica-$(VERSION).7z
+    name: pkg
+
+deploy:
+  provider: GitHub
+  description: '$(APPVEYOR_REPO_TAG_NAME)'
+  auth_token:
+    secure: U440AbFTFluGznzClLqJVmJagEJm9y1kIIZS0a6Tj9nqDb5PCI7UHuBp4apoTX1W
+  artifact: pkg
+  force_update: true
+  on:
+    appveyor_repo_tag: true
