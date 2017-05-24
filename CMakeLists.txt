@@ -69,6 +69,7 @@ target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE PRIVATE ${boost_I
 target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
 
 install(TARGETS khaotica RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
+install(DIRECTORY res DESTINATION share/khaotica)
 
 add_executable(khaotica_gtest test/dummy.cpp)
 target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})
