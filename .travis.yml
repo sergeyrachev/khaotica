@@ -89,13 +89,13 @@ script:
     - cmake --build . --target install -- -j8
 
 after_success:
-    - tar -zcvf $HOME/khaotica~$(git log --pretty=format:'%h' -n 1).tar.gz -C $HOME/khaotica/ .
+    - tar -zcvf $HOME/khaotica-$(git describe --tags).tar.gz -C $HOME/khaotica/ .
 
 deploy:
   provider: releases
   api_key: $DEPLOY_TOKEN
   file_glob: true
-  file: $HOME/khaotica~*.tar.gz
+  file: $HOME/khaotica*.tar.gz
   skip_cleanup: true
   on:
     tags: true
