@@ -1,0 +1,4 @@
+analysis-mode=4
+exclude-path=/usr/include/
+exclude-path=@BOOST_ROOT@
+exclude-path=@LLVM_ROOT@
