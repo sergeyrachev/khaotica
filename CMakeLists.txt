@@ -75,9 +75,14 @@ add_executable(khaotica_gtest test/dummy.cpp)
 target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})
 target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )
 
-include(deps/PVS-Studio.cmake)
-pvs_studio_add_target(TARGET analyze
+if (UNIX)
+
+    configure_file("${CMAKE_CURRENT_LIST_DIR}/pvs.cfg.in" "${CMAKE_CURRENT_BINARY_DIR}/pvs.cfg" @ONLY)
+
+    include(deps/PVS-Studio.cmake)
+    pvs_studio_add_target(TARGET analyze
         OUTPUT FORMAT errorfile
         LOG "report.plog"
         ANALYZE khaotica
-        CONFIG "${CMAKE_CURRENT_LIST_DIR}/pvs.cfg")
+        CONFIG "${CMAKE_CURRENT_BINARY_DIR}/pvs.cfg")
+endif (UNIX)
