@@ -1,5 +1,5 @@
 if(NOT BOOST_ROOT)
-message(FATAL_ERROR "Set BOOST_ROOT to BOOST root folder")
+message("Set BOOST_ROOT to BOOST root folder")
 endif()
 
 #set(Boost_DEBUG ON)
