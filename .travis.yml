@@ -21,37 +21,6 @@ before_install:
 install:
     - mkdir -p build
     - |
-      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
-        pushd build
-            wget http://releases.llvm.org/4.0.0/llvm-4.0.0.src.tar.xz
-            tar xfJ llvm-4.0.0.src.tar.xz
-        popd
-      fi
-      
-    - |
-      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
-        mkdir -p build/llvm
-        pushd build/llvm
-          cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src
-        popd
-      fi
-
-    - |
-      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
-        pushd build/llvm
-          cmake --build . -- -j8
-        popd
-      fi
-
-    - |
-      if [ ! -f "${HOME}/deps/llvm/cached.marker" ]; then
-        pushd build/llvm
-          cmake --build . --target install
-          touch ${HOME}/deps/llvm/cached.marker
-        popd
-      fi
-
-    - |
       if [ ! -f "${HOME}/deps/boost/cached.marker" ]; then
         mkdir -p $HOME/deps/boost
         pushd build
@@ -85,7 +54,7 @@ install:
       popd
 
 script:
-    - cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
+    - cmake -DBOOST_ROOT=$HOME/deps/boost -DCMAKE_INSTALL_PREFIX=$HOME/khaotica .
     - cmake --build . --target install -- -j8
 
 after_success:
