@@ -1,7 +1,7 @@
 class packet {
   unsigned int(4) nibble1;
   unsigned int(4) nibble2;
-  unsigned int(1) bit;
+  unsigned int(1) the_bit;
   unsigned int(1) otherbit;
   unsigned int(3) triplet;
 };
