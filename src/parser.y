@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-//%no-lines
+%no-lines
 
 %verbose
 %define parse.trace

@@ -37,6 +37,7 @@ ADD_CUSTOM_COMMAND(
         COMMAND ${FLEX_EXECUTABLE}
         ARGS
             --outfile=${FlexOutput}
+            -L
 			${CMAKE_CURRENT_LIST_DIR}/${FlexInput}
 )
 
@@ -108,7 +109,7 @@ add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
 target_compile_features(khaotica PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type )
 target_link_libraries(khaotica ${boost_LIBRARIES})
-target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR} PRIVATE src/flavorc)
+target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR} PRIVATE src/flavorc)
 target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
 
 install(TARGETS khaotica RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
