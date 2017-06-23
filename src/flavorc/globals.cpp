@@ -136,7 +136,7 @@ char opkg[MAX_LEN];
 /* XML specific */
 
 /* generate the putxml() method */
-int gen_putxml = 1;
+int gen_putxml = 0;
 
 /* functions to use for xml */
 char default_xml_func1[] = "CreateXmlHeader";

@@ -13,6 +13,9 @@
 
 #include "interpreter.h"
 
+#include "globals.h"
+#include "compile.h"
+
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
 
@@ -40,11 +43,18 @@ int main( int argc, char* argv[] ) {
     std::ifstream f(input_definition_filename);
 
     flavor::Interpreter driver;
+
+    s_init();
     driver.parse(f);
+
+
+    filename = (char*)input_definition_filename.c_str();
+    bitstream_class = "IBitstream";
+    prefix = "";
+    compile(parsed_code);
 
     std::ifstream bitstream(input_bitstream_filename);
     IRRenderer renderer(bitstream);
 
     return 0;
-
 }
