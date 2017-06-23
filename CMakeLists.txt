@@ -1,8 +1,6 @@
 project(khaotica)
 cmake_minimum_required(VERSION 3.6)
 
-add_subdirectory(flavor)
-
 find_package(gtest CONFIG PATHS deps)
 find_package(boost CONFIG PATHS deps)
 find_package(BISON)
