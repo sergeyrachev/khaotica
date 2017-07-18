@@ -47,11 +47,14 @@ add_custom_target(dummy
         res/test.fl
     	res/test.bin
     	${CMAKE_CURRENT_LIST}
+        flex/FlexLexer.h
+
 )
 
-set(SOURCES
-        ${GRAMMAR_DIR}/${BisonOutput}
-        ${GRAMMAR_DIR}/${FlexOutput}
+add_executable(khaotica src/khaotica.cpp ${SOURCES} )
+target_sources(khaotica PRIVATE
+        ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
+        ${GRAMMAR_DIR}/${FlexOutput}  src/scanner.h
 
         src/renderer.cc src/renderer.h
 
@@ -101,11 +104,11 @@ set(SOURCES
         src/flavorc/symbol.h
         src/flavorc/util.cpp
         src/flavorc/util.h
-        src/flavorc/globals.cpp)
+        src/flavorc/globals.cpp
+        )
 
-add_executable(khaotica src/khaotica.cpp ${SOURCES} )
 
-target_compile_features(khaotica PUBLIC cxx_nullptr cxx_trailing_return_types cxx_auto_type )
+target_compile_features(khaotica PUBLIC cxx_std_17 )
 target_link_libraries(khaotica ${boost_LIBRARIES})
 target_include_directories(khaotica PRIVATE src/ flex/ PRIVATE ${boost_INCLUDE_DIRECTORIES} PRIVATE ${GRAMMAR_DIR} PRIVATE src/flavorc)
 target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
@@ -114,6 +117,7 @@ install(TARGETS khaotica RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE
 install(DIRECTORY res DESTINATION share/khaotica)
 
 add_executable(khaotica_gtest test/dummy.cpp)
+target_compile_features(khaotica_gtest PUBLIC cxx_std_17 )
 target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})
 target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )
 
