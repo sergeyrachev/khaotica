@@ -28,10 +28,6 @@ namespace flavor{
         int next_token(flavor::Parser::semantic_type& yylval);
 
     private:
-        int getsymbol(flavor::Parser::semantic_type& yylval);
-        void yycomment(char *end);
-        verbatim_t *yyverbatim(char *end);
-    private:
         flavor::location _location;
     };
 }
