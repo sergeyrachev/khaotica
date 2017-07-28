@@ -9,70 +9,28 @@
 %define parser_class_name {Parser}
 %define api.namespace {flavor}
 
+%define api.token.constructor
+%define api.value.type variant
+
 %lex-param {flavor::Scanner& scanner}
 %parse-param {flavor::Scanner& scanner}
 %locations
 
 %code requires{
-    #include "symbol.h"
+#include "grammar.h"
 
-    namespace flavor{
-        class Scanner;
-    }
+
+namespace flavor{
+    class Scanner;
+}
 }
 
 %code top{
-
-/*
- * Copyright (c) 1997-2005 Alexandros Eleftheriadis, Danny Hong and
- * Yuntai Kyong.
- *
- * This file is part of Flavor, developed at Columbia University
- * (http://flavor.sourceforge.net).
- *
- * Flavor is free software; you can redistribute it and/or modify
- * it under the terms of the Flavor Artistic License as described in
- * the file COPYING.txt.
- *
- */
-
-/*
- * Authors:
- * Alexandros Eleftheriadis <eleft@ee.columbia.edu>
- * Danny Hong <danny@ee.columbia.edu>
- * Yuntai Kyong <yuntaikyong@ieee.org>
- *
- */
-
-/*
- *  Yacc parser for Flavor translator
- */
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include <stdio.h>
 #include <string.h>
-
-#include "port.h"
-#include "error.h"
-#include "globals.h"
-#include "symbol.h"
-#include "ptree.h"
-#include "check.h"
-#include "util.h"
-#include "eval.h"
-#include "compile.h"
-#include "carray.h"
-
-/* defined in the lexical analyzer */
-void yyerror(char *fmt, ...);
-int yywrap();
-int include(char *file, int import);
-
-/* Disable 'unreferenced label' warning from Microsoft Visual C++.
- * MKS Yacc generates various labels that are not used.
- */
-#if defined(_WIN32_) || defined(WIN32)
-#pragma warning(disable : 4102)
-#endif
 
 #include "scanner.h"
 #include "parser.hpp"
@@ -81,56 +39,54 @@ static int yylex(flavor::Parser::semantic_type* yylval,  flavor::Parser::locatio
     return scanner.next_token(*yylval);
 }
 
-void
-flavor::Parser::error( const location_type& loc, const std::string &err_message )
+void flavor::Parser::error( const location_type& loc, const std::string &err_message )
 {
    std::cerr << "Error: " << err_message << "\n";
 }
 
 }
 
-%union{
-    char            *string;
-    int             ival;
-    double          dval;
-    unsigned int    uival;
-    bit_t           *bit;
-    list_t          *lp;
-    symbol_t        *sp;
-    node_t          *np;
-    verbatim_t	    *vp;
-}
+// %union{
+//     char            *string;
+//     int             ival;
+//     double          dval;
+//     unsigned int    uival;
+//     bit_t           *bit;
+//     list_t          *lp;
+//     symbol_t        *sp;
+//     node_t          *np;
+//     verbatim_t	    *vp;
+// }
 
 /* built-in types -- the order is significant (for type promotion) */
-%token <sp> CHAR BIT INT FLOAT DOUBLE
+%token CHAR BIT INT FLOAT DOUBLE
 
 /* keywords */
-%token <ival> CLASS IF ELSE DO WHILE FOR GOTO BREAK
-%token <ival> CONTINUE REPEAT MAP EXTENDS SWITCH CASE DEFAULT BAC
+%token CLASS IF ELSE DO WHILE FOR GOTO BREAK
+%token CONTINUE REPEAT MAP EXTENDS SWITCH CASE DEFAULT BAC
 
 /* pragma keywords */
-%token <ival> PRAGMA PRAGMA_ARRAY PRAGMA_GET PRAGMA_NOGET
-%token <ival> PRAGMA_PUT PRAGMA_NOPUT PRAGMA_PUTXML PRAGMA_NOPUTXML
-%token <ival> PRAGMA_TRACE PRAGMA_NOTRACE PRAGMA_LINE PRAGMA_NOLINE PRAGMA_INCLUDES
-%token <ival> PRAGMA_NULLSTRINGS PRAGMA_NONULLSTRINGS PRAGMA_NOINCLUDES
-%token <ival> PRAGMA_BITSTREAM PRAGMA_PREFIX PRAGMA_ERROR_FUNC PRAGMA_TRACE_FUNC
+%token PRAGMA PRAGMA_ARRAY PRAGMA_GET PRAGMA_NOGET
+%token PRAGMA_PUT PRAGMA_NOPUT PRAGMA_PUTXML PRAGMA_NOPUTXML
+%token PRAGMA_TRACE PRAGMA_NOTRACE PRAGMA_LINE PRAGMA_NOLINE PRAGMA_INCLUDES
+%token PRAGMA_NULLSTRINGS PRAGMA_NONULLSTRINGS PRAGMA_NOINCLUDES
+%token PRAGMA_BITSTREAM PRAGMA_PREFIX PRAGMA_ERROR_FUNC PRAGMA_TRACE_FUNC
 
 /* bac keywords */
-%token <ival> BAC_PREC BAC_OOC BAC_SOC BAC_TE BAC_RENORM BAC_BS BAC_INIT BAC_END
-%token <ival> BAC_RTABLE BAC_NEXTI BAC_TRANS BAC_EXCH
+%token BAC_PREC BAC_OOC BAC_SOC BAC_TE BAC_RENORM BAC_BS BAC_INIT BAC_END
+%token BAC_RTABLE BAC_NEXTI BAC_TRANS BAC_EXCH
 
 /* include/import keywords and expressions */
-%token <ival> INCLUDE IMPORT
-%type <lp> include_file import_file
+%token INCLUDE IMPORT
 
 /* modifiers */
-%token <ival> UNSIGNED SIGNED SHORT LONG CONST ALIGNED STATIC ABSTRACT LITTLE BIG
+%token UNSIGNED SIGNED SHORT LONG CONST ALIGNED STATIC ABSTRACT LITTLE BIG
 
 /* literals */
-%token <ival>   INT_LITERAL
-%token <dval>   DOUBLE_LITERAL
-%token <bit>    BIT_LITERAL
-%token <string> STRING_LITERAL
+%token <int64_t>  INT_LITERAL
+%token <double>   DOUBLE_LITERAL
+%token <std::vector<bool>>  BIT_LITERAL
+%token <std::string> STRING_LITERAL
 
 /* user-defined variables, class, map and bac types */
 %token <sp> VARIABLE CLASS_TYPE MAP_TYPE BAC_TYPE
@@ -175,6 +131,8 @@ flavor::Parser::error( const location_type& loc, const std::string &err_message 
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
+%type <flavor::directive_include_t> include_file
+%type <flavor::directive_emport_t> import_file
 
 /* Non-terminals used for building expressions.
  * The important ones are:
@@ -1307,3 +1265,6 @@ bac_statement
 
 %%
 
+void yyerror(char*, ...){
+    
+}
