@@ -12,7 +12,7 @@ file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 FIND_PACKAGE(BISON 3.0 REQUIRED)
 set(BisonOutput parser.cpp)
 set(BisonOutputH parser.hpp)
-set(BisonInput src/parser.y)
+set(BisonInput src/parser.yy)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${BisonInput}
         OUTPUT ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
@@ -27,7 +27,7 @@ ADD_CUSTOM_COMMAND(
 
 FIND_PACKAGE(FLEX REQUIRED)
 SET(FlexOutput scanner.cpp)
-set(FlexInput src/lexer.l)
+set(FlexInput src/scanner.ll)
 ADD_CUSTOM_COMMAND(
         DEPENDS ${FlexInput} ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         OUTPUT ${GRAMMAR_DIR}/${FlexOutput}
@@ -61,7 +61,7 @@ target_sources(khaotica PRIVATE
         src/logging.cpp src/logging.h
 		src/options.cpp src/options.h
 		src/interpreter.cpp src/interpreter.h
-		src/grammar/grammar.h src/grammar/grammar.cpp
+		src/grammar.h src/grammar.cpp
 
         )
 
