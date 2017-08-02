@@ -6,6 +6,8 @@
 #define YY_USER_ACTION { _location.step(); _location.columns(yyleng); }
 #define yyterminate() flavor::Parser::make_END(_location);
 
+using namespace flavor;
+
 %}
 
 %option yylineno
@@ -16,35 +18,66 @@
 %option nounistd
 %option yyclass="Scanner"
 
+newline    \r?\n
 blank      [ \t]
 identifier [a-zA-Z_][a-zA-Z_0-9]*
-numeric    [0-9]+(\.[0-9][0-9]?)?
+integer    [0-9]+[0-9]*
+bits       [01]+
 
-%s COMMENT
-
+%s bitstring
 %%
 
 {blank}+  /* skip whitespace */
 
-"def"    return flavor::Parser::make_DEF(_location);
+"[" return Parser::make_BRACKET_OPEN(_location);
+"]" return Parser::make_BRACKET_CLOSE(_location);
+"{" return Parser::make_BRACE_OPEN(_location);
+"}" return Parser::make_BRACE_CLOSE(_location);
+"(" return Parser::make_PARENTHESIS_OPEN(_location);
+")" return Parser::make_PARENTHESIS_CLOSE(_location);
+"do" return Parser::make_DO(_location);
+"while" return Parser::make_WHILE(_location);
+"for" return Parser::make_FOR(_location);
+"if" return Parser::make_IF(_location);
+"nextbits" return Parser::make_FUNCTION_NEXTBITS(_location);
+"lengthof" return Parser::make_FUNCTION_LENGTHOF(_location);
+"==" return Parser::make_EQUAL(_location);
+"bslbf" return Parser::make_MNEMONIC_BSLBF(_location);
+"uimsbf" return Parser::make_MNEMONIC_UIMSBF(_location);
+"tcimsbf" return Parser::make_MNEMONIC_TCIMSBF(_location);
+".." return Parser::make_RANGE(_location);
+"=" return Parser::make_ASSIGN(_location);
+";" return Parser::make_SEMICOLON(_location);
+"++" return Parser::make_INCREMENT(_location);
+"-" return Parser::make_MINUS(_location);
+"+" return Parser::make_PLUS(_location);
+"/" return Parser::make_DIVIDE(_location);
+"*" return Parser::make_MULTIPLY(_location);
+"||" return Parser::make_OR(_location);
+"<" return Parser::make_LESSTHAN(_location);
+">" return Parser::make_GREATERTHAN(_location);
 
-";" return flavor::Parser::make_STATEMENT_END(_location);
-"{" return flavor::Parser::make_OPEN_CURLY(_location);
-"}" return flavor::Parser::make_CLOSE_CURLY(_location);
-"(" return flavor::Parser::make_OPEN_PAREN(_location);
-")" return flavor::Parser::make_CLOSE_PAREN(_location);
-"uint" return flavor::Parser::make_TYPE(_location);
+"'" {
+    BEGIN(bitstring);
+}
 
-{identifier} { return flavor::Parser::make_IDENTIFIER(yytext, _location); }
+<bitstring>"'" {
+    BEGIN(INITIAL);
+    return Parser::make_BITS(_location);
+}
 
-{numeric} {
-    uint64_t number = strtoull(yytext, 0, 10);
-    return flavor::Parser::make_NUMBER(number, _location);
+{identifier} {
+    return Parser::make_IDENTIFIER(yytext, _location);
+}
+
+{integer} {
+    int64_t number = strtoll(yytext, 0, 10);
+    return flavor::Parser::make_INTEGER_LITERAL(number, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);
 
-"\n" { _location.initialize(YY_NULLPTR, yylineno, 1); }
+{newline} { _location.initialize(YY_NULLPTR, yylineno, 1); }
 
 <<EOF>>     { return yyterminate(); }
 
