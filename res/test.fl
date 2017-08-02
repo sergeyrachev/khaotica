@@ -86,6 +86,10 @@ adaptation_field() {
              stuffing_byte                                   8 bslbf
         }                                               
     }                                               
-}                                               
+}
+
+A=0
+B=lengthof(var)
+N=184-lengthof(adaptation_field)
 
 
