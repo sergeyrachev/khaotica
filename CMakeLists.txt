@@ -56,7 +56,7 @@ target_sources(khaotica PRIVATE
         ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         ${GRAMMAR_DIR}/${FlexOutput}  src/scanner.h
 
-        src/renderer.cc src/renderer.h
+        src/renderer.cpp src/renderer.h
 
         src/logging.cpp src/logging.h
 		src/options.cpp src/options.h

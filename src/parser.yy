@@ -16,7 +16,8 @@
 
 %code requires{
     #include "grammar.h"
-    #include "logging.h"
+
+    #include <list>
 
     namespace flavor{
         class Scanner;
@@ -24,6 +25,7 @@
 }
 
 %code top {
+    #include "logging.h"
     #include "scanner.h"
     #include "parser.hpp"
 
@@ -85,109 +87,35 @@
 %token BITS
 
 
-%type <bitstring_t> field_definition
+%type <bitstring_t> bitstring
+%type <uint_t> uint
+%type <symbol_t> field_definition
 
 %%
 %start bitstream;
 
-bitstream
-: symbol_definition {}
-| bitstream symbol_definition {}
-;
-
-symbol_definition
-: block_definition {}
-| field_definition {}
-| variable_definition {}
-;
-
-blocks
-: variable_definition {}
-| block_declaration {}
-| block_definition {}
-| blocks variable_definition {}
-| blocks block_definition {}
-;
-
-block_declaration
-: IDENTIFIER "(" ")" {}
-;
-
-block_definition
-: field_definition
-| IDENTIFIER "(" ")" "{" blocks "}" {}
-| IF "(" condition ")" "{" blocks "}" {}
-| FOR "(" variable_definition ";" condition ";" action ")" "{" blocks "}" {}
-| DO "{" blocks "}" WHILE "(" condition ")"  {}
-;
-
-condition
-: logical_expression {}
-| logical_expression "||" logical_expression {}
-;
-
-logical_expression
-: expression comparator expression
-;
-
-comparator
-: "<"
-| "=="
-| ">"
-;
-
-action
-: expression {}
-;
-
 field_definition
-: IDENTIFIER INTEGER_LITERAL MNEMONIC_BSLBF  { $$ = flavor::bitstring_t{$1, $2}; }
-| IDENTIFIER INTEGER_LITERAL MNEMONIC_UIMSBF  {  }
-| IDENTIFIER INTEGER_LITERAL MNEMONIC_TCIMSBF  {  }
-| IDENTIFIER "[" INTEGER_LITERAL RANGE INTEGER_LITERAL "]" INTEGER_LITERAL mnemonic {}
+: bitstring { $$ = {$1};}
+| uint { $$ = {$1};}
+| tcint {}
 ;
 
-mnemonic
-: MNEMONIC_BSLBF
-| MNEMONIC_UIMSBF
-| MNEMONIC_TCIMSBF
+bitstring
+: IDENTIFIER INTEGER_LITERAL MNEMONIC_BSLBF  { $$ = {$1, $2}; }
 ;
 
-variable_definition
-: IDENTIFIER "=" expression {}
+uint
+: IDENTIFIER INTEGER_LITERAL MNEMONIC_UIMSBF  {  $$ = {$1, $2}; }
 ;
 
-expression
-: expression "+" term
-| expression "-" term
-| "(" expression ")"
-| term
+tcint
+: IDENTIFIER INTEGER_LITERAL MNEMONIC_TCIMSBF  {  }
 ;
 
-term
-: term "*" factor
-| term "/" factor
-| factor
-;
 
-factor
-: "-" factor
-| function_call
-| IDENTIFIER "++"
-| IDENTIFIER "--"
-| INTEGER_LITERAL
-| BITS
-| IDENTIFIER
-;
-
-function_call
-: internal_function "(" IDENTIFIER ")" {}
-| internal_function "(" ")" {}
-;
-
-internal_function
-: FUNCTION_LENGTHOF {}
-| FUNCTION_NEXTBITS {}
+bitstream
+: field_definition { symbols.push_back($1); }
+| bitstream field_definition { symbols.push_back($2); }
 ;
 
 %%

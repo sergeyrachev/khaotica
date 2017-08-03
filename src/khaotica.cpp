@@ -43,10 +43,10 @@ int main( int argc, char* argv[] ) {
     std::ifstream f(input_definition_filename);
 
     flavor::Interpreter driver;
-    driver.parse(f);
+    auto symbols = driver.parse(f);
 
     std::ifstream bitstream(input_bitstream_filename);
-    IRRenderer renderer(bitstream);
+    IRRenderer renderer(bitstream, symbols);
 
     return 0;
 }
