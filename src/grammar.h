@@ -19,9 +19,7 @@ namespace flavor{
         int64_t length;
     };
 
-    struct symbol_t{
-        std::variant<bitstring_t> value;
-    };
+    typedef std::variant<bitstring_t, uint_t>  symbol_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H

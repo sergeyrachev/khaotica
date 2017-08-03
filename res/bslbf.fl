@@ -1,1 +1,6 @@
-sync_byte                                               8 bslbf
+nibble          4 bslbf
+nibble2         4 bslbf
+seven_bits      7 bslbf
+bit             1 bslbf
+bit2            2 bslbf
+six             6 bslbf
