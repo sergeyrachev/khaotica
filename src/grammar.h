@@ -3,10 +3,25 @@
 
 #include <string>
 #include <vector>
+#include <variant>
 
 namespace flavor{
     struct directive_include_t{};
     struct directive_import_t{};
+
+    struct bitstring_t{
+        std::string name;
+        int64_t length;
+    };
+
+    struct uint_t{
+        std::string name;
+        int64_t length;
+    };
+
+    struct symbol_t{
+        std::variant<bitstring_t> value;
+    };
 }
 
 #endif //KHAOTICA_GRAMMAR_H

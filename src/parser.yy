@@ -35,6 +35,7 @@
 %lex-param {flavor::Scanner& scanner}
 
 %parse-param {flavor::Scanner& scanner}
+%parse-param {std::list<symbol_t>& symbols}
 
 %locations
 
@@ -83,6 +84,9 @@
 %token QUOTE_SINGLE "'"
 %token BITS
 
+
+%type <bitstring_t> field_definition
+
 %%
 %start bitstream;
 
@@ -123,8 +127,7 @@ condition
 ;
 
 logical_expression
-: variable comparator expression
-| expression comparator variable
+: expression comparator expression
 ;
 
 comparator
@@ -134,12 +137,14 @@ comparator
 ;
 
 action
-: variable "++" {}
+: expression {}
 ;
 
 field_definition
-: variable INTEGER_LITERAL mnemonic  {}
-| variable "[" INTEGER_LITERAL RANGE INTEGER_LITERAL "]" INTEGER_LITERAL mnemonic {}
+: IDENTIFIER INTEGER_LITERAL MNEMONIC_BSLBF  { $$ = flavor::bitstring_t{$1, $2}; }
+| IDENTIFIER INTEGER_LITERAL MNEMONIC_UIMSBF  {  }
+| IDENTIFIER INTEGER_LITERAL MNEMONIC_TCIMSBF  {  }
+| IDENTIFIER "[" INTEGER_LITERAL RANGE INTEGER_LITERAL "]" INTEGER_LITERAL mnemonic {}
 ;
 
 mnemonic
@@ -149,11 +154,7 @@ mnemonic
 ;
 
 variable_definition
-: variable "=" expression {}
-;
-
-variable
-: IDENTIFIER
+: IDENTIFIER "=" expression {}
 ;
 
 expression
@@ -172,13 +173,15 @@ term
 factor
 : "-" factor
 | function_call
+| IDENTIFIER "++"
+| IDENTIFIER "--"
 | INTEGER_LITERAL
 | BITS
-| variable
+| IDENTIFIER
 ;
 
 function_call
-: internal_function "(" variable ")" {}
+: internal_function "(" IDENTIFIER ")" {}
 | internal_function "(" ")" {}
 ;
 
