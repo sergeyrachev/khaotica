@@ -1,20 +1,13 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-// #include "llvm/ExecutionEngine/JIT.h"
-// #include "llvm/Support/TargetSelect.h"
-
 #include "khaotica.h"
-
 #include "renderer.h"
 
 #include "logging.h"
 #include "options.h"
 
 #include "interpreter.h"
-
-#include "globals.h"
-#include "compile.h"
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -43,10 +36,10 @@ int main( int argc, char* argv[] ) {
     std::ifstream f(input_definition_filename);
 
     flavor::Interpreter driver;
-    auto symbols = driver.parse(f);
+    auto symbols = driver.parse(f, true);
 
     std::ifstream bitstream(input_bitstream_filename);
-    IRRenderer renderer(bitstream, symbols);
+    khaotica::parser_t renderer(bitstream, symbols);
 
     return 0;
 }

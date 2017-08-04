@@ -1,6 +1,9 @@
-nibble          4 bslbf
-nibble2         4 bslbf
-seven_bits      7 bslbf
-bit             1 bslbf
-bit2            2 bslbf
-six             6 bslbf
+ sync_byte                                               8 bslbf
+ //transport_error_indicator                               1 bslbf
+ //payload_unit_start_indicator                            1 bslbf
+ //transport_priority                                      1 bslbf
+ //PID                                                    13 uimsbf
+ //transport_scrambling_control                            2 bslbf
+ //adaptation_field_control                                2 bslbf
+ //continuity_counter                                      4 uimsbf
+ rest  1488 bslbf

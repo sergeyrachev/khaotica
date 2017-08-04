@@ -25,7 +25,10 @@ integer    [0-9]+[0-9]*
 bits       [01]+
 
 %s bitstring
+%s commented_line
 %%
+
+"//".*{newline} { }
 
 {blank}+  /* skip whitespace */
 
@@ -51,7 +54,7 @@ bits       [01]+
 "++" return Parser::make_INCREMENT(_location);
 "-" return Parser::make_MINUS(_location);
 "+" return Parser::make_PLUS(_location);
-"/" return Parser::make_DIVIDE(_location);
+
 "*" return Parser::make_MULTIPLY(_location);
 "||" return Parser::make_OR(_location);
 "<" return Parser::make_LESSTHAN(_location);
