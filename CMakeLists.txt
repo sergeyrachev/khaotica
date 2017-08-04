@@ -51,7 +51,7 @@ add_custom_target(dummy
 
 )
 
-add_executable(khaotica src/khaotica.cpp )
+add_executable(khaotica src/khaotica.cpp src/bitreader.cpp src/bitreader.h src/bit.h)
 target_sources(khaotica PRIVATE
         ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
         ${GRAMMAR_DIR}/${FlexOutput}  src/scanner.h
@@ -74,7 +74,7 @@ target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
 install(TARGETS khaotica RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib/static )
 install(DIRECTORY res DESTINATION share/khaotica)
 
-add_executable(khaotica_gtest test/dummy.cpp)
+add_executable(khaotica_gtest test/dummy.cpp test/ut_bitreader.cpp test/ut_bit.cpp)
 target_compile_features(khaotica_gtest PUBLIC cxx_std_17 )
 target_include_directories(khaotica_gtest PRIVATE src/ test/ ${GTEST_INCLUDE_DIRECTORIES})
 target_link_libraries(khaotica_gtest PRIVATE ${GTEST_LIBRARIES} )

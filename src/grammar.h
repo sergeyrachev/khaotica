@@ -19,6 +19,8 @@ namespace flavor{
         int64_t length;
     };
 
+
+
     typedef std::variant<bitstring_t, uint_t>  symbol_t;
 }
 

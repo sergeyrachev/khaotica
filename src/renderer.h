@@ -1,63 +1,50 @@
 #pragma once
 
+#include "grammar.h"
+#include "logging.h"
+#include "bit.h"
+#include "bitreader.h"
+
 #include <map>
 #include <string>
 #include <fstream>
 #include <iostream>
 #include <bitset>
 #include <list>
-#include "grammar.h"
-#include "logging.h"
 
-class IRRenderer {
-public:
-    typedef std::variant<std::bitset<8>, uint64_t> value_t;
-public:
-    IRRenderer(std::ifstream&, const std::list<flavor::symbol_t>&);
-    value_t operator( ) (const flavor::bitstring_t& bs) {
-        std::bitset<8> ret(0);
+namespace khaotica {
+    class parser_t {
+    public:
+        typedef std::variant<std::vector<bool>, uint64_t> value_t;
+    public:
+        parser_t(std::ifstream& in, const std::list<flavor::symbol_t>& symbols);
 
-        if (pos == 0) {
-            uint8_t t;
-            _bitstream >> t;
-            cache = decltype(cache)(t);
-            pos = 8;
+    public:
+        value_t operator( ) (const flavor::bitstring_t& bs) {
+            return bitreader.read(bs.length);
         }
 
-        for (int i = 1; i <= bs.length; i++)
-        {
-            ret[bs.length - i] = cache[pos-1];
-            pos--;
-
-            if (pos == 0) {
-                uint8_t t;
-                _bitstream >> t;
-                cache = decltype(cache)(t);
-                pos = 8;
-            }
+        value_t operator( ) (const flavor::uint_t& bs) {
+            return khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length));
         }
 
-        return ret;
-    }
+        void operator( ) (const flavor::bitstring_t& s, const std::vector<bool>& v) {
+            logging::debug()
+                << s.name << "(" << s.length << "): " << khaotica::algorithm::to_string(v)
+                //<< "(" << std::hex << "0x" << khaotica::algorithm::to_ull_lsbf(v) << ")"
+                ;
+        }
 
-    value_t operator( ) (const flavor::uint_t&) {
-        return uint64_t{};
-    }
+        void operator( ) (const flavor::uint_t& s, const uint64_t& v) {
+            logging::debug() << s.name << "(" << s.length << "): " << v << "(" << std::hex << "0x" << v << ")";
+        }
 
-    void operator( ) (const flavor::bitstring_t& s, const std::bitset<8>& v) {
-        logging::debug() << s.name << "(" << s.length << "): " << v.to_string() << "(" << std::hex << v.to_ullong() << ")" << static_cast<uint8_t>(v.to_ullong());
-    }
+        void operator()(auto&&, auto&&){
 
-    void operator( ) (const flavor::uint_t& s, const uint64_t& v) {
-        logging::debug() << s.name << "(" << s.length << "): " << v << "(" << std::hex << v << ")";
-    }
+        }
 
-    void operator()(auto&&, auto&&){
+    private:
+        bitreader_t bitreader;
+    };
 
-    }
-
-private:
-    std::ifstream& _bitstream;
-    std::bitset<8> cache;
-    uint8_t pos{0};
-};
+}
