@@ -38,7 +38,7 @@ int main( int argc, char* argv[] ) {
     flavor::Interpreter driver;
     auto symbols = driver.parse(f, true);
 
-    std::ifstream bitstream(input_bitstream_filename);
+    std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::parser_t renderer(bitstream, symbols);
 
     return 0;

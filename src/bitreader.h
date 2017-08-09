@@ -22,11 +22,13 @@ namespace khaotica{
         }
 
         std::vector<bool> read(uint64_t n){
-            std::vector<bool> ret(n);
-            for (auto&& entry : ret) {
+            std::vector<bool> ret;
+            for (auto i = 0; i < n; i++) {
                 cache(in);
-                entry = _cache.back();
-                _cache.pop_back();
+                if (!_cache.empty()){
+                    ret.push_back(_cache.back());
+                    _cache.pop_back();
+                }
             }
             return ret;
         }
@@ -37,8 +39,9 @@ namespace khaotica{
 
             if (_cache.empty()) {
                 uint8_t t;
-                in >> t;
-                _cache = unpack(t);
+                if (in.read(reinterpret_cast<char*>(&t), 1)){
+                    _cache = unpack(t);
+                }
             }
         }
 
