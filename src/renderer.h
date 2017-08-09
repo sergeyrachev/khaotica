@@ -30,7 +30,7 @@ namespace khaotica {
 
         void operator( ) (const flavor::bitstring_t& s, const std::vector<bool>& v) {
             logging::debug()
-                << s.name << "(" << s.length << "): " << khaotica::algorithm::to_string(v)
+                << s.name << "(" << s.length << "): " << khaotica::algorithm::to_hex(v)
                 //<< "(" << std::hex << "0x" << khaotica::algorithm::to_ull_lsbf(v) << ")"
                 ;
         }

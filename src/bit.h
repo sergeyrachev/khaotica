@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdint>
 #include <sstream>
+#include <iomanip>
 
 namespace khaotica {
     namespace algorithm {
@@ -25,30 +26,53 @@ namespace khaotica {
         inline uint64_t to_ull_msbf(const std::vector<bool> &v) {
             uint64_t u(0);
             for (auto it = v.rbegin(); it != v.rend(); ++it) {
-                u |= *it;
                 u <<= 1;
+                u |= *it;
             }
 
-            return u >> 1;
+            return u;
         }
 
         inline uint64_t to_ull_lsbf(const std::vector<bool> &v) {
             uint64_t u(0);
             for (auto it = v.begin(); it != v.end(); ++it) {
-                u |= *it;
                 u <<= 1;
+                u |= *it;
             }
 
-            return u >> 1;
+            return u;
         }
 
-        inline std::string to_string(const std::vector<bool>& v) {
+        inline std::string to_string(const std::vector<bool> &v) {
             std::ostringstream ss;
             for (const auto &&b : v) {
                 ss << b ? 1 : 0;
             }
             return ss.str();
         }
+
+        inline std::string to_hex(const std::vector<bool> &v) {
+            std::stringstream ss;
+            uint16_t value(0);
+            size_t idx(0);
+            for (const auto &&b : v) {
+                value <<= 1;
+                value |= b;
+                idx++;
+                if (idx == 8) {
+                    ss << std::setfill('0') << std::setw(2) << std::hex << value;
+                    idx = 0;
+                    value = 0;
+                }
+
+            }
+            if (idx) {
+                ss << std::setfill('0') << std::setw(2) << std::hex << value;
+            }
+
+            return ss.str();
+        }
     }
 }
 #endif //KHAOTICA_BIT_H
+
