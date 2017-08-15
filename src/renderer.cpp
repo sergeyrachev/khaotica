@@ -12,12 +12,14 @@
 
 using namespace khaotica;
 
-parser_t::parser_t(std::ifstream& bitstream, const std::list<flavor::symbol_t>& symbols): bitreader(bitstream)
+parser_t::parser_t(std::ifstream& bitstream, const flavor::symbols_t& symbols): bitreader(bitstream)
 {
     while(!bitstream.eof() && !bitstream.bad()){
         for(const auto& symbol : symbols){
             const auto v = std::visit(*this, symbol);
-            std::visit(*this, symbol, v);
+            for (auto &&item : v) {
+                std::visit(*this, symbol, item);
+            }
         }
 
         logging::debug() << "";
