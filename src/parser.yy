@@ -37,7 +37,7 @@
 %lex-param {flavor::Scanner& scanner}
 
 %parse-param {flavor::Scanner& scanner}
-%parse-param {std::list<symbol_t>& symbols}
+%parse-param {flavor::symbols_t& symbols}
 
 %locations
 
@@ -87,35 +87,51 @@
 %token BITS
 
 
-%type <bitstring_t> bitstring
-%type <uint_t> uint
+%type <bslbf_t> bslbf
+%type <uimsbf_t> uimsbf
+%type <tcimsbf_t> tcimsbf
 %type <symbol_t> field_definition
+
+%type <symbols_t> entries
+%type <compound_t> compound
 
 %%
 %start bitstream;
 
 field_definition
-: bitstring { $$ = {$1};}
-| uint { $$ = {$1};}
-| tcint {}
+: bslbf { $$ = {$1};}
+| uimsbf { $$ = {$1};}
+| tcimsbf {}
 ;
 
-bitstring
-: IDENTIFIER INTEGER_LITERAL MNEMONIC_BSLBF  { $$ = {$1, $2}; }
+bslbf
+: IDENTIFIER INTEGER_LITERAL "bslbf"  { $$ = {$1, $2}; }
 ;
 
-uint
-: IDENTIFIER INTEGER_LITERAL MNEMONIC_UIMSBF  {  $$ = {$1, $2}; }
+uimsbf
+: IDENTIFIER INTEGER_LITERAL "uimsbf"  {  $$ = {$1, $2}; }
 ;
 
-tcint
-: IDENTIFIER INTEGER_LITERAL MNEMONIC_TCIMSBF  {  }
+tcimsbf
+: IDENTIFIER INTEGER_LITERAL "tcimsbf" { $$ = {$1, $2};  }
 ;
 
+entries
+: field_definition {$$.push_back($1);}
+| entries field_definition {$1.push_back($2); $$ = $1;}
+| {$$ = {};}
+;
+
+compound
+: IDENTIFIER "(" ")" "{" entries "}" { $$ = {$1, $5};}
+;
 
 bitstream
-: field_definition { symbols.push_back($1); }
-| bitstream field_definition { symbols.push_back($2); }
+: field_definition { symbols.push_back($1);}
+| bitstream field_definition{ symbols.push_back($2); }
+| compound { symbols.push_back($1); }
+| bitstream compound { symbols.push_back($2); }
+| END
 ;
 
 %%
@@ -128,5 +144,6 @@ void flavor::Parser::error( const location &loc, const std::string &err_message 
     ss << loc;
     logging::debug() << "Parsing error: '" << err_message << "' " << ss.str();
 }
+
 
 

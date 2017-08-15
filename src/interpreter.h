@@ -12,7 +12,7 @@
 namespace flavor{
     class Interpreter {
     public:
-        static std::list<symbol_t> parse(std::istream &in, bool enable_verbosity = true);
+        static flavor::symbols_t parse(std::istream &in, bool enable_verbosity = true);
     };
 }
 

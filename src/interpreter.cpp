@@ -7,12 +7,12 @@
 #include "parser.hpp"
 #include "logging.h"
 
-std::list<flavor::symbol_t> flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
+flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
     flavor::Scanner _scanner(in, serr);
 
-    std::list<flavor::symbol_t> symbols;
+    flavor::symbols_t symbols;
     flavor::Parser _parser(_scanner, symbols);
 
     _scanner.set_debug(enable_verbosity);
