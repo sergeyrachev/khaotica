@@ -24,7 +24,6 @@ identifier [a-zA-Z_][a-zA-Z_0-9]*
 integer    [0-9]+[0-9]*
 bits       [01]+
 
-%s bitstring
 %s commented_line
 %%
 
@@ -60,14 +59,6 @@ bits       [01]+
 "<" return Parser::make_LESSTHAN(_location);
 ">" return Parser::make_GREATERTHAN(_location);
 
-"'" {
-    BEGIN(bitstring);
-}
-
-<bitstring>"'" {
-    BEGIN(INITIAL);
-    return Parser::make_BITS(_location);
-}
 
 {identifier} {
     return Parser::make_IDENTIFIER(yytext, _location);
