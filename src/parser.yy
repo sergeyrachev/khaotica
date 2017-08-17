@@ -93,6 +93,7 @@
 %type <symbol_t> field_definition
 
 %type <symbols_t> entries
+%type <symbols_t> body
 %type <compound_t> compound
 
 %%
@@ -119,11 +120,15 @@ tcimsbf
 entries
 : field_definition {$$.push_back($1);}
 | entries field_definition {$1.push_back($2); $$ = $1;}
-| {$$ = {};}
+;
+
+body
+: "{" entries "}" { $$ = $2;}
+| "{" "}" { $$ = {};}
 ;
 
 compound
-: IDENTIFIER "(" ")" "{" entries "}" { $$ = {$1, $5};}
+: IDENTIFIER "(" ")" body { $$ = {$1, $4};}
 ;
 
 bitstream
