@@ -15,6 +15,7 @@
 %define api.token.prefix {TOKEN_}
 
 %code requires{
+    //Header file
     #include "grammar.h"
 
     #include <list>
@@ -25,19 +26,23 @@
 }
 
 %code top {
+    //Implementation file
     #include "logging.h"
     #include "scanner.h"
     #include "parser.hpp"
 
-    static flavor::Parser::symbol_type yylex(flavor::Scanner &scanner) {
-        return scanner.next_token();
+    namespace {
+        using namespace flavor;
+        Parser::symbol_type yylex(Scanner &scanner) {
+            return scanner.next_token();
+        }
     }
 }
+%lex-param {Scanner& scanner}
 
-%lex-param {flavor::Scanner& scanner}
-
-%parse-param {flavor::Scanner& scanner}
-%parse-param {flavor::symbols_t& symbols}
+%parse-param {Scanner& scanner}
+%parse-param {symbols_t& symbols}
+%parse-param {symbols_table_t& table}
 
 %locations
 
@@ -93,8 +98,13 @@
 %type <symbol_t> field_definition
 
 %type <symbols_t> entries
-%type <symbols_t> body
 %type <compound_t> compound
+%type <std::string> signature
+%type <symbols_t> scope
+
+%type <std::string> variable
+%type <variable_t> variable_definition
+%type <expression_t> expression
 
 %%
 %start bitstream;
@@ -106,36 +116,123 @@ field_definition
 ;
 
 bslbf
-: IDENTIFIER INTEGER_LITERAL "bslbf"  { $$ = {$1, $2}; }
+: IDENTIFIER INTEGER_LITERAL "bslbf"  {
+        $$ = {$1, $2};
+        table[$1] = $$;
+    }
 ;
 
 uimsbf
-: IDENTIFIER INTEGER_LITERAL "uimsbf"  {  $$ = {$1, $2}; }
+: IDENTIFIER INTEGER_LITERAL "uimsbf"  {
+        $$ = {$1, $2};
+        table[$1] = $$;
+    }
 ;
 
 tcimsbf
-: IDENTIFIER INTEGER_LITERAL "tcimsbf" { $$ = {$1, $2};  }
+: IDENTIFIER INTEGER_LITERAL "tcimsbf" {
+        $$ = {$1, $2};
+        table[$1] = $$;
+    }
 ;
 
 entries
-: field_definition {$$.push_back($1);}
-| entries field_definition {$1.push_back($2); $$ = $1;}
+: field_definition {
+        $$.push_back($1);
+    }
+| entries field_definition {
+        $1.push_back($2);
+        $$ = $1;
+    }
 ;
 
-body
-: "{" entries "}" { $$ = $2;}
-| "{" "}" { $$ = {};}
+scope
+: "{" entries "}" {
+        $$ = $2;
+    }
+| "{" "}" {
+        $$ = {};
+    }
+;
+
+signature
+: IDENTIFIER "(" ")" {
+        $$ = $1;
+    }
 ;
 
 compound
-: IDENTIFIER "(" ")" body { $$ = {$1, $4};}
+: signature scope {
+        $$ = {$1, $2};
+        table[$1] = $$;
+    }
+;
+
+variable
+:  IDENTIFIER { $$ = $1; }
+;
+
+variable_definition
+: variable "=" expression {
+        $$ = {$1, $3};
+        table[$1] = $$;
+    }
+;
+
+unary_expr
+: IDENTIFIER {
+
+    }
+| INTEGER_LITERAL {
+
+    }
+;
+
+multiplicative_expr
+: unary_expr
+| multiplicative_expr '*' unary_expr {
+
+    }
+| multiplicative_expr '/' unary_expr {
+
+    }
+| multiplicative_expr '%' unary_expr {
+
+    }
+;
+
+additive_expr
+: multiplicative_expr
+| additive_expr '+' multiplicative_expr {
+
+    }
+| additive_expr '-' multiplicative_expr {
+
+    }
+;
+
+expression
+: multiplicative_expr {
+
+    }
+| additive_expr {
+
+    }
 ;
 
 bitstream
-: field_definition { symbols.push_back($1);}
-| bitstream field_definition{ symbols.push_back($2); }
-| compound { symbols.push_back($1); }
-| bitstream compound { symbols.push_back($2); }
+: field_definition {
+        symbols.push_back($1);
+    }
+| bitstream field_definition {
+        symbols.push_back($2);
+    }
+| compound {
+        symbols.push_back($1);
+    }
+| bitstream compound {
+        symbols.push_back($2);
+    }
 | END
 ;
 

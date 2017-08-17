@@ -3,8 +3,8 @@
 
 #include "interpreter.h"
 
-#include "scanner.h"
 #include "parser.hpp"
+#include "scanner.h"
 #include "logging.h"
 
 flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
@@ -13,7 +13,8 @@ flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbo
     flavor::Scanner _scanner(in, serr);
 
     flavor::symbols_t symbols;
-    flavor::Parser _parser(_scanner, symbols);
+    flavor::symbols_table_t table;
+    flavor::Parser _parser(_scanner, symbols, table);
 
     _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);

@@ -39,7 +39,7 @@ int main( int argc, char* argv[] ) {
     auto symbols = driver.parse(f, true);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-    khaotica::parser_t renderer(bitstream, symbols);
+    //khaotica::parser_t renderer(bitstream, symbols);
 
     return 0;
 }
