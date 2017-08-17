@@ -3,7 +3,6 @@
 
 #include "grammar.h"
 
-
 #include <istream>
 #include <memory>
 #include <vector>

@@ -11,38 +11,45 @@ namespace flavor{
     struct directive_include_t{};
     struct directive_import_t{};
 
-    struct entry_t{
+    struct bslbf_t{
         std::string name;
         uint64_t length;
     };
 
-    struct bslbf_t : entry_t{
+    struct uimsbf_t{
+        std::string name;
+        uint64_t length;
     };
 
-    struct uimsbf_t : entry_t{
+    struct tcimsbf_t{
+        std::string name;
+        uint64_t length;
     };
 
-    struct tcimsbf_t : entry_t{
-    };
-
+    struct variable_t;
     struct compound_t;
-    typedef std::variant<bslbf_t, uimsbf_t, tcimsbf_t, compound_t>  symbol_t;
+    typedef std::variant<bslbf_t, uimsbf_t, tcimsbf_t, compound_t, variable_t>  symbol_t;
     typedef std::list<symbol_t> symbols_t;
-    typedef std::map<std::string, symbol_t> symbol_table_t;
 
-    struct functor_t{
+    typedef std::map<std::string, symbol_t> symbols_table_t;
+
+    struct action_t{
 
     };
 
     struct operand_t{
-
+        std::variant<variable_t, value_t, >
     };
 
-    struct expression_t{
-        functor_t f;
+    struct expression_t {
+        action_t action;
         operand_t operand;
-    };
+    }
 
+    struct variable_t{
+        std::string name;
+        expression_t declaration;
+    };
 
     struct compound_t{
         std::string name;
@@ -59,8 +66,13 @@ namespace flavor{
 
     };
 
-
-
+    typedef std::variant<uint64_t, int64_t, double > numeric_t;
+    typedef std::variant<
+        std::vector<bool>,
+        uint64_t,
+        numeric_t
+    > value_t;
+    typedef std::list<value_t> values_t;
 
 }
 
