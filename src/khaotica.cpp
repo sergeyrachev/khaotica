@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "khaotica.h"
-#include "renderer.h"
+#include "parser.h"
 
 #include "logging.h"
 #include "options.h"

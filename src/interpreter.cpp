@@ -4,17 +4,17 @@
 #include "interpreter.h"
 
 #include "parser.hpp"
-#include "scanner.h"
+#include "lexer.h"
 #include "logging.h"
 
 flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
-    flavor::Scanner _scanner(in, serr);
+    flavor::lexer_t _scanner(in, serr);
 
     flavor::symbols_t symbols;
-    flavor::symbols_table_t table;
-    flavor::Parser _parser(_scanner, symbols, table);
+    flavor::document_t doc;
+    flavor::parser_t _parser(_scanner, symbols, doc);
 
     _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);

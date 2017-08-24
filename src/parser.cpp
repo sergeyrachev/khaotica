@@ -4,10 +4,10 @@
 #include <string>
 
 #include <fstream>
-#include "renderer.h"
+#include "parser.h"
 #include <variant>
 
-#include "grammar.h"
+#include "syntax.h"
 #include "logging.h"
 
 using namespace khaotica;
