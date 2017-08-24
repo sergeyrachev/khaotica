@@ -25,6 +25,7 @@ integer    [0-9]+[0-9]*
 bits       [01]+
 
 %s commented_line
+%s quoted
 %%
 
 "//".*{newline} { }
@@ -59,6 +60,17 @@ bits       [01]+
 "<" return Parser::make_LESSTHAN(_location);
 ">" return Parser::make_GREATERTHAN(_location);
 
+"'" {
+    BEGIN(quoted);
+}
+
+<quoted>{bits} {
+    return Parser::make_BITSTRING(yytext, _location);
+}
+
+<quoted>"'" {
+    BEGIN(INITIAL);
+}
 
 {identifier} {
     return Parser::make_IDENTIFIER(yytext, _location);
@@ -66,7 +78,7 @@ bits       [01]+
 
 {integer} {
     int64_t number = strtoll(yytext, 0, 10);
-    return flavor::Parser::make_INTEGER_LITERAL(number, _location);
+    return flavor::Parser::make_INTEGER(number, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);

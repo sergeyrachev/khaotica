@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-%no-lines
+//%no-lines
 
 %verbose
 %define parse.trace
@@ -64,8 +64,6 @@
 %token FUNCTION_LENGTHOF "lengthof"
 %token EQUAL "=="
 
-%token <int64_t> INTEGER_LITERAL
-
 //0b1000000 -> 0 0 0 0 0 0 0 1
 %token MNEMONIC_BSLBF "bslbf"
 //0b1000000 -> 1 0 0 0 0 0 0 0
@@ -88,8 +86,10 @@
 
 %token LESSTHAN "<"
 %token GREATERTHAN ">"
-%token QUOTE_SINGLE "'"
-%token BITS
+
+
+%token <bitstring_t> BITSTRING
+%token <numeric_t> INTEGER
 
 
 %type <bslbf_t> bslbf
@@ -102,35 +102,38 @@
 %type <std::string> signature
 %type <symbols_t> scope
 
-%type <std::string> variable
 %type <variable_t> variable_definition
 %type <expression_t> expression
+%type <entity_t> primary_expression
+%type <expression_t> unary_expr
+%type <expression_t> multiplicative_expr
+%type <expression_t> additive_expr
 
 %%
 %start bitstream;
 
 field_definition
-: bslbf { $$ = {$1};}
-| uimsbf { $$ = {$1};}
+: bslbf { $$ = $1;}
+| uimsbf { $$ = $1;}
 | tcimsbf {}
 ;
 
 bslbf
-: IDENTIFIER INTEGER_LITERAL "bslbf"  {
+: IDENTIFIER INTEGER "bslbf"  {
         $$ = {$1, $2};
         table[$1] = $$;
     }
 ;
 
 uimsbf
-: IDENTIFIER INTEGER_LITERAL "uimsbf"  {
+: IDENTIFIER INTEGER "uimsbf"  {
         $$ = {$1, $2};
         table[$1] = $$;
     }
 ;
 
 tcimsbf
-: IDENTIFIER INTEGER_LITERAL "tcimsbf" {
+: IDENTIFIER INTEGER "tcimsbf" {
         $$ = {$1, $2};
         table[$1] = $$;
     }
@@ -168,30 +171,40 @@ compound
     }
 ;
 
-variable
-:  IDENTIFIER { $$ = $1; }
-;
-
 variable_definition
-: variable "=" expression {
+: IDENTIFIER "=" expression {
         $$ = {$1, $3};
         table[$1] = $$;
     }
 ;
 
-unary_expr
+primary_expression
 : IDENTIFIER {
-
+        $$ = table[$1];
     }
-| INTEGER_LITERAL {
+| INTEGER {
+        $$ = $1;
+    }
+| BITSTRING {
+        $$ = $1;
+    }
+;
 
+unary_expr
+: "!" primary_expression {
+        $$ = {std::logical_not(), $2};
+    }
+| "-" primary_expression {
+        $$ = {std::negate(), $2};
     }
 ;
 
 multiplicative_expr
-: unary_expr
+: unary_expr {
+        $$ = $1;
+    }
 | multiplicative_expr '*' unary_expr {
-
+        $$ = {$1, std::multiply(), $3};
     }
 | multiplicative_expr '/' unary_expr {
 
@@ -232,6 +245,9 @@ bitstream
     }
 | bitstream compound {
         symbols.push_back($2);
+    }
+| variable_definition {
+        symbols.push_back($1);
     }
 | END
 ;
