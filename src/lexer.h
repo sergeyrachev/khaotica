@@ -10,7 +10,7 @@
 #include <FlexLexer.h>
 #endif
 #undef  YY_DECL
-#define YY_DECL flavor::Parser::symbol_type flavor::Scanner::next_token()
+#define YY_DECL flavor::grammar_t::symbol_type flavor::lexer_t::next_token()
 
 #include "parser.hpp"
 #include "location.hh"
@@ -19,13 +19,13 @@
 namespace flavor{
     class Interpreter;
 
-    class Scanner : public yyFlexLexer {
+    class lexer_t : public yyFlexLexer {
     public:
-        explicit Scanner(std::istream& in, std::ostream& out):yyFlexLexer(in, out){
+        explicit lexer_t(std::istream& in, std::ostream& out):yyFlexLexer(in, out){
 
         };
 
-        flavor::Parser::symbol_type next_token();
+        flavor::parser_t::symbol_type next_token();
 
     private:
         flavor::location _location;
