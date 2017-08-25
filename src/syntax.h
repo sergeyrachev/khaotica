@@ -62,12 +62,12 @@ namespace flavor{
     };
 
     typedef std::variant<
-        std::shared_ptr<bslbf_t>,
-        std::shared_ptr<uimsbf_t>,
-        std::shared_ptr<tcimsbf_t>,
-        std::shared_ptr<if_t>,
-        std::shared_ptr<for_t>,
-        std::shared_ptr<compound_t>
+        bslbf_t,
+        uimsbf_t,
+        tcimsbf_t,
+        if_t,
+        for_t,
+        compound_t
     > entry_t;
 
     typedef std::list<entry_t> entries_t;
@@ -75,7 +75,7 @@ namespace flavor{
         entries_t entries;
     };
 
-    struct  unary_expression_t {
+    struct unary_expression_t {
         std::variant<
             std::negate<>,
             std::logical_not<>,
@@ -84,7 +84,7 @@ namespace flavor{
         std::shared_ptr<expression_t> operand;
     };
 
-    struct  binary_expression_t {
+    struct binary_expression_t {
         std::shared_ptr<expression_t> left_operand;
         std::variant<
             std::plus<>,
@@ -113,26 +113,22 @@ namespace flavor{
         > sentence;
     };
 
-    typedef std::variant<
-        int64_t,
-        uint64_t,
-        std::byte,
-        std::vector<bool>
-    > value_t;
-
-    typedef std::list<std::variant<std::shared_ptr<variable_t>, std::shared_ptr<compound_t>>> document_t;
+    typedef std::list<
+        std::variant<
+            variable_t,
+            compound_t
+        >
+    > document_t;
 
     typedef std::map<
         std::string, std::variant<
-            std::shared_ptr<bslbf_t>,
-            std::shared_ptr<uimsbf_t>,
-            std::shared_ptr<tcimsbf_t>,
-            std::shared_ptr<compound_definition_t>,
-            std::shared_ptr<expression_t>
+            bslbf_t,
+            uimsbf_t,
+            tcimsbf_t,
+            compound_definition_t,
+            expression_t
         >
     > symbols_t;
-
-    typedef std::map<std::string, value_t > values_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H

@@ -115,33 +115,33 @@
 
 entry
 : IDENTIFIER INTEGER "bslbf"  {
-    auto entry = std::make_shared<bslbf_t>(bslbf_t{$1, $2.value});
+    bslbf_t entry{$1, $2.value};
     $$ = entry;
     symbols[$1] = entry;
 }
 | IDENTIFIER INTEGER "uimsbf"  {
-    auto entry = std::make_shared<uimsbf_t>(uimsbf_t{$1, $2.value});
+    uimsbf_t entry{$1, $2.value};
     $$ = entry;
     symbols[$1] = entry;
 }
 | IDENTIFIER INTEGER "tcimsbf" {
-    auto entry = std::make_shared<tcimsbf_t>(tcimsbf_t{$1, $2.value});
+    tcimsbf_t entry{$1, $2.value};
     $$ = entry;
     symbols[$1] = entry;
 }
 | IDENTIFIER "(" ")" {
-    $$ = std::make_shared<compound_t>(compound_t{$1});
+    $$ = compound_t{$1};
 }
 | "if" "(" expression ")" compound_definition {
     auto condition = $3;
     auto _then =  $5;
-    $$ = std::make_shared<if_t>(if_t{condition, _then, nullptr});
+    $$ = if_t{condition, _then, std::nullopt};
 }
 | "if" "(" expression ")" compound_definition "else" compound_definition {
     auto condition = $3;
     auto _then =  $5;
     auto _else =  $7;
-    $$ = std::make_shared<if_t>(if_t{condition, _then, _else});
+    $$ = if_t{condition, _then, _else};
 }
 | "for" "(" IDENTIFIER "=" expression ";" expression ";" expression ")" compound_definition {
     auto variable = variable_t{$3};
@@ -149,22 +149,22 @@ entry
     auto condition = $7;
     auto modifier = $9;
     auto body = $11;
-    $$ = std::make_shared<for_t>(for_t{variable, initializer, condition, modifier, body});
+    $$ = for_t{variable, initializer, condition, modifier, body};
 }
 | "for" "(" ";" expression ";" expression ")" compound_definition {
     auto condition = $4;
     auto modifier = $6;
     auto body = $8;
-    $$ = std::make_shared<for_t>(for_t{std::nullopt, nullptr, condition, modifier, body});
+    $$ = for_t{std::nullopt, nullptr, condition, modifier, body};
 }
 | "for" "(" ";" expression ";" ")" compound_definition {
     auto condition = $4;
     auto body = $7;
-    $$ = std::make_shared<for_t>(for_t{std::nullopt, nullptr, condition, nullptr, body});
+    $$ = for_t{std::nullopt, nullptr, condition, nullptr, body};
 }
 | "for" "(" ";" ";" ")" compound_definition {
     auto body = $6;
-    $$ = std::make_shared<for_t>(for_t{std::nullopt, nullptr, nullptr, nullptr, body});
+    $$ = for_t{std::nullopt, nullptr, nullptr, nullptr, body};
 }
 ;
 
@@ -265,20 +265,20 @@ entries
 
 bitstream
 : IDENTIFIER "(" ")" compound_definition{
-    doc.push_back(std::make_shared<compound_t>(compound_t{$1}));
-    symbols[$1] = $4;
+    doc.push_back(compound_t{$1});
+    symbols[$1] = *($4);
 }
 | bitstream IDENTIFIER "(" ")" compound_definition {
-    doc.push_back(std::make_shared<compound_t>(compound_t{$2}));
-    symbols[$2] = $5;
+    doc.push_back(compound_t{$2});
+    symbols[$2] = *($5);
 }
 | IDENTIFIER "=" expression {
-    doc.push_back( std::make_shared<variable_t>(variable_t{$1}));
-    symbols[$1] = $3;
+    doc.push_back(variable_t{$1});
+    symbols[$1] = *($3);
 }
 | bitstream IDENTIFIER "=" expression {
-    doc.push_back( std::make_shared<variable_t>(variable_t{$2}));
-    symbols[$2] = $4;
+    doc.push_back(variable_t{$2});
+    symbols[$2] = *($4);
 }
 | END
 ;
