@@ -100,59 +100,51 @@
 %token <bitstring_t> BITSTRING
 %token <integer_t> INTEGER
 
-%type <std::shared_ptr<bslbf_t>> bslbf
-%type <std::shared_ptr<uimsbf_t>> uimsbf
-%type <std::shared_ptr<tcimsbf_t>> tcimsbf
-
 %type <entry_t> entry
+%type <entries_t> entries
 
 %type <std::shared_ptr<variable_definition_t>> variable_definition
-%type <std::shared_ptr<compound_t>> compound
 %type <std::shared_ptr<compound_definition_t>> compound_definition
 
 %%
 %start bitstream;
 
-entry : bslbf | uimsbf | tcimsbf | compound {
-    $$ = $1;
-}
-;
-
-bslbf
+entry
 : IDENTIFIER INTEGER "bslbf"  {
-        $$ = std::make_shared<bslbf_t>(bslbf_t{$1, $2.value});
-        symbols[$1] = $$;
+        auto entry = std::make_shared<bslbf_t>(bslbf_t{$1, $2.value});
+        $$ = entry;
+        symbols[$1] = entry;
     }
-;
-
-uimsbf
-: IDENTIFIER INTEGER "uimsbf"  {
-        $$ = std::make_shared<uimsbf_t>(uimsbf_t{$1, $2.value});
-        symbols[$1] = $$;
+| IDENTIFIER INTEGER "uimsbf"  {
+        auto entry = std::make_shared<uimsbf_t>(uimsbf_t{$1, $2.value});
+        $$ = entry;
+        symbols[$1] = entry;
     }
-;
-
-tcimsbf
-: IDENTIFIER INTEGER "tcimsbf" {
-        $$ = std::make_shared<tcimsbf_t>(tcimsbf_t{$1, $2.value});
-        symbols[$1] = $$;
+| IDENTIFIER INTEGER "tcimsbf" {
+        auto entry = std::make_shared<tcimsbf_t>(tcimsbf_t{$1, $2.value});
+        $$ = entry;
+        symbols[$1] = entry;
     }
-;
-
-compound
-: IDENTIFIER "(" ")" {
+| IDENTIFIER "(" ")" {
         $$ = std::make_shared<compound_t>(compound_t{$1});
     }
 ;
 
 compound_definition
-:  "{" compound_definition entry "}" {
-        $$ = std::make_shared<compound_definition_t>();
-        $2->entries.push_back($3);
+: "{" entries "}" {
+        $$ = std::make_shared<compound_definition_t>(compound_definition_t{$2});
+    }
+;
+
+entries
+: entry {
+        $$.push_back($1);
+    }
+| entries entry{
+        $1.push_back($2); $$ = $1;
     }
 |
 ;
-
 variable_definition
 : INTEGER {
         $$ = std::make_shared<variable_definition_t>(variable_definition_t{std::make_shared<expression_t>(expression_t{$1})});
@@ -160,13 +152,13 @@ variable_definition
 ;
 
 bitstream
-: compound compound_definition{
-        doc.push_back($1);
-        symbols[$1->name] = $2;
+: IDENTIFIER "(" ")" compound_definition{
+        doc.push_back(std::make_shared<compound_t>(compound_t{$1}));
+        symbols[$1] = $4;
     }
-| bitstream compound compound_definition {
-        doc.push_back($2);
-        symbols[$2->name] = $3;
+| bitstream IDENTIFIER "(" ")" compound_definition {
+        doc.push_back(std::make_shared<compound_t>(compound_t{$2}));
+        symbols[$2] = $5;
     }
 | IDENTIFIER "=" variable_definition {
         doc.push_back( std::make_shared<variable_t>(variable_t{$1}));

@@ -11,7 +11,7 @@
 namespace flavor{
     class Interpreter {
     public:
-        static flavor::symbols_t parse(std::istream &in, bool enable_verbosity = true);
+        static std::tuple<flavor::document_t, flavor::symbols_t> parse(std::istream &in, bool enable_verbosity = true);
     };
 }
 
