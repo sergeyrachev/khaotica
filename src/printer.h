@@ -71,7 +71,7 @@ namespace khaotica{
             }
 
             void operator( )(const flavor::bitstring_t& value) {
-                out << value.value;
+                out << "'" << value.value << "'";
             }
 
             void operator( )(const flavor::integer_t& value) {
@@ -80,6 +80,14 @@ namespace khaotica{
 
             void operator( )(const flavor::variable_t& value) {
                 out << value.name;
+
+                auto it = symbols.find(value.name);
+                if( it != symbols.end()){
+                    out << " = ";
+                    std::visit(*this, it->second);
+                } else {
+                    out << "(!!!!)";
+                }
             }
 
             void operator( )(const flavor::if_t& value) {
@@ -103,7 +111,26 @@ namespace khaotica{
             }
 
             void operator( )(const flavor::for_t& value) {
+                out << std::string(alignment, ' ') << "for( " ;
+                if(value.counter){
+                    (*this)(*value.counter);
+                }
+                out << "; ";
+                if(value.condition){
+                    (*this)(**value.condition);
+                }
+                out << "; ";
+                if(value.modifier){
+                    (*this)(**value.modifier);
+                }
+                out << ")";
 
+                out << "{" << std::endl;
+                {
+                    indent_t<> indent(alignment);
+                    (*this)(*value.body);
+                }
+                out << std::string(alignment, ' ') << "}" << std::endl;
             }
 
             void operator( )(const flavor::compound_definition_t& value) {
@@ -117,11 +144,18 @@ namespace khaotica{
             }
 
             void operator( )(const flavor::unary_expression_t& value) {
-
+                out << "( OP ";
+                (*this)(*value.operand);
+                out << " )";
             }
 
             void operator( )(const flavor::binary_expression_t& value) {
 
+                out << "( ";
+                (*this)(*value.left_operand);
+                out << " OP ";
+                (*this)(*value.right_operand);
+                out << " )";
             }
 
             void operator( )(const std::shared_ptr<flavor::expression_t>& value) {
