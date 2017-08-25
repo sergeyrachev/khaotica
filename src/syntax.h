@@ -93,7 +93,11 @@ namespace flavor{
             std::divides<expression_t>,
             std::modulus<expression_t>,
             std::logical_and<expression_t>,
-            std::logical_or<expression_t>
+            std::logical_or<expression_t>,
+            std::not_equal_to<expression_t>,
+            std::equal_to<expression_t>,
+            std::less<expression_t>,
+            std::greater<expression_t>
         > operation;
         std::shared_ptr<expression_t> right_operand;
     };
