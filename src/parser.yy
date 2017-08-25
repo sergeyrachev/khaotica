@@ -27,17 +27,25 @@
 
 %code top {
     //Implementation file
-    #include "parser.hpp"
     #include "logging.h"
+    #include "parser.hpp"
     #include "lexer.h"
 
-    namespace {
-        using namespace flavor;
-        parser_t::symbol_type yylex(lexer_t &lexer) {
-            return lexer.next_token();
-        }
+    #include <sstream>
+    #include <iostream>
+
+    flavor::parser_t::symbol_type yylex(flavor::lexer_t &lexer) {
+        return lexer.next_token();
+    }
+
+    void flavor::parser_t::error( const location &loc, const std::string &err_message )
+    {
+        std::ostringstream ss;
+        ss << loc;
+        logging::debug() << "Parsing error: '" << err_message << "' " << ss.str();
     }
 }
+
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
@@ -112,34 +120,34 @@ entry : bslbf | uimsbf | tcimsbf | compound {
 
 bslbf
 : IDENTIFIER INTEGER "bslbf"  {
-        $$ = std::make_unique($1, $2);
+        $$ = std::make_shared<bslbf_t>(bslbf_t{$1, $2.value});
         symbols[$1] = $$;
     }
 ;
 
 uimsbf
 : IDENTIFIER INTEGER "uimsbf"  {
-        $$ = std::make_unique($1, $2);
+        $$ = std::make_shared<uimsbf_t>(uimsbf_t{$1, $2.value});
         symbols[$1] = $$;
     }
 ;
 
 tcimsbf
 : IDENTIFIER INTEGER "tcimsbf" {
-        $$ = std::make_unique($1, $2);
+        $$ = std::make_shared<tcimsbf_t>(tcimsbf_t{$1, $2.value});
         symbols[$1] = $$;
     }
 ;
 
 compound
 : IDENTIFIER "(" ")" {
-        $$ = {$1};
+        $$ = std::make_shared<compound_t>(compound_t{$1});
     }
 ;
 
 compound_definition
 :  "{" compound_definition entry "}" {
-        $$ = std::make_unique();
+        $$ = std::make_shared<compound_definition_t>();
         $2->entries.push_back($3);
     }
 |
@@ -147,40 +155,28 @@ compound_definition
 
 variable_definition
 : INTEGER {
-        $$ = $1;
+        $$ = std::make_shared<variable_definition_t>(variable_definition_t{std::make_shared<expression_t>(expression_t{$1})});
     }
 ;
 
 bitstream
 : compound compound_definition{
         doc.push_back($1);
-        symbols[$1.name] = $2;
+        symbols[$1->name] = $2;
     }
 | bitstream compound compound_definition {
         doc.push_back($2);
-        symbols[$2.name] = $3;
+        symbols[$2->name] = $3;
     }
 | IDENTIFIER "=" variable_definition {
-        doc.push_back( variable_t($1));
+        doc.push_back( std::make_shared<variable_t>(variable_t{$1}));
         symbols[$1] = $3;
     }
 | bitstream IDENTIFIER "=" variable_definition {
-        doc.push_back( variable_t($2));
+        doc.push_back( std::make_shared<variable_t>(variable_t{$2}));
         symbols[$2] = $4;
     }
 | END
 ;
 
 %%
-#include "logging.h"
-#include <sstream>
-#include <iostream>
-void flavor::Parser::error( const location &loc, const std::string &err_message )
-{
-    std::ostringstream ss;
-    ss << loc;
-    logging::debug() << "Parsing error: '" << err_message << "' " << ss.str();
-}
-
-
-

@@ -24,8 +24,7 @@ identifier [a-zA-Z_][a-zA-Z_0-9]*
 integer    [0-9]+[0-9]*
 bits       [01]+
 
-%s commented_line
-%s quoted
+%x quoted
 %%
 
 "//".*{newline} { }
@@ -52,6 +51,7 @@ bits       [01]+
 "=" return parser_t::make_ASSIGN(_location);
 ";" return parser_t::make_SEMICOLON(_location);
 "++" return parser_t::make_INCREMENT(_location);
+"--" return parser_t::make_DECREMENT(_location);
 "-" return parser_t::make_MINUS(_location);
 "+" return parser_t::make_PLUS(_location);
 
@@ -64,13 +64,15 @@ bits       [01]+
     BEGIN(quoted);
 }
 
+<quoted>\' {
+    BEGIN(INITIAL);
+}
+
 <quoted>{bits} {
     return parser_t::make_BITSTRING( {yytext}, _location);
 }
 
-<quoted>\' {
-    BEGIN(INITIAL);
-}
+<quoted>.|{newline} { printf("Bad quoted character '%s' at line %d\n", yytext, yylineno); return yyterminate();}
 
 {identifier} {
     return parser_t::make_IDENTIFIER(yytext, _location);
@@ -78,7 +80,7 @@ bits       [01]+
 
 {integer} {
     int64_t number = strtoll(yytext, 0, 10);
-    return flavor::parser_t::make_INTEGER(number, _location);
+    return flavor::parser_t::make_INTEGER( {number}, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);

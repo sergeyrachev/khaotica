@@ -116,7 +116,7 @@ namespace flavor{
         std::vector<bool>
     > value_t;
 
-    typedef std::list<std::variant<variable_t, compound_t> > document_t;
+    typedef std::list<std::variant<std::shared_ptr<variable_t>, std::shared_ptr<compound_t>>> document_t;
     typedef std::map<
         std::string, std::variant<
             std::shared_ptr<bslbf_t>,

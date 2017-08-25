@@ -10,11 +10,10 @@
 #include <FlexLexer.h>
 #endif
 #undef  YY_DECL
-#define YY_DECL flavor::grammar_t::symbol_type flavor::lexer_t::next_token()
+#define YY_DECL flavor::parser_t::symbol_type flavor::lexer_t::next_token()
 
 #include "parser.hpp"
 #include "location.hh"
-#include "position.hh"
 
 namespace flavor{
     class Interpreter;
