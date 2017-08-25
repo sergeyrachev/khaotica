@@ -77,9 +77,9 @@ namespace flavor{
 
     struct  unary_expression_t {
         std::variant<
-            std::negate<expression_t>,
-            std::logical_not<expression_t>,
-            std::bit_not<expression_t>
+            std::negate<>,
+            std::logical_not<>,
+            std::bit_not<>
         > operation;
         std::shared_ptr<expression_t> operand;
     };
@@ -87,17 +87,17 @@ namespace flavor{
     struct  binary_expression_t {
         std::shared_ptr<expression_t> left_operand;
         std::variant<
-            std::plus<expression_t>,
-            std::minus<expression_t>,
-            std::multiplies<expression_t>,
-            std::divides<expression_t>,
-            std::modulus<expression_t>,
-            std::logical_and<expression_t>,
-            std::logical_or<expression_t>,
-            std::not_equal_to<expression_t>,
-            std::equal_to<expression_t>,
-            std::less<expression_t>,
-            std::greater<expression_t>
+            std::plus<>,
+            std::minus<>,
+            std::multiplies<>,
+            std::divides<>,
+            std::modulus<>,
+            std::logical_and<>,
+            std::logical_or<>,
+            std::not_equal_to<>,
+            std::equal_to<>,
+            std::less<>,
+            std::greater<>
         > operation;
         std::shared_ptr<expression_t> right_operand;
     };

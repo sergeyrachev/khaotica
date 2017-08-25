@@ -185,13 +185,13 @@ unary_expr
     $$ = $1;
 }
 | "-" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::negate<expression_t>(), $2}});
+    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::negate<>(), $2}});
 }
 | "!" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::logical_not<expression_t>(), $2}});
+    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::logical_not<>(), $2}});
 }
 | "~" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::bit_not<expression_t>(), $2}});
+    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::bit_not<>(), $2}});
 }
 
 multiplicative_expr
@@ -199,28 +199,28 @@ multiplicative_expr
     $$ = $1;
 }
 | multiplicative_expr "*" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::multiplies<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::multiplies<>(), $3}});
 }
 | multiplicative_expr "/" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::divides<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::divides<>(), $3}});
 }
 | multiplicative_expr "%" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::modulus<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::modulus<>(), $3}});
 }
 | multiplicative_expr "&&" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_and<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_and<>(), $3}});
 }
 | multiplicative_expr "==" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<>(), $3}});
 }
 | multiplicative_expr "!=" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }
 | multiplicative_expr "<" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less<>(), $3}});
 }
 | multiplicative_expr ">" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater<>(), $3}});
 }
 ;
 
@@ -229,19 +229,19 @@ expression
     $$ = $1;
 }
 | expression "+" multiplicative_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<>(), $3}});
 }
 | expression "-" multiplicative_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<>(), $3}});
 }
 | expression "||" multiplicative_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<expression_t>(), $3}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<>(), $3}});
 }
 | expression "++" {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<expression_t>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
 }
 | expression "--" {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<expression_t>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
 }
 ;
 
