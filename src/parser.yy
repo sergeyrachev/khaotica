@@ -210,6 +210,18 @@ multiplicative_expr
 | multiplicative_expr "&&" unary_expr {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_and<expression_t>(), $3}});
 }
+| multiplicative_expr "==" unary_expr {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<expression_t>(), $3}});
+}
+| multiplicative_expr "!=" unary_expr {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<expression_t>(), $3}});
+}
+| multiplicative_expr "<" unary_expr {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less<expression_t>(), $3}});
+}
+| multiplicative_expr ">" unary_expr {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater<expression_t>(), $3}});
+}
 ;
 
 expression
@@ -225,7 +237,12 @@ expression
 | expression "||" multiplicative_expr {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<expression_t>(), $3}});
 }
-
+| expression "++" {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<expression_t>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
+}
+| expression "--" {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<expression_t>(), std::make_shared<expression_t>(expression_t{integer_t{1}})}});
+}
 ;
 
 compound_definition
