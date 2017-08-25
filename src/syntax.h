@@ -31,19 +31,6 @@ namespace flavor{
         uint64_t length;
     };
 
-    struct if_t{
-        std::shared_ptr<expression_t> condition;
-        std::shared_ptr<compound_definition_t> _then;
-        std::optional<std::shared_ptr<compound_definition_t>> _else;
-    };
-
-    struct for_t {
-        std::shared_ptr<variable_definition_t> initialization;
-        std::shared_ptr<expression_t> condition;
-        std::shared_ptr<expression_t> iteration;
-        std::shared_ptr<compound_definition_t> _then;
-    };
-
     struct compound_t{
         std::string name;
     };
@@ -60,6 +47,20 @@ namespace flavor{
         std::string name;
     };
 
+    struct if_t{
+        std::shared_ptr<expression_t> condition;
+        std::shared_ptr<compound_definition_t> _then;
+        std::optional<std::shared_ptr<compound_definition_t>> _else;
+    };
+
+    struct for_t {
+        std::optional<variable_t> counter;
+        std::optional<std::shared_ptr<expression_t>> initializer;
+        std::optional<std::shared_ptr<expression_t>> condition;
+        std::optional<std::shared_ptr<expression_t>> modifier;
+        std::shared_ptr<compound_definition_t> body;
+    };
+
     typedef std::variant<
         std::shared_ptr<bslbf_t>,
         std::shared_ptr<uimsbf_t>,
@@ -74,10 +75,6 @@ namespace flavor{
         entries_t entries;
     };
 
-    struct variable_definition_t{
-        std::shared_ptr<expression_t> expression;
-    };
-
     struct  unary_expression_t {
         std::variant<
             std::negate<expression_t>,
@@ -88,15 +85,16 @@ namespace flavor{
     };
 
     struct  binary_expression_t {
+        std::shared_ptr<expression_t> left_operand;
         std::variant<
-            std::multiplies<expression_t>,
-            std::divides<expression_t>,
             std::plus<expression_t>,
             std::minus<expression_t>,
+            std::multiplies<expression_t>,
+            std::divides<expression_t>,
+            std::modulus<expression_t>,
             std::logical_and<expression_t>,
             std::logical_or<expression_t>
         > operation;
-        std::shared_ptr<expression_t> left_operand;
         std::shared_ptr<expression_t> right_operand;
     };
 
@@ -106,7 +104,8 @@ namespace flavor{
             integer_t,
             bitstring_t,
             unary_expression_t,
-            binary_expression_t
+            binary_expression_t,
+            std::shared_ptr<expression_t>
         > sentence;
     };
 
@@ -125,10 +124,9 @@ namespace flavor{
             std::shared_ptr<uimsbf_t>,
             std::shared_ptr<tcimsbf_t>,
             std::shared_ptr<compound_definition_t>,
-            std::shared_ptr<variable_definition_t>
+            std::shared_ptr<expression_t>
         >
     > symbols_t;
-
 
     typedef std::map<std::string, value_t > values_t;
 }
