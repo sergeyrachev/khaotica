@@ -7,7 +7,7 @@
 #include "lexer.h"
 #include "logging.h"
 
-flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
+std::tuple<flavor::document_t, flavor::symbols_t> flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
     flavor::lexer_t _scanner(in, serr);
@@ -25,5 +25,5 @@ flavor::symbols_t flavor::Interpreter::parse(std::istream &in, bool enable_verbo
     int ret = _parser.parse();
     logging::debug() << "Parsing has ended with code " << ret << ": " << perr.str();
 
-    return symbols;
+    return std::make_tuple(doc, symbols);
 }

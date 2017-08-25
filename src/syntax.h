@@ -69,8 +69,9 @@ namespace flavor{
         std::shared_ptr<compound_t>
     > entry_t;
 
+    typedef std::list<entry_t> entries_t;
     struct compound_definition_t{
-        std::list<entry_t> entries;
+        entries_t entries;
     };
 
     struct variable_definition_t{
@@ -117,6 +118,7 @@ namespace flavor{
     > value_t;
 
     typedef std::list<std::variant<std::shared_ptr<variable_t>, std::shared_ptr<compound_t>>> document_t;
+
     typedef std::map<
         std::string, std::variant<
             std::shared_ptr<bslbf_t>,
@@ -126,6 +128,8 @@ namespace flavor{
             std::shared_ptr<variable_definition_t>
         >
     > symbols_t;
+
+
     typedef std::map<std::string, value_t > values_t;
 }
 
