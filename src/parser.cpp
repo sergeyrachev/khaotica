@@ -12,17 +12,3 @@
 
 using namespace khaotica;
 
-parser_t::parser_t(std::ifstream& bitstream, const flavor::document_t& doc)
-    : bitreader(bitstream)
-{
-//    while(!bitstream.eof() && !bitstream.bad()){
-//        for(const auto& symbol : symbols){
-//            const auto v = std::visit(*this, symbol);
-//            for (auto &&item : v) {
-//                std::visit(*this, symbol, item);
-//            }
-//        }
-//
-//        logging::debug() << "";
-//    }
-}

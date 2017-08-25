@@ -17,8 +17,15 @@ namespace khaotica {
     public:
 
     public:
-        parser_t(std::ifstream& in, const flavor::document_t& doc);
+        parser_t( const flavor::document_t& doc) : doc(doc)
+        {
 
+        }
+
+        void parse(std::ifstream& in, const flavor::symbols_t& symbols){
+            bitreader_t bitreader(in);
+
+        }
     public:
 //        flavor::values_t operator( ) (const flavor::bslbf_t& bs) {
 //            flavor::values_t v;
@@ -66,6 +73,6 @@ namespace khaotica {
 //
 //        }
     private:
-        bitreader_t bitreader;
+        flavor::document_t doc;
     };
 }

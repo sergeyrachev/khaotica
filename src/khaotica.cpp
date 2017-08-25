@@ -8,6 +8,7 @@
 #include "options.h"
 
 #include "interpreter.h"
+#include "printer.h"
 
 int main( int argc, char* argv[] ) {
     namespace po = boost::program_options;
@@ -38,9 +39,11 @@ int main( int argc, char* argv[] ) {
     flavor::Interpreter driver;
     auto [doc, symbols] = driver.parse(f, true);
 
+    khaotica::printer_t printer(std::cout, doc, symbols);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-    //khaotica::parser_t renderer(bitstream, symbols);
+  //  khaotica::parser_t parser(doc);
+  //  parser.parse(bitstream, symbols);
 
     return 0;
 }
