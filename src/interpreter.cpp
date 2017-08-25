@@ -16,14 +16,15 @@ std::tuple<flavor::document_t, flavor::symbols_t> flavor::Interpreter::parse(std
     flavor::document_t doc;
     flavor::parser_t _parser(_scanner, symbols, doc);
 
-    _scanner.set_debug(enable_verbosity);
+    //_scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);
 
     std::ostringstream perr;
     _parser.set_debug_stream(perr);
 
     int ret = _parser.parse();
-    logging::debug() << "Parsing has ended with code " << ret << ": " << perr.str();
+    logging::debug() << "Parsing has ended with code " << ret << ": ";
+    logging::debug() << perr.str();
 
     return std::make_tuple(doc, symbols);
 }
