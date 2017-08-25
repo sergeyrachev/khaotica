@@ -149,6 +149,8 @@ entry
     auto condition = $7;
     auto modifier = $9;
     auto body = $11;
+
+    symbols[$3] = *initializer;
     $$ = for_t{variable, initializer, condition, modifier, body};
 }
 | "for" "(" ";" expression ";" expression ")" compound_definition {
