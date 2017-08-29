@@ -4,6 +4,7 @@
 #include "logging.h"
 #include "bit.h"
 #include "bitreader.h"
+#include "eval.h"
 
 #include <map>
 #include <string>
@@ -11,68 +12,81 @@
 #include <iostream>
 #include <bitset>
 #include <list>
+#include <cassert>
 
 namespace khaotica {
     class parser_t {
-    public:
+        class impl_t{
+            flavor::value_t eval(const flavor::expression_t& def){
+                return std::visit(eval_t(symbols, values), def.sentence);
+            }
+        public:
+            explicit impl_t(bitreader_t& bitreader, const flavor::symbols_t& symbols, flavor::values_t& values)
+                : bitreader(bitreader), symbols(symbols), values(values) {
+
+            }
+
+            void operator( )(const flavor::bslbf_t &bs) {
+                values.emplace(bs.name, bitreader.read(bs.length));
+            }
+
+            void operator( )(const flavor::uimsbf_t &bs) {
+                values.emplace(bs.name, khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length)));
+            }
+
+            void operator( )(const flavor::compound_t &bs) {
+                auto it = symbols.find(bs.name);
+                assert( it != symbols.end() );
+                const auto& compound_definition = it->second;
+                std::visit(*this, compound_definition);
+
+            }
+
+            void operator()(const flavor::compound_definition_t& bs){
+                for (const auto &entry : bs.entries) {
+                    std::visit(*this, entry);
+                }
+            }
+
+            void operator( )(const flavor::variable_t& node) {
+                auto it = symbols.find(node.name);
+                assert( it != symbols.end());
+                values.emplace(node.name, eval(std::get<flavor::expression_t>(it->second)));
+            }
+
+            void operator( )(const flavor::if_t& node) {
+                auto value = flavor::to_boolean(eval_t(symbols, values)(node.condition));
+                if(value){
+                    (*this)(*node._then);
+                } else if(node._else){
+                    (*this)(**node._else);
+                }
+            }
+
+            void operator( )(const flavor::for_t& node) {
+
+            }
+
+            void operator()(const auto &) {
+                flavor::values_t values;
+            }
+
+        private:
+            bitreader_t& bitreader;
+            const flavor::symbols_t& symbols;
+            flavor::values_t& values;
+        };
 
     public:
-        parser_t( const flavor::document_t& doc) : doc(doc)
-        {
-
-        }
-
-        void parse(std::ifstream& in, const flavor::symbols_t& symbols){
+        static flavor::values_t parse(std::ifstream& in, const flavor::document_t& doc, const flavor::symbols_t& symbols){
             bitreader_t bitreader(in);
+            flavor::values_t values;
+            impl_t impl(bitreader, symbols, values);
+            for (auto &&entry : doc) {
+                std::visit(impl, entry);
+            }
 
+            return values;
         }
-    public:
-//        flavor::values_t operator( ) (const flavor::bslbf_t& bs) {
-//            flavor::values_t v;
-//            v.push_back(bitreader.read(bs.length));
-//            return v;
-//        }
-//
-//        flavor::values_t operator( ) (const flavor::uimsbf_t& bs) {
-//            flavor::values_t v;
-//            v.push_back(khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length)));
-//            return v;
-//        }
-//
-//        flavor::values_t operator( ) (const flavor::compound_t& bs) {
-//            flavor::values_t values;
-//            for (const auto & symbol : bs.body) {
-//                const auto v = std::visit(*this, symbol);
-//                values.insert(values.end(), v.begin(), v.end());
-//            }
-//            return values;
-//        }
-//
-//        flavor::values_t operator()(const auto&){
-//            flavor::values_t values;
-//            return values;
-//        }
-//
-//        void operator( ) (const flavor::bslbf_t& s, const std::vector<bool>& v) {
-//            logging::debug()
-//                << s.name << "(" << s.length << "): " << khaotica::algorithm::to_hex(v)
-//                //<< "(" << std::hex << "0x" << khaotica::algorithm::to_ull_lsbf(v) << ")"
-//                ;
-//        }
-//
-//        void operator( ) (const flavor::uimsbf_t& s, const uint64_t& v) {
-//            logging::debug() << s.name << "(" << s.length << "): " << v << "(" << std::hex << "0x" << v << ")";
-//        }
-//
-//        void operator( ) (const flavor::compound_t& s, auto&& v) {
-//            logging::debug() << s.name << "(" << "): ";
-//
-//        }
-//
-//        void operator()(auto&&, auto&&){
-//
-//        }
-    private:
-        flavor::document_t doc;
     };
 }

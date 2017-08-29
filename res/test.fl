@@ -12,9 +12,13 @@ transport_packet(){
     }
     if(adaptation_field_control=='01' || adaptation_field_control=='11') {
         for (i=0;i<N;i++){
-             data_byte                                       8 bslbf
+             fakerest  1472 bslbf
         }
     }
+}
+
+adaptation_field() {
+     fakerest  1472 bslbf
 }
 
 N = 184
