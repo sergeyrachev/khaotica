@@ -36,14 +36,15 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    flavor::Interpreter driver;
-    auto [doc, symbols] = driver.parse(f, true);
-
-    khaotica::printer_t printer(std::cout, doc, symbols);
+    auto [doc, symbols] = flavor::Interpreter::parse(f, false);
+    //khaotica::printer_t::print(std::cout, doc, symbols);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-  //  khaotica::parser_t parser(doc);
-  //  parser.parse(bitstream, symbols);
+    while(!bitstream.bad() && !bitstream.eof()){
+        auto value = khaotica::parser_t::parse(bitstream, doc, symbols);
+        khaotica::printer_t::print(std::cout, doc, symbols, value);
+
+    }
 
     return 0;
 }

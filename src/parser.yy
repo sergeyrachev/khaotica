@@ -172,7 +172,7 @@ entry
 
 primary_expression
 : IDENTIFIER {
-    $$ = std::make_shared<expression_t>(expression_t{$1});
+    $$ = std::make_shared<expression_t>(expression_t{variable_t{$1}});
 }
 | INTEGER {
     $$ = std::make_shared<expression_t>(expression_t{$1});

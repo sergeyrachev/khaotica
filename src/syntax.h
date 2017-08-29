@@ -1,6 +1,7 @@
 #ifndef KHAOTICA_GRAMMAR_H
 #define KHAOTICA_GRAMMAR_H
 
+#include <type_traits>
 #include <string>
 #include <vector>
 #include <variant>
@@ -12,7 +13,6 @@
 
 namespace flavor{
 
-    struct variable_definition_t;
     struct compound_definition_t;
     struct expression_t;
 
@@ -104,12 +104,12 @@ namespace flavor{
 
     struct expression_t {
         std::variant<
-            std::string,
+            variable_t,
             integer_t,
             bitstring_t,
             unary_expression_t,
             binary_expression_t,
-            std::shared_ptr<expression_t>
+            std::shared_ptr<const expression_t>
         > sentence;
     };
 
@@ -120,15 +120,34 @@ namespace flavor{
         >
     > document_t;
 
-    typedef std::map<
-        std::string, std::variant<
-            bslbf_t,
-            uimsbf_t,
-            tcimsbf_t,
-            compound_definition_t,
-            expression_t
-        >
-    > symbols_t;
+    typedef std::variant<
+        bslbf_t,
+        uimsbf_t,
+        tcimsbf_t,
+        compound_definition_t,
+        expression_t
+    > symbol_t;
+    typedef std::map< const std::string, symbol_t > symbols_t;
+
+    typedef std::variant<
+        std::vector<bool>,
+        uint64_t,
+        int64_t,
+        bool
+    > value_t;
+    typedef std::map< const std::string, value_t > values_t;
+
+    // TODO: It is a temporary solution; there is a plan to print if\for evaluation steps also.
+    inline bool to_boolean(const value_t& value){
+        return std::visit([](auto&& value)->bool {
+            using T = std::decay_t<decltype(value)>;
+            if constexpr (std::is_same_v<T, std::vector<bool>> ) {
+                return !value.empty();
+            } else {
+                return value;
+            }
+        }, value);
+    }
 }
 
 #endif //KHAOTICA_GRAMMAR_H

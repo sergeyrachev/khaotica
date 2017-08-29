@@ -6,6 +6,8 @@
 #define KHAOTICA_PRINTER_H
 
 #include "syntax.h"
+#include "bit.h"
+#include "eval.h"
 
 #include <iostream>
 
@@ -24,38 +26,74 @@ namespace khaotica{
                 size_t& alignment;
             };
 
+            class echo_t {
+            public:
+                echo_t(std::ostream& out):out(out){}
+
+                void operator()(const flavor::variable_t& node ){
+                    out << node.name;
+                }
+                void operator()(const flavor::integer_t& node ){
+                    out << node.value;
+                }
+                void operator()(const flavor::bitstring_t& node ){
+                    out << "'" << node.value << "'";
+                }
+                void operator()(const flavor::unary_expression_t& node ){
+                    out << "( OP ";
+                    (*this)(node.operand);
+                }
+
+                void operator()(const flavor::binary_expression_t& node ){
+                    out << " ( ";
+                    (*this)(node.left_operand);
+                    out << " OP ";
+                    (*this)(node.right_operand);
+                    out << " ) ";
+                }
+
+                void operator()(const std::shared_ptr<const flavor::expression_t>& node ){
+                    std::visit(*this, node->sentence);
+                }
+
+                std::ostream& out;
+            };
         public:
-            explicit impl_t(std::ostream& out, const flavor::symbols_t& symbols)
+            explicit impl_t(std::ostream& out, const flavor::symbols_t& symbols, const flavor::values_t& values = {})
                 : out(out)
-                , symbols(symbols){
-
+                , symbols(symbols)
+                , values(values){
             }
 
-            void operator( )(const flavor::bslbf_t& value) {
+            void operator( )(const flavor::bslbf_t& node) {
+                // FIXME: Check absence, be robust, be flexible to print syntax tree only
+                const auto& value = std::get<std::vector<bool>>(values.at(node.name));
+
                 out << std::string(alignment, ' ')
-                    << value.name
-                    << "(" << value.length << ")"
+                    << node.name << "(" << node.length << ")"
+                    << " -> " << khaotica::algorithm::to_hex(value) << "(" << khaotica::algorithm::to_string(value) << ")"
                     << std::endl;
             }
 
-            void operator( )(const flavor::uimsbf_t& value) {
+            void operator( )(const flavor::uimsbf_t& node) {
+                const auto& value = std::get<uint64_t>(values.at(node.name));
                 out << std::string(alignment, ' ')
-                    << value.name
-                    << "(" << value.length << ")"
+                    << node.name << "(" << node.length << ")"
+                    << " -> " << khaotica::algorithm::to_hex(value) << "(" << value << ")"
                     << std::endl;
             }
 
-            void operator( )(const flavor::tcimsbf_t& value) {
+            void operator( )(const flavor::tcimsbf_t& node) {
                 out << std::string(alignment, ' ')
-                    << value.name
-                    << "(" << value.length << ")"
+                    << node.name
+                    << "(" << node.length << ")"
                     << std::endl;
             }
 
-            void operator( )(const flavor::compound_t& value) {
-                out << std::string(alignment, ' ') << value.name << "()";
+            void operator( )(const flavor::compound_t& node) {
+                out << std::string(alignment, ' ') << node.name << "()";
 
-                auto it = symbols.find(value.name);
+                auto it = symbols.find(node.name);
                 if(it != symbols.end()){
 
                     out << "{" << std::endl;
@@ -70,18 +108,10 @@ namespace khaotica{
                 }
             }
 
-            void operator( )(const flavor::bitstring_t& value) {
-                out << "'" << value.value << "'";
-            }
+            void operator( )(const flavor::variable_t& node) {
+                out << node.name;
 
-            void operator( )(const flavor::integer_t& value) {
-                out << value.value;
-            }
-
-            void operator( )(const flavor::variable_t& value) {
-                out << value.name;
-
-                auto it = symbols.find(value.name);
+                auto it = symbols.find(node.name);
                 if( it != symbols.end()){
                     out << " = ";
                     std::visit(*this, it->second);
@@ -90,98 +120,78 @@ namespace khaotica{
                 }
             }
 
-            void operator( )(const flavor::if_t& value) {
+            void operator( )(const flavor::if_t& node) {
                 out << std::string(alignment, ' ') << "if( " ;
-                (*this)(*value.condition);
+                (*this)(*node.condition);
                 out << ")";
 
-                {
-                    out << "{" << std::endl;
+                out << " -> if( ";
+                auto value = flavor::to_boolean(eval_t(symbols, values)(node.condition));
+                out << value;
+                out << " )";
+                out << "{" << std::endl;
+
+                if(value){
                     indent_t<> indent(alignment);
-                    (*this)(*value._then);
-
-                }
-
-                if( value._else){
+                    (*this)(*node._then);
+                } else if( node._else ){
                     out << "} else {" << std::endl;
                     indent_t<> indent(alignment);
-                    (*this)(**value._else);
+                    (*this)(**node._else);
                 }
+
                 out << std::string(alignment, ' ') << "}" << std::endl;
             }
 
-            void operator( )(const flavor::for_t& value) {
+            void operator( )(const flavor::for_t& node) {
                 out << std::string(alignment, ' ') << "for( " ;
-                if(value.counter){
-                    (*this)(*value.counter);
+                if(node.counter){
+                    (*this)(*node.counter);
                 }
                 out << "; ";
-                if(value.condition){
-                    (*this)(**value.condition);
+                if(node.condition){
+                    (*this)(**node.condition);
                 }
                 out << "; ";
-                if(value.modifier){
-                    (*this)(**value.modifier);
+                if(node.modifier){
+                    (*this)(**node.modifier);
                 }
                 out << ")";
 
                 out << "{" << std::endl;
+
                 {
                     indent_t<> indent(alignment);
-                    (*this)(*value.body);
+                    (*this)(*node.body);
                 }
                 out << std::string(alignment, ' ') << "}" << std::endl;
             }
 
-            void operator( )(const flavor::compound_definition_t& value) {
-                for (auto &&entry : value.entries) {
+            void operator( )(const flavor::compound_definition_t& node) {
+                for (auto &&entry : node.entries) {
                     std::visit(*this, entry);
                 }
             }
 
-            void operator( )(const flavor::expression_t& value) {
-                std::visit(*this, value.sentence);
-            }
-
-            void operator( )(const flavor::unary_expression_t& value) {
-                out << "( OP ";
-                (*this)(*value.operand);
-                out << " )";
-            }
-
-            void operator( )(const flavor::binary_expression_t& value) {
-
-                out << "( ";
-                (*this)(*value.left_operand);
-                out << " OP ";
-                (*this)(*value.right_operand);
-                out << " )";
-            }
-
-            void operator( )(const std::shared_ptr<flavor::expression_t>& value) {
-                (*this)(*value);
-            }
-
-            void operator( )(const std::string& value) {
-                out << value;
+            void operator( )(const flavor::expression_t& node) {
+                std::visit(echo_t(out), node.sentence);
             }
 
         private:
             std::ostream& out;
             const flavor::symbols_t& symbols;
+            const flavor::values_t& values;
             size_t alignment{0};
-
         };
     public:
-        printer_t(std::ostream& out, const flavor::document_t& doc, const flavor::symbols_t& symbols){
-            impl_t impl(out, symbols);
+        static void print(std::ostream& out, const flavor::document_t& doc, const flavor::symbols_t& symbols, const flavor::values_t& values){
+            impl_t impl(out, symbols, values);
             for(auto&& entry : doc){
                 std::visit(impl, entry);
             }
+
+            out << std::endl;
         }
-
-    private:
-
     };
 }
 #endif //KHAOTICA_PRINTER_H

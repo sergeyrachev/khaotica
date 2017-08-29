@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <sstream>
 #include <iomanip>
+#include <cassert>
 
 namespace khaotica {
     namespace algorithm {
@@ -23,9 +24,19 @@ namespace khaotica {
             return ret;
         }
 
+        inline std::vector<bool> unpack(const std::string& v) {
+            std::vector<bool> ret;
+            for (auto &&entry : v) {
+                assert(entry == '0' || entry == '1');
+                bool bit = entry == '1';
+                ret.push_back(bit);
+            }
+            return ret;
+        }
+
         inline uint64_t to_ull_msbf(const std::vector<bool> &v) {
             uint64_t u(0);
-            for (auto it = v.rbegin(); it != v.rend(); ++it) {
+            for (auto it = v.begin(); it != v.end(); ++it) {
                 u <<= 1;
                 u |= *it;
             }
@@ -51,8 +62,15 @@ namespace khaotica {
             return ss.str();
         }
 
+        inline std::string to_hex(uint64_t v) {
+            std::stringstream ss;
+            ss << std::hex << v;
+            return ss.str();
+        }
+
         inline std::string to_hex(const std::vector<bool> &v) {
             std::stringstream ss;
+            ss << "0x";
             uint16_t value(0);
             size_t idx(0);
             for (const auto &&b : v) {
