@@ -129,12 +129,15 @@ namespace flavor{
     > symbol_t;
     typedef std::map< const std::string, symbol_t > symbols_t;
 
-    typedef std::variant<
-        std::vector<bool>,
-        uint64_t,
-        int64_t,
-        bool
-    > value_t;
+    struct value_t{
+        std::variant<
+            std::vector<bool>,
+            uint64_t,
+            int64_t,
+            bool,
+            std::list<std::shared_ptr<value_t>>
+        > value;
+    };
     typedef std::map< const std::string, value_t > values_t;
 
     // TODO: It is a temporary solution; there is a plan to print if\for evaluation steps also.
@@ -142,11 +145,13 @@ namespace flavor{
         return std::visit([](auto&& value)->bool {
             using T = std::decay_t<decltype(value)>;
             if constexpr (std::is_same_v<T, std::vector<bool>> ) {
-                return !value.empty();
+                return {!value.empty()};
+            } else if constexpr (std::is_same_v<T, std::list<std::shared_ptr<value_t>>> ) {
+                return {!value.empty()};
             } else {
                 return value;
             }
-        }, value);
+        }, value.value);
     }
 }
 

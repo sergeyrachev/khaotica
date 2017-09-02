@@ -27,11 +27,11 @@ namespace khaotica {
             }
 
             void operator( )(const flavor::bslbf_t &bs) {
-                values.emplace(bs.name, bitreader.read(bs.length));
+                values.emplace(bs.name, flavor::value_t{bitreader.read(bs.length)});
             }
 
             void operator( )(const flavor::uimsbf_t &bs) {
-                values.emplace(bs.name, khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length)));
+                values.emplace(bs.name, flavor::value_t{khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length))});
             }
 
             void operator( )(const flavor::compound_t &bs) {
@@ -65,6 +65,14 @@ namespace khaotica {
 
             void operator( )(const flavor::for_t& node) {
 
+                values.emplace(node.counter->name, eval(**node.initializer));
+
+                while(auto condition = flavor::to_boolean(eval(**node.condition))){
+
+                    (*this)(*node.body);
+
+                    values[node.counter->name] = eval(**node.modifier);
+                }
             }
 
             void operator()(const auto &) {
