@@ -16,49 +16,74 @@
 namespace khaotica{
     struct operation_t{
         flavor::value_t operator()(const auto& operation, const auto& operand){
-            assert((false, "It is unlikely to call this operation on this value"));
+            assert(false && "It is unlikely to call this operation on this value");
             return {};
         }
 
         flavor::value_t operator()(const std::negate<>& op, const int64_t& v){
-            return op(v);
+            return {op(v)};
         }
 
         flavor::value_t operator()(const std::logical_not<>& op, const int64_t& v){
-            return op(v);
+            return {op(v)};
         }
 
         flavor::value_t operator()(const std::logical_not<>& op, const uint64_t& v){
-            return op(v);
+            return {op(v)};
         }
 
         flavor::value_t operator()(const std::bit_not<>& op, const std::vector<bool>& v){
             auto ret = v;
             ret.flip();
-            return ret;
+            return {ret};
         }
 
         flavor::value_t operator()(const std::bit_not<>& op, const uint64_t& v){
-            return op(v);
+            return {op(v)};
         }
 
         flavor::value_t operator()(const std::bit_not<>& op, const int64_t& v){
-            return op(v);
+            return {op(v)};
         }
 
         flavor::value_t operator()(const auto& left_operand, const auto& operation, const auto& right_operand){
-            assert((false, "It is unlikely to call operation with these values"));
+            assert(false && "It is unlikely to call operation with these values");
             return {};
+        }
+
+        flavor::value_t operator()(const int64_t & left_operand, const std::less<>& operation, const int64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const int64_t & left_operand, const std::plus<>& operation, const int64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const int64_t& left_operand, const std::greater<>& operation, const int64_t& right_operand){
+            return {operation(left_operand, right_operand)};
         }
 
         flavor::value_t operator()(const std::vector<bool>& left_operand, const std::equal_to<>& operation, const std::vector<bool>& right_operand){
             auto l = khaotica::algorithm::to_string(left_operand);
             auto r = khaotica::algorithm::to_string(right_operand);
-            return operation(left_operand, right_operand);
+            return {operation(left_operand, right_operand)};
         }
 
+        flavor::value_t operator()(const std::vector<bool>& left_operand, const std::less<>& operation, const std::vector<bool>& right_operand){
+            auto l = khaotica::algorithm::to_string(left_operand);
+            auto r = khaotica::algorithm::to_string(right_operand);
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const std::vector<bool>& left_operand, const std::greater<>& operation, const std::vector<bool>& right_operand){
+            auto l = khaotica::algorithm::to_string(left_operand);
+            auto r = khaotica::algorithm::to_string(right_operand);
+            return {operation(left_operand, right_operand)};
+        }
+
+
         flavor::value_t operator()(const bool& left_operand, const std::logical_or<>& operation, const bool& right_operand){
-            return operation(left_operand, right_operand);
+            return {operation(left_operand, right_operand)};
         }
     };
 
@@ -69,11 +94,11 @@ namespace khaotica{
         }
 
         flavor::value_t operator()(const flavor::bitstring_t& node) {
-            return khaotica::algorithm::unpack(node.value);
+            return {khaotica::algorithm::unpack(node.value)};
         }
 
         flavor::value_t operator()(const flavor::integer_t& node) {
-            return node.value;
+            return {node.value};
         }
 
         flavor::value_t operator()(const flavor::variable_t& node) {
@@ -92,13 +117,13 @@ namespace khaotica{
 
         flavor::value_t operator()(const flavor::unary_expression_t& node) {
             auto operand = (*this)(node.operand);
-            return std::visit(operation_t(), node.operation, operand);
+            return std::visit(operation_t(), node.operation, operand.value);
         }
 
         flavor::value_t operator()(const flavor::binary_expression_t& node) {
             auto left_operand = (*this)(node.left_operand);
             auto right_operand = (*this)(node.right_operand);
-            return std::visit(operation_t(), left_operand, node.operation, right_operand);
+            return std::visit(operation_t(), left_operand.value, node.operation, right_operand.value);
         }
 
         flavor::value_t operator()(const std::shared_ptr<const flavor::expression_t>& node) {

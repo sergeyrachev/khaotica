@@ -67,7 +67,7 @@ namespace khaotica{
 
             void operator( )(const flavor::bslbf_t& node) {
                 // FIXME: Check absence, be robust, be flexible to print syntax tree only
-                const auto& value = std::get<std::vector<bool>>(values.at(node.name));
+                const auto& value = std::get<std::vector<bool>>(values.at(node.name).value);
 
                 out << std::string(alignment, ' ')
                     << node.name << "(" << node.length << ")"
@@ -76,7 +76,7 @@ namespace khaotica{
             }
 
             void operator( )(const flavor::uimsbf_t& node) {
-                const auto& value = std::get<uint64_t>(values.at(node.name));
+                const auto& value = std::get<uint64_t>(values.at(node.name).value);
                 out << std::string(alignment, ' ')
                     << node.name << "(" << node.length << ")"
                     << " -> " << khaotica::algorithm::to_hex(value) << "(" << value << ")"
