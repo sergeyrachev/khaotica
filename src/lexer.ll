@@ -60,7 +60,6 @@ bits       [01]+
 
 "*" return parser_t::make_MULTIPLY(_location);
 "/" return parser_t::make_DIVIDE(_location);
-"||" return parser_t::make_OR(_location);
 "<" return parser_t::make_LESSTHAN(_location);
 ">" return parser_t::make_GREATERTHAN(_location);
 "<=" return parser_t::make_LESSTHAN_EQUAL(_location);

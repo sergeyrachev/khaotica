@@ -250,8 +250,6 @@ relational_expression
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less_equal<>(), $3}});
 }| logical_expression ">=" logical_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater_equal<>(), $3}});
-}| logical_expression {
-    $$ = $1;
 }
 
 comparison_expression
@@ -261,6 +259,10 @@ comparison_expression
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }| relational_expression {
     $$ = $1;
+}| logical_expression "==" logical_expression {
+    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<>(), $3}});
+}| logical_expression "!=" logical_expression {
+     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }
 
 logical_expression_and
@@ -306,12 +308,9 @@ entries
 ;
 
 bitstream
-: IDENTIFIER "(" ")" compound_definition{
+: IDENTIFIER "(" ")" compound_definition bitstream{
     doc.push_back(compound_t{$1});
     symbols[$1] = *($4);
-}| bitstream IDENTIFIER "(" ")" compound_definition {
-    doc.push_back(compound_t{$2});
-    symbols[$2] = *($5);
 }| IDENTIFIER "=" expression bitstream{
     doc.push_back(variable_t{$1});
     symbols[$1] = *($3);
