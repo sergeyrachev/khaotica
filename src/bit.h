@@ -46,7 +46,7 @@ namespace khaotica {
 
         inline uint64_t to_ull_lsbf(const std::vector<bool> &v) {
             uint64_t u(0);
-            for (auto it = v.begin(); it != v.end(); ++it) {
+            for (auto it = v.rbegin(); it != v.rend(); ++it) {
                 u <<= 1;
                 u |= *it;
             }

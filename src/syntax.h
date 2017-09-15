@@ -97,7 +97,9 @@ namespace flavor{
             std::not_equal_to<>,
             std::equal_to<>,
             std::less<>,
-            std::greater<>
+            std::greater<>,
+            std::less_equal<>,
+            std::greater_equal<>
         > operation;
         std::shared_ptr<expression_t> right_operand;
     };

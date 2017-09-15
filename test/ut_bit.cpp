@@ -18,13 +18,13 @@ TEST(Bit, UnpackLeastSignificantFirst){
 TEST(Bit, to_ull_msbf){
     auto u = to_ull_msbf({true, false, false, false, false, false, false, false});
 
-    ASSERT_EQ(1, u);
+    ASSERT_EQ(128, u);
 }
 
 TEST(Bit, to_ull_lsbf){
     auto u = to_ull_lsbf({true, false, false, false, false, false, false, false});
 
-    ASSERT_EQ(128, u);
+    ASSERT_EQ(1, u);
 }
 
 TEST(Bit, to_str){

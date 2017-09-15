@@ -44,6 +44,7 @@ bits       [01]+
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
 "lengthof" return parser_t::make_FUNCTION_LENGTHOF(_location);
 "==" return parser_t::make_EQUAL(_location);
+"!=" return parser_t::make_NOTEQUAL(_location);
 "bslbf" return parser_t::make_MNEMONIC_BSLBF(_location);
 "uimsbf" return parser_t::make_MNEMONIC_UIMSBF(_location);
 "tcimsbf" return parser_t::make_MNEMONIC_TCIMSBF(_location);
@@ -51,14 +52,19 @@ bits       [01]+
 "=" return parser_t::make_ASSIGN(_location);
 ";" return parser_t::make_SEMICOLON(_location);
 "++" return parser_t::make_INCREMENT(_location);
+"&&" return parser_t::make_AND(_location);
+"||" return parser_t::make_OR(_location);
 "--" return parser_t::make_DECREMENT(_location);
 "-" return parser_t::make_MINUS(_location);
 "+" return parser_t::make_PLUS(_location);
 
 "*" return parser_t::make_MULTIPLY(_location);
+"/" return parser_t::make_DIVIDE(_location);
 "||" return parser_t::make_OR(_location);
 "<" return parser_t::make_LESSTHAN(_location);
 ">" return parser_t::make_GREATERTHAN(_location);
+"<=" return parser_t::make_LESSTHAN_EQUAL(_location);
+">=" return parser_t::make_GREATERTHAN_EQUAL(_location);
 
 \' {
     BEGIN(quoted);
