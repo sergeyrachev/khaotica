@@ -104,6 +104,22 @@ namespace flavor{
         std::shared_ptr<expression_t> right_operand;
     };
 
+    struct postincrement_t{
+        variable_t operand;
+        std::variant<
+            std::plus<>,
+            std::minus<>
+        > operation;
+    };
+
+    struct preincrement_t{
+        variable_t operand;
+        std::variant<
+            std::plus<>,
+            std::minus<>
+        > operation;
+    };
+
     struct expression_t {
         std::variant<
             variable_t,
@@ -111,6 +127,8 @@ namespace flavor{
             bitstring_t,
             unary_expression_t,
             binary_expression_t,
+            postincrement_t,
+            preincrement_t,
             std::shared_ptr<const expression_t>
         > sentence;
     };

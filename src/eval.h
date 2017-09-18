@@ -55,6 +55,18 @@ namespace khaotica{
             return {operation(left_operand, right_operand)};
         }
 
+        flavor::value_t operator()(const int64_t & left_operand, const std::less<>& operation, const uint64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const int64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const uint64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
         flavor::value_t operator()(const int64_t & left_operand, const std::plus<>& operation, const int64_t& right_operand){
             return {operation(left_operand, right_operand)};
         }
@@ -124,6 +136,20 @@ namespace khaotica{
             auto left_operand = (*this)(node.left_operand);
             auto right_operand = (*this)(node.right_operand);
             return std::visit(operation_t(), left_operand.value, node.operation, right_operand.value);
+        }
+
+        flavor::value_t operator()(const flavor::postincrement_t& node) {
+            auto operand = (*this)(node.operand);
+            flavor::value_t inc;
+            inc.value = static_cast<int64_t>(1);
+            return std::visit(operation_t(), operand.value, node.operation, inc.value);
+        }
+
+        flavor::value_t operator()(const flavor::preincrement_t& node) {
+            auto operand = (*this)(node.operand);
+            flavor::value_t inc;
+            inc.value = static_cast<int64_t>(1);
+            return std::visit(operation_t(), operand.value, node.operation, inc.value);
         }
 
         flavor::value_t operator()(const std::shared_ptr<const flavor::expression_t>& node) {
