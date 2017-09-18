@@ -114,7 +114,6 @@
 %type <std::shared_ptr<expression_t>> multiplicative_expr
 %type <std::shared_ptr<expression_t>> additive_expression
 %type <std::shared_ptr<expression_t>> logical_expression
-%type <std::shared_ptr<expression_t>> logical_expression_or
 %type <std::shared_ptr<expression_t>> logical_expression_and
 %type <std::shared_ptr<expression_t>> postfix_expression
 %type <std::shared_ptr<expression_t>> prefix_expression
@@ -139,7 +138,7 @@ entry
     symbols[$1] = entry;
 }| IDENTIFIER "(" ")" {
     $$ = compound_t{$1};
-}| "if" "(" expression ")" compound_definition {
+}| "if" "(" logical_expression ")" compound_definition {
     auto condition = $3;
     auto _then =  $5;
     $$ = if_t{condition, _then, std::nullopt};
@@ -242,14 +241,16 @@ additive_expression
 ;
 
 relational_expression
-: logical_expression "<" logical_expression  {
+: additive_expression "<" additive_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less<>(), $3}});
-}| logical_expression ">" logical_expression  {
+}| additive_expression ">" additive_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater<>(), $3}});
-}| logical_expression "<=" logical_expression  {
+}| additive_expression "<=" additive_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less_equal<>(), $3}});
-}| logical_expression ">=" logical_expression  {
+}| additive_expression ">=" additive_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater_equal<>(), $3}});
+}| additive_expression {
+    $$ = $1;
 }
 
 comparison_expression
@@ -259,10 +260,6 @@ comparison_expression
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }| relational_expression {
     $$ = $1;
-}| logical_expression "==" logical_expression {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<>(), $3}});
-}| logical_expression "!=" logical_expression {
-     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }
 
 logical_expression_and
@@ -272,22 +269,15 @@ logical_expression_and
     $$ = $1;
 }
 
-logical_expression_or
-: logical_expression_or "||" logical_expression_and{
+logical_expression
+: logical_expression "||" logical_expression_and{
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<>(), $3}});
 }| logical_expression_and{
     $$ = $1;
 }
 
-logical_expression
-: additive_expression {
-    $$ = $1;
-}| "(" logical_expression ")"{
-    $$ = $2;
-}
-
 expression
-: logical_expression_or {
+: logical_expression {
     $$ = $1;
 }
 
