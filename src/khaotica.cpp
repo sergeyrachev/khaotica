@@ -37,7 +37,6 @@ int main( int argc, char* argv[] ) {
     std::ifstream f(input_definition_filename);
 
     auto [doc, symbols] = flavor::Interpreter::parse(f, false);
-    //khaotica::printer_t::print(std::cout, doc, symbols);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     while(!bitstream.bad() && !bitstream.eof()){

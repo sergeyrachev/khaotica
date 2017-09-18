@@ -8,7 +8,7 @@ transport_packet(){
      adaptation_field_control                                2 bslbf
      continuity_counter                                      4 uimsbf
     if(adaptation_field_control=='10' || adaptation_field_control=='11' ){
-
+         adaptation_field()
     }
     if(adaptation_field_control=='01' || adaptation_field_control=='11') {
         for (i=0;i<N;i++){
@@ -17,6 +17,12 @@ transport_packet(){
     }
 }
 
+adaptation_field() {
+     adaptation_field_length                                 8 uimsbf
+     for (j=0;j<adaptation_field_length;j++){
+        fakerest2  8 bslbf
+     }
+}
 
-N = 184
+N = 184 - adaptation_field_length
 

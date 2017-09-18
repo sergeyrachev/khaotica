@@ -73,6 +73,8 @@ namespace khaotica {
 
                     values[node.counter->name] = eval(**node.modifier);
                 }
+
+                values.erase(node.counter->name);
             }
 
             void operator()(const auto &) {

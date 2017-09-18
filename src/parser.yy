@@ -188,24 +188,16 @@ primary_expression
 
 postfix_expression
 : IDENTIFIER "++" {
-    auto variable = std::make_shared<expression_t>(expression_t{variable_t{$1}});
-    auto increment = std::make_shared<expression_t>(expression_t{integer_t{1}});
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{ variable, std::plus<>(), increment}});
+    $$ = std::make_shared<expression_t>(expression_t{postincrement_t{ variable_t{$1}, std::plus<>()}});
 }| IDENTIFIER "--" {
-    auto variable = std::make_shared<expression_t>(expression_t{variable_t{$1}});
-    auto increment = std::make_shared<expression_t>(expression_t{integer_t{1}});
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{ variable, std::minus<>(), increment}});
+    $$ = std::make_shared<expression_t>(expression_t{postincrement_t{ variable_t{$1}, std::minus<>()}});
 }
 
 prefix_expression
 : "++" IDENTIFIER {
-    auto variable = std::make_shared<expression_t>(expression_t{variable_t{$2}});
-    auto increment = std::make_shared<expression_t>(expression_t{integer_t{1}});
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{ variable, std::plus<>(), increment}});
+    $$ = std::make_shared<expression_t>(expression_t{preincrement_t{ variable_t{$2}, std::plus<>()}});
 }| "--" IDENTIFIER {
-    auto variable = std::make_shared<expression_t>(expression_t{variable_t{$2}});
-    auto increment = std::make_shared<expression_t>(expression_t{integer_t{1}});
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{ variable, std::minus<>(), increment}});
+    $$ = std::make_shared<expression_t>(expression_t{preincrement_t{ variable_t{$2}, std::minus<>()}});
 }
 
 unary_expr
@@ -294,10 +286,11 @@ entries
 
 bitstream
 : IDENTIFIER "(" ")" compound_definition bitstream{
-    doc.push_back(compound_t{$1});
+    doc.push_front(compound_t{$1});
     symbols[$1] = *($4);
-}| IDENTIFIER "=" expression bitstream{
-    doc.push_back(variable_t{$1});
+
+}| IDENTIFIER "=" expression bitstream {
+    doc.push_front(variable_t{$1});
     symbols[$1] = *($3);
 }| END
 ;
