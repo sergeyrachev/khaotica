@@ -41,6 +41,7 @@ bits       [01]+
 "while" return parser_t::make_WHILE(_location);
 "for" return parser_t::make_FOR(_location);
 "if" return parser_t::make_IF(_location);
+"else" return parser_t::make_ELSE(_location);
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
 "lengthof" return parser_t::make_FUNCTION_LENGTHOF(_location);
 "==" return parser_t::make_EQUAL(_location);

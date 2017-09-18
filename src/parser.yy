@@ -67,6 +67,7 @@
 %token WHILE "while"
 %token FOR "for"
 %token IF "if"
+%token ELSE "else"
 %token FUNCTION_NEXTBITS "nextbits"
 %token FUNCTION_LENGTHOF "lengthof"
 
