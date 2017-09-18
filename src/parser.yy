@@ -114,7 +114,6 @@
 %type <std::shared_ptr<expression_t>> unary_expr
 %type <std::shared_ptr<expression_t>> multiplicative_expr
 %type <std::shared_ptr<expression_t>> additive_expression
-%type <std::shared_ptr<expression_t>> logical_expression
 %type <std::shared_ptr<expression_t>> logical_expression_and
 %type <std::shared_ptr<expression_t>> postfix_expression
 %type <std::shared_ptr<expression_t>> prefix_expression
@@ -139,16 +138,16 @@ entry
     symbols[$1] = entry;
 }| IDENTIFIER "(" ")" {
     $$ = compound_t{$1};
-}| "if" "(" logical_expression ")" compound_definition {
+}| "if" "(" expression ")" compound_definition {
     auto condition = $3;
     auto _then =  $5;
     $$ = if_t{condition, _then, std::nullopt};
-}| "if" "(" logical_expression ")" compound_definition "else" compound_definition {
+}| "if" "(" expression ")" compound_definition "else" compound_definition {
     auto condition = $3;
     auto _then =  $5;
     auto _else =  $7;
     $$ = if_t{condition, _then, _else};
-}| "for" "(" IDENTIFIER "=" expression ";" logical_expression ";" expression ")" compound_definition {
+}| "for" "(" IDENTIFIER "=" expression ";" expression ";" expression ")" compound_definition {
     auto variable = variable_t{$3};
     auto initializer = $5;
     auto condition = $7;
@@ -157,12 +156,12 @@ entry
 
     symbols[$3] = *initializer;
     $$ = for_t{variable, initializer, condition, modifier, body};
-}| "for" "(" ";" logical_expression ";" expression ")" compound_definition {
+}| "for" "(" ";" expression ";" expression ")" compound_definition {
     auto condition = $4;
     auto modifier = $6;
     auto body = $8;
     $$ = for_t{std::nullopt, nullptr, condition, modifier, body};
-}| "for" "(" ";" logical_expression ";" ")" compound_definition {
+}| "for" "(" ";" expression ";" ")" compound_definition {
     auto condition = $4;
     auto body = $7;
     $$ = for_t{std::nullopt, nullptr, condition, nullptr, body};
@@ -270,15 +269,10 @@ logical_expression_and
     $$ = $1;
 }
 
-logical_expression
-: logical_expression "||" logical_expression_and{
+expression
+: expression "||" logical_expression_and{
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<>(), $3}});
 }| logical_expression_and{
-    $$ = $1;
-}
-
-expression
-: logical_expression {
     $$ = $1;
 }
 
