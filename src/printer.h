@@ -43,14 +43,12 @@ namespace khaotica{
                     out << "( OP ";
                     (*this)(node.operand);
                 }
-
                 void operator()(const flavor::postincrement_t& node ){
                     out << node.operand.name << " -< " << node.operand.name << " OP " << 1;
                 }
                 void operator()(const flavor::preincrement_t& node ){
                     out << node.operand.name << " >- " << node.operand.name << " OP " << 1;
                 }
-
                 void operator()(const flavor::binary_expression_t& node ){
                     out << " ( ";
                     (*this)(node.left_operand);
@@ -58,7 +56,6 @@ namespace khaotica{
                     (*this)(node.right_operand);
                     out << " ) ";
                 }
-
                 void operator()(const std::shared_ptr<const flavor::expression_t>& node ){
                     std::visit(*this, node->sentence);
                 }

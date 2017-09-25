@@ -16,7 +16,7 @@
 #include "location.hh"
 
 namespace flavor{
-    class Interpreter;
+    class interpreter_t;
 
     class lexer_t : public yyFlexLexer {
     public:

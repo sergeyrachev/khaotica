@@ -27,11 +27,13 @@ namespace khaotica {
             }
 
             void operator( )(const flavor::bslbf_t &bs) {
-                values.emplace(bs.name, flavor::value_t{bitreader.read(bs.length)});
+                auto value = bitreader.read(bs.length);
+                values.emplace(bs.name, flavor::value_t{value});
             }
 
             void operator( )(const flavor::uimsbf_t &bs) {
-                values.emplace(bs.name, flavor::value_t{khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length))});
+                auto value = khaotica::algorithm::to_ull_msbf(bitreader.read(bs.length));
+                values.emplace(bs.name, flavor::value_t{value});
             }
 
             void operator( )(const flavor::compound_t &bs) {
