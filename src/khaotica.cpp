@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream f(input_definition_filename);
 
-    auto [doc, symbols] = flavor::Interpreter::parse(f, false);
+    auto [doc, symbols] = flavor::interpreter_t::parse(f, false);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     while(!bitstream.bad() && !bitstream.eof()){

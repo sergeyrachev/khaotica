@@ -63,6 +63,14 @@ namespace khaotica{
             return {operation(left_operand, right_operand)};
         }
 
+        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const bool& right_operand){
+            return {operation(left_operand, (int64_t)right_operand)};
+        }
+
+        flavor::value_t operator()(const uint64_t & left_operand, const std::minus<>& operation, const bool& right_operand){
+            return {operation(left_operand, (uint64_t)right_operand)};
+        }
+
         flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const uint64_t& right_operand){
             return {operation(left_operand, right_operand)};
         }
@@ -72,6 +80,10 @@ namespace khaotica{
         }
 
         flavor::value_t operator()(const int64_t& left_operand, const std::greater<>& operation, const int64_t& right_operand){
+            return {operation(left_operand, right_operand)};
+        }
+
+        flavor::value_t operator()(const uint64_t& left_operand, const std::greater<>& operation, const int64_t& right_operand){
             return {operation(left_operand, right_operand)};
         }
 
@@ -122,9 +134,14 @@ namespace khaotica{
 
             auto it = symbols.find(node.name);
             assert( it != symbols.end());
-            auto&& def = std::get<flavor::expression_t>(it->second);
-            auto value = std::visit(*this, def.sentence);
-            return value;
+
+            if(auto expr_ptr = std::get_if<flavor::expression_t>(&it->second)){
+                auto& def = *expr_ptr;
+                auto value = std::visit(*this, def.sentence);
+                return value;
+            }
+
+            return {int64_t(0)};
         }
 
         flavor::value_t operator()(const flavor::unary_expression_t& node) {

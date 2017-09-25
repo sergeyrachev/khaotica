@@ -7,7 +7,7 @@
 #include "lexer.h"
 #include "logging.h"
 
-std::tuple<flavor::document_t, flavor::symbols_t> flavor::Interpreter::parse(std::istream &in, bool enable_verbosity) {
+std::tuple<flavor::document_t, flavor::symbols_t> flavor::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
     flavor::lexer_t _scanner(in, serr);

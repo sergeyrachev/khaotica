@@ -9,7 +9,7 @@
 #include <list>
 
 namespace flavor{
-    class Interpreter {
+    class interpreter_t {
     public:
         static std::tuple<flavor::document_t, flavor::symbols_t> parse(std::istream &in, bool enable_verbosity = true);
     };
