@@ -1,4 +1,3 @@
-
 set(gtest_force_shared_crt ON)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/googletest EXCLUDE_FROM_ALL)
 set(GTEST_LIBRARIES gmock_main)
