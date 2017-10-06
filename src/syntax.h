@@ -35,16 +35,16 @@ namespace flavor{
         std::string name;
     };
 
+    struct variable_t{
+        std::string name;
+    };
+
     struct bitstring_t{
         std::string value;
     };
 
     struct integer_t{
-        int64_t value;
-    };
-
-    struct variable_t{
-        std::string name;
+        uint64_t value;
     };
 
     struct if_t{
@@ -54,7 +54,6 @@ namespace flavor{
     };
 
     struct for_t {
-        std::optional<variable_t> counter;
         std::optional<std::shared_ptr<expression_t>> initializer;
         std::optional<std::shared_ptr<expression_t>> condition;
         std::optional<std::shared_ptr<expression_t>> modifier;
@@ -104,8 +103,12 @@ namespace flavor{
         std::shared_ptr<expression_t> right_operand;
     };
 
+    struct assignment_t {
+        variable_t variable;
+        std::shared_ptr<expression_t> expression;
+    };
+
     struct postincrement_t{
-        variable_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -113,7 +116,6 @@ namespace flavor{
     };
 
     struct preincrement_t{
-        variable_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -129,7 +131,7 @@ namespace flavor{
             binary_expression_t,
             postincrement_t,
             preincrement_t,
-            std::shared_ptr<const expression_t>
+            assignment_t
         > sentence;
     };
 
@@ -145,7 +147,7 @@ namespace flavor{
         uimsbf_t,
         tcimsbf_t,
         compound_definition_t,
-        expression_t
+        assignment_t
     > symbol_t;
     typedef std::map< const std::string, symbol_t > symbols_t;
 
@@ -154,25 +156,24 @@ namespace flavor{
             std::vector<bool>,
             uint64_t,
             int64_t,
-            bool,
             std::list<std::shared_ptr<value_t>>
         > value;
     };
     typedef std::map< const std::string, value_t > values_t;
 
-    // TODO: It is a temporary solution; there is a plan to print if\for evaluation steps also.
-    inline bool to_boolean(const value_t& value){
-        return std::visit([](auto&& value)->bool {
-            using T = std::decay_t<decltype(value)>;
-            if constexpr (std::is_same_v<T, std::vector<bool>> ) {
-                return {!value.empty()};
-            } else if constexpr (std::is_same_v<T, std::list<std::shared_ptr<value_t>>> ) {
-                return {!value.empty()};
-            } else {
-                return value;
-            }
-        }, value.value);
-    }
+//    // TODO: It is a temporary solution; there is a plan to print if\for evaluation steps also.
+//    inline bool to_boolean(const value_t& value){
+//        return std::visit([](auto&& value)->bool {
+//            using T = std::decay_t<decltype(value)>;
+//            if constexpr (std::is_same_v<T, std::vector<bool>> ) {
+//                return {!value.empty()};
+//            } else if constexpr (std::is_same_v<T, std::list<std::shared_ptr<value_t>>> ) {
+//                return {!value.empty()};
+//            } else {
+//                return value;
+//            }
+//        }, value.value);
+//    }
 }
 
 #endif //KHAOTICA_GRAMMAR_H
