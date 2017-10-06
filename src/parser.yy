@@ -140,7 +140,10 @@ entry
     symbols[$1] = entry;
 }| compound_signature {
     $$ = $1;
-    symbols[$1.name] = compound_definition_t{};
+    auto it = symbols.find($1.name);
+    if( it == symbols.end() ){
+        symbols[$1.name] = compound_definition_t{};
+    }
 
 }| "if" "(" expression ")" compound_definition {
     auto condition = $3;
@@ -194,23 +197,23 @@ primary_expression
 
 postfix_expression
 : IDENTIFIER "++" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::plus<>()}});
     assignment_t assignment{variable_t{$1}, expr};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
 
 }| IDENTIFIER "--" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::minus<>()}});
     assignment_t assignment{variable_t{$1}, expr};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
 }
 
 prefix_expression
 : "++" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::plus<>()}});
     assignment_t assignment{variable_t{$2}, expr};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
 }| "--" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::minus<>()}});
     assignment_t assignment{variable_t{$2}, expr};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
 }
@@ -312,10 +315,11 @@ entries
 bitstream
 : compound_signature compound_definition bitstream{
     auto it = symbols.find($1.name);
-    if( it != symbols.end() ){
-        it->second = {*$2};
-    } else {
+    if( it == symbols.end() ){
         doc.push_front($1);
+        symbols[$1.name] = {*$2};
+    } else {
+        it->second = {*$2};
     }
 
 }| IDENTIFIER "=" expression bitstream {
