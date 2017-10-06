@@ -100,12 +100,13 @@
 %token LESSTHAN_EQUAL "<="
 %token GREATERTHAN_EQUAL ">="
 
+
 %token <std::string> IDENTIFIER
 %token <bitstring_t> BITSTRING
 %token <integer_t> INTEGER
-
 %type <entry_t> entry
 %type <entries_t> entries
+%type <compound_t> compound_signature
 
 %type <std::shared_ptr<compound_definition_t>> compound_definition
 
@@ -114,7 +115,8 @@
 %type <std::shared_ptr<expression_t>> unary_expr
 %type <std::shared_ptr<expression_t>> multiplicative_expr
 %type <std::shared_ptr<expression_t>> additive_expression
-%type <std::shared_ptr<expression_t>> logical_expression_and
+%type <std::shared_ptr<expression_t>> logical_and
+%type <std::shared_ptr<expression_t>> logical_or
 %type <std::shared_ptr<expression_t>> postfix_expression
 %type <std::shared_ptr<expression_t>> prefix_expression
 %type <std::shared_ptr<expression_t>> relational_expression
@@ -136,8 +138,10 @@ entry
     tcimsbf_t entry{$1, $2.value};
     $$ = entry;
     symbols[$1] = entry;
-}| IDENTIFIER "(" ")" {
-    $$ = compound_t{$1};
+}| compound_signature {
+    $$ = $1;
+    symbols[$1.name] = compound_definition_t{};
+
 }| "if" "(" expression ")" compound_definition {
     auto condition = $3;
     auto _then =  $5;
@@ -147,29 +151,31 @@ entry
     auto _then =  $5;
     auto _else =  $7;
     $$ = if_t{condition, _then, _else};
-}| "for" "(" IDENTIFIER "=" expression ";" expression ";" expression ")" compound_definition {
-    auto variable = variable_t{$3};
-    auto initializer = $5;
-    auto condition = $7;
-    auto modifier = $9;
-    auto body = $11;
-
-    symbols[$3] = *initializer;
-    $$ = for_t{variable, initializer, condition, modifier, body};
+}| "for" "(" expression ";" expression ";" expression ")" compound_definition {
+    auto initializer = $3;
+    auto condition = $5;
+    auto modifier = $7;
+    auto body = $9;
+    $$ = for_t{initializer, condition, modifier, body};
 }| "for" "(" ";" expression ";" expression ")" compound_definition {
     auto condition = $4;
     auto modifier = $6;
     auto body = $8;
-    $$ = for_t{std::nullopt, nullptr, condition, modifier, body};
+    $$ = for_t{ nullptr, condition, modifier, body};
 }| "for" "(" ";" expression ";" ")" compound_definition {
     auto condition = $4;
     auto body = $7;
-    $$ = for_t{std::nullopt, nullptr, condition, nullptr, body};
+    $$ = for_t{nullptr, condition, nullptr, body};
 }| "for" "(" ";" ";" ")" compound_definition {
     auto body = $6;
-    $$ = for_t{std::nullopt, nullptr, nullptr, nullptr, body};
+    $$ = for_t{nullptr, nullptr, nullptr, body};
 }
 ;
+
+compound_signature
+: IDENTIFIER "(" ")" {
+    $$ = compound_t{$1};
+}
 
 primary_expression
 : IDENTIFIER {
@@ -188,16 +194,25 @@ primary_expression
 
 postfix_expression
 : IDENTIFIER "++" {
-    $$ = std::make_shared<expression_t>(expression_t{postincrement_t{ variable_t{$1}, std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{std::plus<>()}});
+    assignment_t assignment{variable_t{$1}, expr};
+    $$ = std::make_shared<expression_t>(expression_t{assignment});
+
 }| IDENTIFIER "--" {
-    $$ = std::make_shared<expression_t>(expression_t{postincrement_t{ variable_t{$1}, std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{std::minus<>()}});
+    assignment_t assignment{variable_t{$1}, expr};
+    $$ = std::make_shared<expression_t>(expression_t{assignment});
 }
 
 prefix_expression
 : "++" IDENTIFIER {
-    $$ = std::make_shared<expression_t>(expression_t{preincrement_t{ variable_t{$2}, std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{std::plus<>()}});
+    assignment_t assignment{variable_t{$2}, expr};
+    $$ = std::make_shared<expression_t>(expression_t{assignment});
 }| "--" IDENTIFIER {
-    $$ = std::make_shared<expression_t>(expression_t{preincrement_t{ variable_t{$2}, std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{std::minus<>()}});
+    assignment_t assignment{variable_t{$2}, expr};
+    $$ = std::make_shared<expression_t>(expression_t{assignment});
 }
 
 unary_expr
@@ -254,18 +269,27 @@ comparison_expression
     $$ = $1;
 }
 
-logical_expression_and
-: logical_expression_and "&&" comparison_expression {
+logical_and
+: logical_and "&&" comparison_expression {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_and<>(), $3}});
 }| comparison_expression{
     $$ = $1;
 }
 
-expression
-: expression "||" logical_expression_and{
+logical_or
+: logical_or "||" logical_and{
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<>(), $3}});
-}| logical_expression_and{
+}| logical_and{
     $$ = $1;
+}
+
+expression
+: logical_or {
+    $$ = $1;
+}| IDENTIFIER "=" logical_or {
+    assignment_t assignment{ variable_t{$1}, $3};
+    $$ = std::make_shared<expression_t>(expression_t{assignment});
+    symbols[$1] = assignment;
 }
 
 compound_definition
@@ -280,18 +304,25 @@ entries
 : entry {
     $$.push_back($1);
 }| entries entry{
-    $1.push_back($2); $$ = $1;
+    $1.push_back($2);
+    $$ = $1;
 }
 ;
 
 bitstream
-: IDENTIFIER "(" ")" compound_definition bitstream{
-    doc.push_front(compound_t{$1});
-    symbols[$1] = *($4);
+: compound_signature compound_definition bitstream{
+    auto it = symbols.find($1.name);
+    if( it != symbols.end() ){
+        it->second = {*$2};
+    } else {
+        doc.push_front($1);
+    }
 
 }| IDENTIFIER "=" expression bitstream {
-    doc.push_front(variable_t{$1});
-    symbols[$1] = *($3);
+    variable_t variable{$1};
+    assignment_t assignment{variable, $3};
+    doc.push_front(variable);
+    symbols[$1] = assignment;
 }| END
 ;
 

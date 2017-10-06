@@ -21,7 +21,10 @@ using namespace flavor;
 newline    \r?\n
 blank      [ \t]
 identifier [a-zA-Z_][a-zA-Z_0-9]*
-integer    [0-9]+[0-9]*
+integer_dec    [0-9]+[0-9]*
+integer_hex    0x[0-9a-fA-F]+[0-9a-fA-F]*
+integer_oct    0[0-7]+[0-7]*
+integer_bin    0b[01]+[01]*
 bits       [01]+
 
 %x quoted
@@ -84,8 +87,13 @@ bits       [01]+
     return parser_t::make_IDENTIFIER(yytext, _location);
 }
 
-{integer} {
-    int64_t number = strtoll(yytext, 0, 10);
+{integer_dec}|{integer_hex}|{integer_oct} {
+    uint64_t number = std::stoull(yytext, 0, 0);
+    return flavor::parser_t::make_INTEGER( {number}, _location);
+}
+
+{integer_bin} {
+    uint64_t number = std::stoull(yytext, 0, 2);
     return flavor::parser_t::make_INTEGER( {number}, _location);
 }
 
