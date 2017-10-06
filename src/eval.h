@@ -20,95 +20,7 @@ namespace khaotica{
 //            return {};
 //        }
 //
-//        flavor::value_t operator()(const std::negate<>& op, const int64_t& v){
-//            return {int64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::logical_not<>& op, const int64_t& v){
-//            return {int64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::logical_not<>& op, const uint64_t& v){
-//            return {uint64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<>& op, const std::vector<bool>& v){
-//            auto ret = v;
-//            ret.flip();
-//            return {ret};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<>& op, const uint64_t& v){
-//            return {op(v)};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<>& op, const int64_t& v){
-//            return {op(v)};
-//        }
-//
-//        flavor::value_t operator()(const auto& left_operand, const auto& operation, const auto& right_operand){
-//            assert(false && "It is unlikely to call operation with these values");
-//            return {};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::less<>& operation, const int64_t& right_operand){
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::less<>& operation, const uint64_t& right_operand){
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const int64_t& right_operand){
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const bool& right_operand){
-//            return {operation(left_operand, (int64_t)right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const uint64_t & left_operand, const std::minus<>& operation, const bool& right_operand){
-//            return {operation(left_operand, (uint64_t)right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::minus<>& operation, const uint64_t& right_operand){
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t & left_operand, const std::plus<>& operation, const int64_t& right_operand){
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t& left_operand, const std::greater<>& operation, const int64_t& right_operand){
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const uint64_t& left_operand, const std::greater<>& operation, const int64_t& right_operand){
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool>& left_operand, const std::equal_to<>& operation, const std::vector<bool>& right_operand){
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool>& left_operand, const std::less<>& operation, const std::vector<bool>& right_operand){
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool>& left_operand, const std::greater<>& operation, const std::vector<bool>& right_operand){
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//
-//        flavor::value_t operator()(const bool& left_operand, const std::logical_or<>& operation, const bool& right_operand){
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
+
 //    };
 //
 //    class eval_t{
@@ -117,57 +29,7 @@ namespace khaotica{
 //
 //        }
 //
-//        flavor::value_t operator()(const flavor::bitstring_t& node) {
-//            return {khaotica::algorithm::unpack(node.value)};
-//        }
-//
-//        flavor::value_t operator()(const flavor::integer_t& node) {
-//            return {node.value};
-//        }
-//
-//        flavor::value_t operator()(const flavor::variable_t& node) {
-//
-//            auto prev_value = values.find(node.name);
-//            if( prev_value != values.end()){
-//                return prev_value->second;
-//            }
-//
-//            auto it = symbols.find(node.name);
-//            assert( it != symbols.end());
-//
-//            if(auto expr_ptr = std::get_if<flavor::expression_t>(&it->second)){
-//                auto& def = *expr_ptr;
-//                auto value = std::visit(*this, def.sentence);
-//                return value;
-//            }
-//
-//            return {int64_t(0)};
-//        }
-//
-//        flavor::value_t operator()(const flavor::unary_expression_t& node) {
-//            auto operand = (*this)(node.operand);
-//            return std::visit(operation_t(), node.operation, operand.value);
-//        }
-//
-//        flavor::value_t operator()(const flavor::binary_expression_t& node) {
-//            auto left_operand = (*this)(node.left_operand);
-//            auto right_operand = (*this)(node.right_operand);
-//            return std::visit(operation_t(), left_operand.value, node.operation, right_operand.value);
-//        }
-//
-//        flavor::value_t operator()(const flavor::postincrement_t& node) {
-//            auto operand = (*this)(node.operand);
-//            flavor::value_t inc;
-//            inc.value = static_cast<int64_t>(1);
-//            return std::visit(operation_t(), operand.value, node.operation, inc.value);
-//        }
-//
-//        flavor::value_t operator()(const flavor::preincrement_t& node) {
-//            auto operand = (*this)(node.operand);
-//            flavor::value_t inc;
-//            inc.value = static_cast<int64_t>(1);
-//            return std::visit(operation_t(), operand.value, node.operation, inc.value);
-//        }
+
 //
 //        flavor::value_t operator()(const std::shared_ptr<const flavor::expression_t>& node) {
 //            return std::visit(*this, node->sentence);

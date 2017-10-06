@@ -11,37 +11,36 @@
 #include "printer.h"
 
 int main( int argc, char* argv[] ) {
-    namespace po = boost::program_options;
+    std::string input_definition_filename;
+    std::string input_bitstream_filename;
 
+    namespace po = boost::program_options;
     po::options_description opt_desc( "Options" );
     opt_desc.add_options( )
         ( "help,h", "Produce this message" )
-        ( "input-definition,i", po::value<std::string>( )->required(), "Flavor definition for input bitstream" )
-        ( "input-bitstream,I", po::value<std::string>()->required(), "input bitstream")
+        ( "input-definition,i", po::value(&input_definition_filename)->required(), "Flavor definition for input bitstream" )
+        ( "input-bitstream,I", po::value(&input_bitstream_filename)->required(), "input bitstream")
        ;
 
     po::positional_options_description pos_opt_desc;
     pos_opt_desc.add( "input-definition", 1 );
     pos_opt_desc.add("input-bitstream", 1);
-
     po::variables_map varmap;
     if( !options::is_args_valid(argc, argv, opt_desc, pos_opt_desc, varmap, std::cerr, std::cout ) ) {
         return 1;
     }
 
-    const std::string& input_definition_filename = varmap.at("input-definition").as<std::string>();
-    const std::string& input_bitstream_filename = varmap.at("input-bitstream").as<std::string>();
     logging::debug() << "Flavor Definition file: " << input_definition_filename;
     logging::debug() << "Bitstream file: " << input_bitstream_filename;
 
-    std::ifstream f(input_definition_filename);
+    std::ifstream flavor_script(input_definition_filename);
 
-    auto [doc, symbols] = flavor::interpreter_t::parse(f, false);
+    auto [bitstream_structure, symbols] = flavor::interpreter_t::parse(flavor_script, false);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     while(!bitstream.bad() && !bitstream.eof()){
-        auto value = khaotica::parser_t::parse(bitstream, doc, symbols);
-        khaotica::printer_t::print(std::cout, doc, symbols, value);
+        auto value = khaotica::parser_t::parse(bitstream, bitstream_structure, symbols);
+        khaotica::printer_t::print(std::cout, bitstream_structure, symbols, value);
 
     }
 

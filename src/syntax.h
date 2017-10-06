@@ -109,6 +109,7 @@ namespace flavor{
     };
 
     struct postincrement_t{
+        variable_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -116,6 +117,7 @@ namespace flavor{
     };
 
     struct preincrement_t{
+        variable_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -160,20 +162,6 @@ namespace flavor{
         > value;
     };
     typedef std::map< const std::string, value_t > values_t;
-
-//    // TODO: It is a temporary solution; there is a plan to print if\for evaluation steps also.
-//    inline bool to_boolean(const value_t& value){
-//        return std::visit([](auto&& value)->bool {
-//            using T = std::decay_t<decltype(value)>;
-//            if constexpr (std::is_same_v<T, std::vector<bool>> ) {
-//                return {!value.empty()};
-//            } else if constexpr (std::is_same_v<T, std::list<std::shared_ptr<value_t>>> ) {
-//                return {!value.empty()};
-//            } else {
-//                return value;
-//            }
-//        }, value.value);
-//    }
 }
 
 #endif //KHAOTICA_GRAMMAR_H
