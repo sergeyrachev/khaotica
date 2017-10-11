@@ -12,7 +12,7 @@ build:
   verbosity: minimal
 
 install:
-  - cmd: msystem.bat MSYS && bash pacman-key --init && bash pacman-key --populate msys2 && pacman -Syu && pacman --noconfirm -S bison flex
+  - cmd: pacman --noconfirm -S bison flex
 
 build_script:
   - cmd: |
