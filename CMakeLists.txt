@@ -102,9 +102,6 @@ target_include_directories( khaotica_gtest
     PRIVATE ${GRAMMAR_DIR} )
 target_compile_definitions( khaotica_gtest PRIVATE ${boost_COMPILE_DEFINITIONS} )
 
-target_compile_options(khaotica PRIVATE /std:c++17)
-target_compile_options(khaotica_gtest PRIVATE /std:c++17)
-
 if ( UNIX )
 
     configure_file( "${CMAKE_CURRENT_LIST_DIR}/pvs.cfg.in" "${CMAKE_CURRENT_BINARY_DIR}/pvs.cfg" @ONLY )
