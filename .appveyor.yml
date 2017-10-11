@@ -4,8 +4,8 @@ environment:
   global:
     PATH: C:\msys64\usr\bin;%PATH%
   matrix:
-    - GENERATOR: Visual Studio 15 2017
-    - GENERATOR: Visual Studio 15 2017 Win64
+    - GENERATOR: "Visual Studio 15 2017"
+    - GENERATOR: "Visual Studio 15 2017 Win64"
   
 build:
   verbosity: minimal
