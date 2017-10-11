@@ -12,7 +12,7 @@ build:
   verbosity: minimal
 
 install:
-  - cmd: pacman --noconfirm -S bison flex
+  - cmd: C:\msys64\msys2 pacman --noconfirm -S bison flex
 
 build_script:
   - cmd: |
