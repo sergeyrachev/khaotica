@@ -12,8 +12,7 @@ build:
 
 install:
   - cmd: |
-        dir C:\msys64
-        C:\msys64\msys2_shell.bat
+        C:\msys64\msys2_shell.cmd
         pacman --noconfirm -S bison flex
 
 build_script:
@@ -21,7 +20,7 @@ build_script:
       refreshenv
       mkdir _build
       cd _build
-      C:\msys64\msys2_shell.bat
+      C:\msys64\msys2_shell.cmd
       cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=C:/Libraries/boost_1_64_0 ..
       cmake --build . --config Release
       cmake --build . --target install
