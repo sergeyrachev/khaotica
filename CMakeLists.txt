@@ -102,6 +102,9 @@ target_include_directories( khaotica_gtest
     PRIVATE ${GRAMMAR_DIR} )
 target_compile_definitions( khaotica_gtest PRIVATE ${boost_COMPILE_DEFINITIONS} )
 
+target_compile_options(khaotica PRIVATE /std:c++latest)
+target_compile_options(khaotica_gtest PRIVATE /std:c++latest)
+
 if ( UNIX )
 
     configure_file( "${CMAKE_CURRENT_LIST_DIR}/pvs.cfg.in" "${CMAKE_CURRENT_BINARY_DIR}/pvs.cfg" @ONLY )
@@ -113,11 +116,3 @@ if ( UNIX )
         ANALYZE khaotica
         CONFIG "${CMAKE_CURRENT_BINARY_DIR}/pvs.cfg" )
 endif ( UNIX )
-
-if (MSVC_VERSION GREATER_EQUAL "1900")
-    include(CheckCXXCompilerFlag)
-    CHECK_CXX_COMPILER_FLAG("/std:c++latest" _cpp_latest_flag_supported)
-    if (_cpp_latest_flag_supported)
-        add_compile_options("/std:c++latest")
-    endif()
-endif()
