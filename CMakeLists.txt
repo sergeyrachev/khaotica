@@ -96,6 +96,7 @@ target_link_libraries( khaotica_gtest
 target_include_directories( khaotica_gtest
     PRIVATE src/
     PRIVATE test/
+    PRIVATE flex/
     PRIVATE ${GTEST_INCLUDE_DIRECTORIES}
     PRIVATE ${boost_INCLUDE_DIRECTORIES}
     PRIVATE ${GRAMMAR_DIR} )
