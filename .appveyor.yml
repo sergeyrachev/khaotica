@@ -1,35 +1,39 @@
 version: "{build}"
 os: Visual Studio 2017
-platform:
-  - Win32
-  - x64
 
 configuration:
   - Release
-#  - Debug
 
+platform:
+  - x64
+
+environment:
+  matrix:
+    - GENERATOR: Visual Studio 15 2017 Win64
+    - GENERATOR: Visual Studio 15 2017
+  
 build:
   verbosity: minimal
-
+  
 install:
-  - cmd: cinst msys2
-  - cmd: refreshenv
-  - cmd: msystem.bat MSYS && bash pacman-key --init && bash pacman-key --populate msys2 && pacman -Syu && pacman --noconfirm -S bison flex
+  - cmd: |
+        set "PATH=C:\msys64\usr\bin;C:\msys64\mingw64\bin;C:\Windows\System32;C:\Windows;%PATH%"
+        set MSYSTEM=MSYS2
+        pacman --noconfirm -S bison flex
 
 build_script:
   - cmd: |
-      refreshenv
-      mkdir _build
-      cd _build
-      msystem.bat MSYS
-      cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=C:/Libraries/boost_1_64_0 ..
-      cmake --build . --config Release
-      cmake --build . --target install
+        mkdir _build
+        cd _build
+        cmake -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=C:/Libraries/boost_1_64_0 ..
+        cmake --build . --config Release
+        cmake --build . --target install
 
 after_build:
-  - git describe --tags > version.txt
-  - set /p VERSION= < version.txt
-  - 7z a -t7z khaotica-%VERSION%.7z ./khaotica/*
+  - cmd: |
+        git describe --tags > version.txt
+        set /p VERSION= < version.txt
+        7z a -t7z khaotica-%VERSION%.7z ./khaotica/*
 
 artifacts:
   - path: _build/khaotica-$(VERSION).7z

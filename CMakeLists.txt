@@ -1,5 +1,5 @@
 project( khaotica )
-cmake_minimum_required( VERSION 3.6 )
+cmake_minimum_required( VERSION 3.9 )
 
 find_package( gtest CONFIG PATHS deps )
 find_package( boost CONFIG PATHS deps )
@@ -96,6 +96,7 @@ target_link_libraries( khaotica_gtest
 target_include_directories( khaotica_gtest
     PRIVATE src/
     PRIVATE test/
+    PRIVATE flex/
     PRIVATE ${GTEST_INCLUDE_DIRECTORIES}
     PRIVATE ${boost_INCLUDE_DIRECTORIES}
     PRIVATE ${GRAMMAR_DIR} )
