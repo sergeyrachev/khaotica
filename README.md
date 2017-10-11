@@ -11,17 +11,10 @@ http://flavor.sourceforge.net/
 
 ### Preparation:
 
-* CMake >= 3.6
-* LLVM == 4.0
+* CMake >= 3.9
 * Boost >= 1.63
 
-Project supports CMake-based build process and relies on prebuilt LLVM and Boost libraries. It would be nice to use not in-source build so all commands below are executed from temporal build directory.
-
-**LLVM**
-
-Performance and portability are not issues not so Exception Handling and RTTI enabled in LLVM. To build LLVM: 
-		
-	cmake -DCMAKE_INSTALL_PREFIX=$HOME/deps/llvm -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_EH=ON -DLLVM_ENABLE_RTTI=ON  -DLLVM_TARGETS_TO_BUILD="X86" -DLLVM_INCLUDE_TOOLS=Off -DLLVM_BUILD_TOOLS=Off -DLLVM_INCLUDE_EXAMPLES=Off -DLLVM_INCLUDE_TESTS=Off ../llvm-4.0.0.src && cmake --build . --target install    
+Project supports CMake-based build process and relies on prebuilt Boost libraries. It would be nice to use not in-source build so all commands below are executed from temporal build directory.
 
 **Boost**
 
@@ -39,13 +32,13 @@ OR
 
 ### Build:
 
-Pull requests are welcome. There are Travis-CI and Appveyor support in the project dir. You can look at its build scriptsin project root folder to solve build issues.
+Pull requests are welcome. There are Travis-CI and Appveyor support in the project dir. You can look at its build scripts in project root folder to solve build issues.
 
-    cmake -DLLVM_ROOT=$HOME/deps/llvm -DBOOST_ROOT=$HOME/deps/boost ..\khaotica\
+    cmake -DBOOST_ROOT=$HOME/deps/boost ..\khaotica\
     
     OR
     
-    cmake -G "Visual Studio 14 2015 Win64" -DLLVM_ROOT=d:/work/env/llvm/static/x64/debug -DBOOST_ROOT=d:/work/env/boost/prebuilt/x64/ ../khaotica/
+    cmake -G "Visual Studio 14 2015 Win64" -DBOOST_ROOT=d:/work/env/boost/prebuilt/x64/ ../khaotica/
    
 ### Usage:
 
