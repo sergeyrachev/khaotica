@@ -12,6 +12,7 @@ build:
 
 install:
   - cmd: |
+        dir C:\msys64
         C:\msys64\msys2_shell.bat
         pacman --noconfirm -S bison flex
 
