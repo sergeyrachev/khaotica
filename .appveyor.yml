@@ -4,8 +4,8 @@ environment:
   global:
     PATH: C:\msys64\usr\bin;%PATH%
   matrix:
-    - GENERATOR: "Visual Studio 15 2017"
-    - GENERATOR: "Visual Studio 15 2017 Win64"
+    - GENERATOR: Visual Studio 15 2017
+    - GENERATOR: Visual Studio 15 2017 Win64
   
 build:
   verbosity: minimal
@@ -17,7 +17,7 @@ build_script:
   - cmd: |
         mkdir _build
         cd _build
-        cmake -G %GENERATOR% -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=C:/Libraries/boost_1_64_0 ..
+        cmake -G "%GENERATOR%" -DCMAKE_INSTALL_PREFIX=khaotica -DCMAKE_BUILD_TYPE=Release -DBOOST_ROOT=C:/Libraries/boost_1_64_0 ..
         cmake --build . --config Release
         cmake --build . --target install
 
