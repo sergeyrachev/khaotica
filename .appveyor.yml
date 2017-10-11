@@ -6,14 +6,12 @@ platform:
 
 configuration:
   - Release
-#  - Debug
+  - Debug
 
 build:
   verbosity: minimal
 
 install:
-  - cmd: cinst msys2
-  - cmd: refreshenv
   - cmd: msystem.bat MSYS && bash pacman-key --init && bash pacman-key --populate msys2 && pacman -Syu && pacman --noconfirm -S bison flex
 
 build_script:
