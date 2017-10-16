@@ -50,7 +50,7 @@
 
 %parse-param {lexer_t& lexer}
 %parse-param {symbols_t& symbols}
-%parse-param {document_t& doc}
+%parse-param {ast_t& tree}
 
 %locations
 
@@ -316,7 +316,7 @@ bitstream
 : compound_signature compound_definition bitstream{
     auto it = symbols.find($1.name);
     if( it == symbols.end() ){
-        doc.push_front($1);
+        tree.push_front($1);
         symbols[$1.name] = {*$2};
     } else {
         it->second = {*$2};
@@ -325,7 +325,6 @@ bitstream
 }| IDENTIFIER "=" expression bitstream {
     variable_t variable{$1};
     assignment_t assignment{variable, $3};
-    doc.push_front(variable);
     symbols[$1] = assignment;
 }| END
 ;

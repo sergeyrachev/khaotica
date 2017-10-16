@@ -257,12 +257,12 @@ private:
     flavor::values_t &values;
 };
 
-flavor::values_t parser_t::parse(std::ifstream &in, const flavor::document_t &doc, const flavor::symbols_t &symbols) {
+flavor::values_t parser_t::parse(std::ifstream &in, const flavor::document_t &doc) {
     bitreader_t bitreader(in);
     flavor::values_t values;
-    impl_t impl(bitreader, symbols, values);
-    for (auto &&entry : doc) {
-        std::visit(impl, entry);
+    impl_t impl(bitreader, doc.symbols, values);
+    for (auto &&entry : doc.hierarchy) {
+
     }
     return values;
 }

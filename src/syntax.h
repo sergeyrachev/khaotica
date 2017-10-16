@@ -137,13 +137,6 @@ namespace flavor{
         > sentence;
     };
 
-    typedef std::list<
-        std::variant<
-            variable_t,
-            compound_t
-        >
-    > document_t;
-
     typedef std::variant<
         bslbf_t,
         uimsbf_t,
@@ -152,6 +145,13 @@ namespace flavor{
         assignment_t
     > symbol_t;
     typedef std::map< const std::string, symbol_t > symbols_t;
+
+    typedef std::list<compound_t> ast_t;
+
+    struct document_t{
+        ast_t hierarchy;
+        symbols_t symbols;
+    };
 
     struct value_t{
         std::variant<

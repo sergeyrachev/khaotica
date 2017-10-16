@@ -35,14 +35,13 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto [bitstream_structure, symbols] = flavor::interpreter_t::parse(flavor_script, false);
+    auto doc = flavor::interpreter_t::parse(flavor_script, false);
+    khaotica::printer_t::print(doc, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-    while(!bitstream.bad() && !bitstream.eof()){
-        auto value = khaotica::parser_t::parse(bitstream, bitstream_structure, symbols);
-        khaotica::printer_t::print(std::cout, bitstream_structure, symbols, value);
-
-    }
+//    while(!bitstream.bad() && !bitstream.eof()){
+//
+//    }
 
     return 0;
 }
