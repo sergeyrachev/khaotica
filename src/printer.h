@@ -13,7 +13,6 @@
 
 namespace khaotica{
     class printer_t{
-        class impl_t;
     public:
         static void print(const flavor::document_t& doc, std::ostream& out);
     };
