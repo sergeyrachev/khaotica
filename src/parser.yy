@@ -101,7 +101,7 @@
 %token GREATERTHAN_EQUAL ">="
 
 
-%token <variable_t> IDENTIFIER
+%token <std::string> IDENTIFIER
 %token <bitstring_t> BITSTRING
 %token <integer_t> INTEGER
 %type <entry_t> entry
@@ -127,17 +127,17 @@
 
 entry
 : IDENTIFIER INTEGER "bslbf"  {
-    bslbf_t entry{$1.name, $2.value};
+    bslbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1.name] = entry;
+    symbols[$1] = entry;
 }| IDENTIFIER INTEGER "uimsbf"  {
-    uimsbf_t entry{$1.name, $2.value};
+    uimsbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1.name] = entry;
+    symbols[$1] = entry;
 }| IDENTIFIER INTEGER "tcimsbf" {
-    tcimsbf_t entry{$1.name, $2.value};
+    tcimsbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1.name] = entry;
+    symbols[$1] = entry;
 }| compound_signature {
     $$ = $1;
     auto it = symbols.find($1.name);
@@ -178,12 +178,13 @@ entry
 
 compound_signature
 : IDENTIFIER "(" ")" {
-    $$ = compound_t{$1.name};
+    $$ = compound_t{$1};
 }
 
 primary_expression
 : IDENTIFIER {
-    $$ = std::make_shared<expression_t>(expression_t{$1});
+    field_t field{$1};
+    $$ = std::make_shared<expression_t>(expression_t{field});
 }| INTEGER {
     $$ = std::make_shared<expression_t>(expression_t{$1});
 }| BITSTRING {
@@ -247,7 +248,7 @@ additive_expression
 }| additive_expression "-" multiplicative_expr{
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<>(), $3}});
 }| multiplicative_expr {
-       $$ = $1;
+    $$ = $1;
 }
 ;
 
@@ -261,7 +262,7 @@ relational_expression
 }| additive_expression ">=" additive_expression  {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater_equal<>(), $3}});
 }| additive_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{cast_t<bool>(), $1}});
+    $$ = $1;
 }
 
 comparison_expression
@@ -270,7 +271,7 @@ comparison_expression
 }| relational_expression "!=" relational_expression {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }| relational_expression {
-    $$ = $1;
+    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{cast_t<bool>(), $1}});
 }
 
 logical_and
@@ -293,7 +294,7 @@ expression
 }| IDENTIFIER "=" logical_or {
     assignment_t assignment{ variable_t{$1}, $3};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
-    symbols[$1.name] = assignment;
+    symbols[$1] = assignment;
 }
 
 compound_definition
@@ -324,8 +325,8 @@ bitstream
     }
 
 }| IDENTIFIER "=" expression bitstream {
-    assignment_t assignment{$1, $3};
-    symbols[$1.name] = assignment;
+    assignment_t assignment{variable_t{$1}, $3};
+    symbols[$1] = assignment;
 }| END
 ;
 

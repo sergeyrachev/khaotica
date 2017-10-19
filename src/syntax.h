@@ -40,6 +40,10 @@ namespace flavor{
         std::string name;
     };
 
+    struct field_t{
+        std::string name;
+    };
+
     struct bitstring_t{
         std::string value;
     };
@@ -137,6 +141,7 @@ namespace flavor{
     struct expression_t {
         std::variant<
             variable_t,
+            field_t,
             integer_t,
             bitstring_t,
             unary_expression_t,
