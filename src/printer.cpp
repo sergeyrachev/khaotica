@@ -10,8 +10,6 @@ public:
     void operator()(const flavor::bslbf_t& node){
         p.enter(node);
 
-//      p.on(node);
-
         p.exit(node);
     }
 
@@ -48,15 +46,25 @@ public:
         p.enter(node);
 
         auto&& definition = std::get<flavor::compound_definition_t>(symbols.at(node.name));
-        for (auto &&entry : definition.entries) {
-            std::visit(*this, entry);
-        }
+        (*this)(definition);
 
         p.exit(node);
     }
 
     void operator()(const flavor::variable_t& node){
         p.enter(node);
+
+
+        p.exit(node);
+    }
+
+    void operator()(const flavor::compound_definition_t& node){
+
+        p.enter(node);
+
+        for (auto &&entry : node.entries) {
+            std::visit(*this, entry);
+        }
 
         p.exit(node);
     }
@@ -80,6 +88,10 @@ public:
             << "bslbf"
             << std::endl;
     }
+    void exit(const flavor::bslbf_t &node){
+
+    }
+
     void enter(const flavor::uimsbf_t &node){
         out << std::string(indentation, ' ')
             << node.name
@@ -88,6 +100,9 @@ public:
             << " "
             << "uimsbf"
             << std::endl;
+    }
+    void exit(const flavor::uimsbf_t &node){
+
     }
 
     void enter(const flavor::tcimsbf_t &node){
@@ -99,51 +114,48 @@ public:
             << "tcimsbf"
             << std::endl;
     }
-
-    void enter(const flavor::if_t &node){
-        out << std::string(indentation, ' ') << "if" << "(" << ")" << "{" << std::endl;
-        indentation++;
-    }
-    void enter(const flavor::for_t &node){
-        out << std::string(indentation, ' ') << "for" << "(" << ")" << "{" << std::endl;
-        indentation++;
-    }
-
-    void enter(const flavor::compound_t& node){
-        out << std::string(indentation, ' ') << node.name << "(){" << std::endl;
-        indentation++;
-    }
-
-    void exit(const flavor::bslbf_t &node){
-
-    }
-    void exit(const flavor::uimsbf_t &node){
-
-    }
     void exit(const flavor::tcimsbf_t &node){
 
     }
+
+    void enter(const flavor::if_t &node){
+        out << std::string(indentation, ' ') << "if" << "(" << ")";
+    }
     void exit(const flavor::if_t &node){
-        indentation--;
-        out << std::string(indentation, ' ') << "}" << std::endl;
+        out << std::endl;
+    }
+    void enter(const flavor::for_t &node){
+        out << std::string(indentation, ' ') << "for" << "(" << ")";
     }
     void exit(const flavor::for_t &node){
-        indentation--;
-        out << std::string(indentation, ' ') << "}" << std::endl;
+        out << std::endl;
     }
-
+    void enter(const flavor::compound_t& node){
+        out << std::string(indentation, ' ') << node.name << "()";
+    }
     void exit(const flavor::compound_t& node){
-        indentation--;
-        out << std::string(indentation, ' ') << "}" << std::endl;;
+        out << std::endl;
     }
 
+    void enter(const flavor::compound_definition_t& node){
+        out << "{" << std::endl;
+        indentation++;
+    }
+    void exit(const flavor::compound_definition_t& node){
+        indentation--;
+        out << std::string(indentation, ' ') << "}";
+    }
 
     void on(const flavor::if_t& node, traversal_t<print_t>& traversal){
+        traversal(*node._then);
 
+        out << "else";
+
+        traversal(*node._else);
     }
 
     void on(const flavor::for_t& node, traversal_t<print_t>& traversal){
-
+        traversal(*node.body);
     }
 
 private:

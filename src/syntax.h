@@ -15,6 +15,7 @@ namespace flavor{
 
     struct compound_definition_t;
     struct expression_t;
+    struct value_t;
 
     struct bslbf_t{
         std::string name;
@@ -50,7 +51,7 @@ namespace flavor{
     struct if_t{
         std::shared_ptr<expression_t> condition;
         std::shared_ptr<compound_definition_t> _then;
-        std::optional<std::shared_ptr<compound_definition_t>> _else;
+        std::shared_ptr<compound_definition_t> _else;
     };
 
     struct for_t {
@@ -74,11 +75,20 @@ namespace flavor{
         entries_t entries;
     };
 
+    template<typename T>
+    struct cast_t{
+        template<typename U>
+        T operator()(const U& u){
+            return static_cast<T>(std::decay(u));
+        }
+    };
+
     struct unary_expression_t {
         std::variant<
             std::negate<>,
             std::logical_not<>,
-            std::bit_not<>
+            std::bit_not<>,
+            cast_t<bool>
         > operation;
         std::shared_ptr<expression_t> operand;
     };
@@ -158,6 +168,7 @@ namespace flavor{
             std::vector<bool>,
             uint64_t,
             int64_t,
+            bool,
             std::list<std::shared_ptr<value_t>>
         > value;
     };

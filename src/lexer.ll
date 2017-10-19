@@ -84,7 +84,7 @@ bits       [01]+
 <quoted>.|{newline} { printf("Bad quoted character '%s' at line %d\n", yytext, yylineno); return yyterminate();}
 
 {identifier} {
-    return parser_t::make_IDENTIFIER(yytext, _location);
+    return parser_t::make_IDENTIFIER( {yytext}, _location);
 }
 
 {integer_dec}|{integer_hex}|{integer_oct} {

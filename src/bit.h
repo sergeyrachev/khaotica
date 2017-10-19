@@ -57,7 +57,7 @@ namespace khaotica {
         inline std::string to_string(const std::vector<bool> &v) {
             std::ostringstream ss;
             for (const auto &&b : v) {
-                ss << b ? 1 : 0;
+                ss << (b ? 1 : 0);
             }
             return ss.str();
         }
