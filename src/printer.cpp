@@ -1,5 +1,7 @@
 #include "printer.h"
 
+#include <boost/core/demangle.hpp>
+
 template<typename P>
 class traversal_t{
 public:
@@ -43,8 +45,7 @@ public:
     }
 
     void operator()(const flavor::variable_t& node){
-        auto && definition = std::get<flavor::assignment_t>(symbols.at(node.name));
-        //p.on(node, definition, *this);
+        assert( false && "Should never be here. AST should not contain free variables");
     }
 
     void operator()(const flavor::field_t& node){
@@ -60,10 +61,15 @@ public:
         p.on(node, *this);
     }
     void operator()( const flavor::unary_expression_t& node){
-        p.on(node, *this);
+        std::visit( [this, &node](const auto& operation){
+            p.on(operation, *node.operand, *this);
+        }, node.operation);
+
     }
     void operator()( const flavor::binary_expression_t& node){
-        p.on(node, *this);
+        std::visit( [this, &node](const auto& operation){
+            p.on(*node.left_operand, operation, *node.right_operand, *this);
+        }, node.operation);
     }
     void operator()( const flavor::postincrement_t& node){
         p.on(node, *this);
@@ -122,19 +128,37 @@ public:
 
         out << " )";
 
-        on(*node._then, traversal);
+        on_(*node._then, traversal);
 
         out << "else";
 
-        on(*node._else, traversal);
+        on_(*node._else, traversal);
 
         out << std::endl;
     }
 
     void on(const flavor::for_t& node, traversal_t<print_t>& traversal){
-        out << std::string(indentation, ' ') << "for" << "(" << ")";
+        out << std::string(indentation, ' ') << "for" << "(";
 
-        on(*node.body, traversal);
+        if(node.initializer){
+            traversal(**node.initializer);
+        }
+
+        out << ";";
+
+        if(node.condition){
+            traversal(**node.condition);
+        }
+
+        out << ";";
+
+        if(node.modifier){
+            traversal(**node.modifier);
+        }
+
+        out << ")";
+
+        on_(*node.body, traversal);
 
         out << std::endl;
     }
@@ -142,17 +166,31 @@ public:
     void on(const flavor::compound_t& node, const flavor::compound_definition_t& body, traversal_t<print_t>& traversal){
         out << std::string(indentation, ' ') << node.name << "()";
 
-        on(body, traversal);
+        on_(body, traversal);
 
         out << std::endl;
     }
 
-    void on( const flavor::field_t& node, const auto& definition, traversal_t<print_t>& traversal){
-        out << node.name;
+    void on( const flavor::field_t& node, const flavor::bslbf_t& definition, traversal_t<print_t>& traversal){
+        out << node.name << "<" <<  "bslbf("<< definition.length << ")>";
+    }
+
+    void on( const flavor::field_t& node, const flavor::uimsbf_t& definition, traversal_t<print_t>& traversal){
+        out << node.name << "<" <<  "uimsbf("<< definition.length << ")>";
+    }
+
+    void on( const flavor::field_t& node, const flavor::tcimsbf_t& definition, traversal_t<print_t>& traversal){
+        out << node.name << "<" <<  "tcimsbf("<< definition.length << ")>";
     }
 
     void on( const flavor::field_t& node, const flavor::compound_definition_t& definition, traversal_t<print_t>& traversal){
-        out << node.name;
+        assert( false && "Should never be here until sizeof is not implemented");
+    }
+
+    void on( const flavor::field_t& node, const flavor::assignment_t& definition, traversal_t<print_t>& traversal){
+        out << node.name << "<";
+        traversal(*definition.expression);
+        out << ">";
     }
 
     void on( const flavor::integer_t& node, traversal_t<print_t>& traversal){
@@ -161,37 +199,37 @@ public:
     void on( const flavor::bitstring_t& node, traversal_t<print_t>& traversal){
         out << "'" << node.value << "'";
     }
-    void on( const flavor::unary_expression_t& node, traversal_t<print_t>& traversal){
+
+    void on( const auto& operation, const flavor::expression_t& operand, traversal_t<print_t>& traversal){
         out << "( ";
-        out << " & ";
-        traversal(*node.operand);
+        out << boost::core::demangle(typeid(operation).name()) << "(";
+        traversal(operand);
+        out << ") )";
+    }
+
+    void on( const flavor::expression_t& left, const auto& operation, const flavor::expression_t& right, traversal_t<print_t>& traversal){
+        out << "( ";
+        traversal(left);
+        out << " " << boost::core::demangle(typeid(operation).name()) << " ";
+        traversal(right);
         out << " )";
     }
 
-    void on( const flavor::binary_expression_t& node, traversal_t<print_t>& traversal){
-
-        out << "( ";
-
-        traversal(*node.left_operand);
-
-        out << " ? ";
-
-        traversal(*node.right_operand);
-
-        out << " )";
-
-    }
     void on( const flavor::postincrement_t& node, traversal_t<print_t>& traversal){
-        out << "(i++)";
+        out << "(" << node.operand.name << "??" <<")";
     }
+
     void on( const flavor::preincrement_t& node, traversal_t<print_t>& traversal){
-        out << "(++i)";
+        out << "( ??" << node.operand.name <<")";
     }
+
     void on( const flavor::assignment_t& node, traversal_t<print_t>& traversal){
-        out << "(a)";
+        out << node.variable.name << "=";
+        traversal(*node.expression);
     }
+
 private:
-    void on(const flavor::compound_definition_t& body, traversal_t<print_t>& traversal){
+    void on_(const flavor::compound_definition_t& body, traversal_t<print_t>& traversal){
         out << "{" << std::endl;
         indentation++;
 

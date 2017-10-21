@@ -62,6 +62,9 @@ bits       [01]+
 "-" return parser_t::make_MINUS(_location);
 "+" return parser_t::make_PLUS(_location);
 
+"!" return parser_t::make_LOGICAL_NOT(_location);
+"~" return parser_t::make_BITWISE_NOT(_location);
+
 "*" return parser_t::make_MULTIPLY(_location);
 "/" return parser_t::make_DIVIDE(_location);
 "<" return parser_t::make_LESSTHAN(_location);

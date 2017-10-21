@@ -95,6 +95,9 @@
 %token EQUAL "=="
 %token NOTEQUAL "!="
 
+%token LOGICAL_NOT "!"
+%token BITWISE_NOT "~"
+
 %token LESSTHAN "<"
 %token GREATERTHAN ">"
 %token LESSTHAN_EQUAL "<="
@@ -200,24 +203,20 @@ primary_expression
 postfix_expression
 : IDENTIFIER "++" {
     auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::plus<>()}});
-    assignment_t assignment{variable_t{$1}, expr};
-    $$ = std::make_shared<expression_t>(expression_t{assignment});
+    $$ = expr;
 
 }| IDENTIFIER "--" {
     auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::minus<>()}});
-    assignment_t assignment{variable_t{$1}, expr};
-    $$ = std::make_shared<expression_t>(expression_t{assignment});
+    $$ = expr;
 }
 
 prefix_expression
 : "++" IDENTIFIER {
     auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::plus<>()}});
-    assignment_t assignment{variable_t{$2}, expr};
-    $$ = std::make_shared<expression_t>(expression_t{assignment});
+    $$ = expr;
 }| "--" IDENTIFIER {
     auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::minus<>()}});
-    assignment_t assignment{variable_t{$2}, expr};
-    $$ = std::make_shared<expression_t>(expression_t{assignment});
+    $$ = expr;
 }
 
 unary_expr
@@ -271,7 +270,7 @@ comparison_expression
 }| relational_expression "!=" relational_expression {
     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
 }| relational_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{cast_t<bool>(), $1}});
+    $$ = $1;
 }
 
 logical_and
