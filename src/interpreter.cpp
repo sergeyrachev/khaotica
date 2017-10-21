@@ -12,7 +12,7 @@ flavor::document_t flavor::interpreter_t::parse(std::istream &in, bool enable_ve
     std::ostringstream serr;
     flavor::lexer_t _scanner(in, serr);
 
-    flavor::symbols_t symbols;
+    flavor::definitions_t symbols;
     flavor::ast_t tree;
     flavor::parser_t _parser(_scanner, symbols, tree);
 

@@ -49,7 +49,7 @@
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
-%parse-param {symbols_t& symbols}
+%parse-param {definitions_t& definitions}
 %parse-param {ast_t& tree}
 
 %locations
@@ -109,7 +109,7 @@
 %token <integer_t> INTEGER
 %type <entry_t> entry
 %type <entries_t> entries
-%type <compound_t> compound_signature
+%type <symbol_t> compound_signature
 
 %type <std::shared_ptr<compound_definition_t>> compound_definition
 
@@ -132,26 +132,25 @@ entry
 : IDENTIFIER INTEGER "bslbf"  {
     bslbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1] = entry;
+    definitions[$1] = entry;
 }| IDENTIFIER INTEGER "uimsbf"  {
     uimsbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1] = entry;
+    definitions[$1] = entry;
 }| IDENTIFIER INTEGER "tcimsbf" {
     tcimsbf_t entry{$1, $2.value};
     $$ = entry;
-    symbols[$1] = entry;
+    definitions[$1] = entry;
 }| compound_signature {
     $$ = $1;
-    auto it = symbols.find($1.name);
-    if( it == symbols.end() ){
-        symbols[$1.name] = compound_definition_t{};
+    auto it = definitions.find($1.name);
+    if( it == definitions.end() ){
+        definitions[$1.name] = compound_definition_t{};
     }
-
 }| "if" "(" expression ")" compound_definition {
     auto condition = $3;
     auto _then =  $5;
-    auto _else = std::make_shared<compound_definition_t>();
+    auto _else = std::nullopt;
     $$ = if_t{condition, _then, _else};
 }| "if" "(" expression ")" compound_definition "else" compound_definition {
     auto condition = $3;
@@ -177,17 +176,11 @@ entry
     auto body = $6;
     $$ = for_t{nullptr, nullptr, nullptr, body};
 }
-;
-
-compound_signature
-: IDENTIFIER "(" ")" {
-    $$ = compound_t{$1};
-}
 
 primary_expression
 : IDENTIFIER {
-    field_t field{$1};
-    $$ = std::make_shared<expression_t>(expression_t{field});
+    symbol_t symbol{$1};
+    $$ = std::make_shared<expression_t>(expression_t{symbol});
 }| INTEGER {
     $$ = std::make_shared<expression_t>(expression_t{$1});
 }| BITSTRING {
@@ -202,20 +195,20 @@ primary_expression
 
 postfix_expression
 : IDENTIFIER "++" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{symbol_t{$1}, std::plus<>()}});
     $$ = expr;
 
 }| IDENTIFIER "--" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{variable_t{$1}, std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{symbol_t{$1}, std::minus<>()}});
     $$ = expr;
 }
 
 prefix_expression
 : "++" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::plus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{symbol_t{$2}, std::plus<>()}});
     $$ = expr;
 }| "--" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{variable_t{$2}, std::minus<>()}});
+    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{symbol_t{$2}, std::minus<>()}});
     $$ = expr;
 }
 
@@ -249,7 +242,6 @@ additive_expression
 }| multiplicative_expr {
     $$ = $1;
 }
-;
 
 relational_expression
 : additive_expression "<" additive_expression  {
@@ -291,9 +283,9 @@ expression
 : logical_or {
     $$ = $1;
 }| IDENTIFIER "=" logical_or {
-    assignment_t assignment{ variable_t{$1}, $3};
+    assignment_t assignment{symbol_t{$1}, $3};
     $$ = std::make_shared<expression_t>(expression_t{assignment});
-    symbols[$1] = assignment;
+    definitions[$1] = assignment;
 }
 
 compound_definition
@@ -302,7 +294,6 @@ compound_definition
 }| "{" "}" {
     $$ = std::make_shared<compound_definition_t>();
 }
-;
 
 entries
 : entry {
@@ -311,21 +302,21 @@ entries
     $1.push_back($2);
     $$ = $1;
 }
-;
+
+compound_signature
+: IDENTIFIER "(" ")" {
+    $$ = symbol_t{$1};
+}
 
 bitstream
 : compound_signature compound_definition bitstream{
-    auto it = symbols.find($1.name);
-    if( it == symbols.end() ){
+    auto it = definitions.find($1.name);
+    if( it == definitions.end() ){
         tree.push_front($1);
-        symbols[$1.name] = {*$2};
-    } else {
-        it->second = {*$2};
     }
-
+    definitions[$1.name] = {*$2};
 }| IDENTIFIER "=" expression bitstream {
-    assignment_t assignment{variable_t{$1}, $3};
-    symbols[$1] = assignment;
+    definitions[$1] = assignment_t{$1, $3};
 }| END
 ;
 

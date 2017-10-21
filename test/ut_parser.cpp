@@ -44,17 +44,17 @@ namespace {
     std::vector<std::string> increment{"i++", "i--"};
 
     struct interpreter_t : public ::testing::Test{
-        std::tuple<int, flavor::document_t, flavor::symbols_t> parse(const std::string& text){
+        std::tuple<int, flavor::document_t> parse(const std::string& text){
 
             std::ostringstream serr;
             std::istringstream in(text);
             flavor::lexer_t _scanner(in, serr);
 
-            flavor::symbols_t symbols;
-            flavor::document_t doc;
-            flavor::parser_t _parser(_scanner, symbols, doc);
+            flavor::definitions_t symbols;
+            flavor::ast_t ast;
+            flavor::parser_t _parser(_scanner, symbols, ast);
             //_parser.set_debug_level(1);
-            return {_parser.parse(), doc, symbols};
+            return {_parser.parse(), {ast, symbols}};
         }
     };
 }
@@ -71,7 +71,7 @@ TEST_F(interpreter_t, variable_definition){
                             expressions.push_back(input);
 
                             auto definition = assignment( string_literal, binary_expression(input, comp, input));
-                            auto [ret, doc, symbols] = parse(definition);
+                            auto [ret, doc] = parse(definition);
                             EXPECT_EQ(0, ret) << definition;
                         }
                     }
@@ -82,19 +82,19 @@ TEST_F(interpreter_t, variable_definition){
 
     for (auto &&expression : expressions) {
         auto expr_if = if_(expression);
-        auto [ret, doc, symbols] = parse(expr_if);
+        auto [ret, doc] = parse(expr_if);
         EXPECT_EQ(0, ret) << expr_if;
     }
 
     for (auto &&init_expr : expressions) {
         for (auto &&modifier_expr : increment) {
             auto expr_for = for_(assignment("i", init_expr), init_expr, modifier_expr);
-            auto [ret, doc, symbols] = parse(expr_for);
+            auto [ret, doc] = parse(expr_for);
             EXPECT_EQ(0, ret) << expr_for;
         }
 
         auto expr_for = for_(assignment("i", init_expr), init_expr, init_expr);
-        auto [ret, doc, symbols] = parse(expr_for);
+        auto [ret, doc] = parse(expr_for);
         EXPECT_EQ(0, ret) << expr_for;
     }
 }
@@ -112,6 +112,6 @@ TEST_F(interpreter_t, conditions){
         }
     }
     )'";
-    auto [ret, doc, symbols] = parse(expr_if);
+    auto [ret, doc] = parse(expr_if);
     EXPECT_EQ(0, ret) << expr_if;
 }

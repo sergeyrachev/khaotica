@@ -51,9 +51,10 @@ namespace {
 
             on_(*node._then, traversal);
 
-            out << "else";
-
-            on_(*node._else, traversal);
+            if(node._else){
+                out << "else";
+                on_(**node._else, traversal);
+            }
 
             out << std::endl;
         }
@@ -82,36 +83,6 @@ namespace {
             on_(*node.body, traversal);
 
             out << std::endl;
-        }
-
-        void on(const flavor::compound_t& node, const flavor::compound_definition_t& body, traversal_t<print_t>& traversal){
-            out << std::string(indentation, ' ') << node.name << "()";
-
-            on_(body, traversal);
-
-            out << std::endl;
-        }
-
-        void on( const flavor::field_t& node, const flavor::bslbf_t& definition, traversal_t<print_t>& traversal){
-            out << node.name << "<" <<  "bslbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::field_t& node, const flavor::uimsbf_t& definition, traversal_t<print_t>& traversal){
-            out << node.name << "<" <<  "uimsbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::field_t& node, const flavor::tcimsbf_t& definition, traversal_t<print_t>& traversal){
-            out << node.name << "<" <<  "tcimsbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::field_t& node, const flavor::compound_definition_t& definition, traversal_t<print_t>& traversal){
-            assert( false && "Should never be here until sizeof is not implemented");
-        }
-
-        void on( const flavor::field_t& node, const flavor::assignment_t& definition, traversal_t<print_t>& traversal){
-            out << node.name << "<";
-            traversal(*definition.expression);
-            out << ">";
         }
 
         void on( const flavor::integer_t& node, traversal_t<print_t>& traversal){
@@ -145,10 +116,35 @@ namespace {
         }
 
         void on( const flavor::assignment_t& node, traversal_t<print_t>& traversal){
-            out << node.variable.name << "=";
+            out << node.symbol.name << "=";
             traversal(*node.expression);
         }
 
+        void on( const flavor::symbol_t& node, const flavor::bslbf_t& definition, traversal_t<print_t>& traversal){
+            out << node.name << "<" <<  "bslbf("<< definition.length << ")>";
+        }
+
+        void on( const flavor::symbol_t& node, const flavor::uimsbf_t& definition, traversal_t<print_t>& traversal){
+            out << node.name << "<" <<  "uimsbf("<< definition.length << ")>";
+        }
+
+        void on( const flavor::symbol_t& node, const flavor::tcimsbf_t& definition, traversal_t<print_t>& traversal){
+            out << node.name << "<" <<  "tcimsbf("<< definition.length << ")>";
+        }
+
+        void on( const flavor::symbol_t& node, const flavor::compound_definition_t& definition, traversal_t<print_t>& traversal){
+            out << std::string(indentation, ' ') << node.name << "()<";
+
+            on_(definition, traversal);
+
+            out << ">" << std::endl;
+        }
+
+        void on( const flavor::symbol_t& node, const flavor::assignment_t& definition, traversal_t<print_t>& traversal){
+            out << node.name << "<";
+            traversal(*definition.expression);
+            out << ">";
+        }
     private:
         void on_(const flavor::compound_definition_t& body, traversal_t<print_t>& traversal){
             out << "{" << std::endl;

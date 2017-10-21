@@ -9,7 +9,7 @@ namespace khaotica {
     template<typename P>
     class traversal_t{
     public:
-        traversal_t(const flavor::symbols_t& symbols, P& p):symbols(symbols), p(p){
+        traversal_t(const flavor::definitions_t& symbols, P& p):symbols(symbols), p(p){
 
         }
 
@@ -33,11 +33,6 @@ namespace khaotica {
             p.on(node, *this);
         }
 
-        void operator()(const flavor::compound_t& node){
-            auto && definition = std::get<flavor::compound_definition_t>(symbols.at(node.name));
-            p.on(node, definition, *this);
-        }
-
         void operator()(const flavor::compound_definition_t& node){
             for (auto &&entry : node.entries) {
                 std::visit(*this, entry);
@@ -48,11 +43,7 @@ namespace khaotica {
             std::visit(*this, node.sentence);
         }
 
-        void operator()(const flavor::variable_t& node){
-            assert( false && "Should never be here. AST should not contain free variables");
-        }
-
-        void operator()(const flavor::field_t& node){
+        void operator()(const flavor::symbol_t& node){
             std::visit([this, &node](const auto& definition){
                 p.on(node, definition, *this);
             }, symbols.at(node.name));
@@ -85,7 +76,7 @@ namespace khaotica {
             p.on(node, *this);
         }
 
-        const flavor::symbols_t& symbols;
+        const flavor::definitions_t& symbols;
         P& p;
     };
 }

@@ -32,15 +32,7 @@ namespace flavor{
         uint64_t length;
     };
 
-    struct compound_t{
-        std::string name;
-    };
-
-    struct variable_t{
-        std::string name;
-    };
-
-    struct field_t{
+    struct symbol_t{
         std::string name;
     };
 
@@ -55,7 +47,7 @@ namespace flavor{
     struct if_t{
         std::shared_ptr<expression_t> condition;
         std::shared_ptr<compound_definition_t> _then;
-        std::shared_ptr<compound_definition_t> _else;
+        std::optional<std::shared_ptr<compound_definition_t>> _else;
     };
 
     struct for_t {
@@ -71,7 +63,7 @@ namespace flavor{
         tcimsbf_t,
         if_t,
         for_t,
-        compound_t
+        symbol_t
     > entry_t;
 
     typedef std::list<entry_t> entries_t;
@@ -118,12 +110,12 @@ namespace flavor{
     };
 
     struct assignment_t {
-        variable_t variable;
+        symbol_t symbol;
         std::shared_ptr<expression_t> expression;
     };
 
     struct postincrement_t{
-        variable_t operand;
+        symbol_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -131,7 +123,7 @@ namespace flavor{
     };
 
     struct preincrement_t{
-        variable_t operand;
+        symbol_t operand;
         std::variant<
             std::plus<>,
             std::minus<>
@@ -140,8 +132,7 @@ namespace flavor{
 
     struct expression_t {
         std::variant<
-            variable_t,
-            field_t,
+            symbol_t,
             integer_t,
             bitstring_t,
             unary_expression_t,
@@ -152,20 +143,20 @@ namespace flavor{
         > sentence;
     };
 
-    typedef std::variant<
-        bslbf_t,
-        uimsbf_t,
-        tcimsbf_t,
-        compound_definition_t,
-        assignment_t
-    > symbol_t;
-    typedef std::map< const std::string, symbol_t > symbols_t;
+    typedef std::map<
+        const std::string, std::variant<
+            bslbf_t,
+            uimsbf_t,
+            tcimsbf_t,
+            compound_definition_t,
+            assignment_t>
+    > definitions_t;
 
-    typedef std::list<compound_t> ast_t;
+    typedef std::list<symbol_t> ast_t;
 
     struct document_t{
         ast_t hierarchy;
-        symbols_t symbols;
+        definitions_t symbols;
     };
 
     struct value_t{
