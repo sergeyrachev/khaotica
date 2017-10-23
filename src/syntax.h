@@ -165,10 +165,12 @@ namespace flavor{
             uint64_t,
             int64_t,
             bool,
+            std::pair<bool, std::shared_ptr<value_t>>,
             std::list<std::shared_ptr<value_t>>
         > value;
     };
-    typedef std::map< const std::string, value_t > values_t;
+
+    typedef std::unordered_multimap< std::string, value_t > values_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H

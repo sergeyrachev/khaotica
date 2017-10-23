@@ -88,6 +88,7 @@ namespace {
         void on( const flavor::integer_t& node, traversal_t<print_t>& traversal){
             out << node.value;
         }
+
         void on( const flavor::bitstring_t& node, traversal_t<print_t>& traversal){
             out << "'" << node.value << "'";
         }
