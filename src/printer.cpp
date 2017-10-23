@@ -150,7 +150,9 @@ namespace {
             out << "{" << std::endl;
             indentation++;
 
-            traversal(body);
+            for (auto &&entry : body.entries) {
+                std::visit(traversal, entry);
+            }
 
             indentation--;
             out << std::string(indentation, ' ') << "}";
