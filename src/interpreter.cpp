@@ -12,11 +12,10 @@ flavor::document_t flavor::interpreter_t::parse(std::istream &in, bool enable_ve
     std::ostringstream serr;
     flavor::lexer_t _scanner(in, serr);
 
-    flavor::definitions_t symbols;
-    flavor::ast_t tree;
-    flavor::parser_t _parser(_scanner, symbols, tree);
+    flavor::document_t document;
+    flavor::parser_t _parser(_scanner, document);
 
-    //_scanner.set_debug(enable_verbosity);
+    _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);
 
     std::ostringstream perr;
@@ -26,5 +25,5 @@ flavor::document_t flavor::interpreter_t::parse(std::istream &in, bool enable_ve
     logging::debug() << "Parsing has ended with code " << ret << ": ";
     logging::debug() << perr.str();
 
-    return {tree, symbols};
+    return document;
 }

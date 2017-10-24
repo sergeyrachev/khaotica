@@ -49,8 +49,7 @@
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
-%parse-param {definitions_t& definitions}
-%parse-param {ast_t& tree}
+%parse-param {document_t& document}
 
 %locations
 
@@ -105,13 +104,12 @@
 
 
 %token <std::string> IDENTIFIER
-%token <bitstring_t> BITSTRING
-%token <integer_t> INTEGER
-%type <entry_t> entry
-%type <entries_t> entries
-%type <symbol_t> compound_signature
+%token <std::string> BITSTRING
+%token <int64_t> INTEGER
+%type <std::shared_ptr<node_t>> entry
 
-%type <std::shared_ptr<compound_definition_t>> compound_definition
+%type <entries_t> entries
+%type <entries_t> block
 
 %type <std::shared_ptr<expression_t>> expression
 %type <std::shared_ptr<expression_t>> primary_expression
@@ -130,61 +128,57 @@
 
 entry
 : IDENTIFIER INTEGER "bslbf"  {
-    bslbf_t entry{$1, $2.value};
+    auto entry = std::make_shared<bslbf_t>($1, $2);
     $$ = entry;
-    definitions[$1] = entry;
 }| IDENTIFIER INTEGER "uimsbf"  {
-    uimsbf_t entry{$1, $2.value};
+    auto entry = std::make_shared<uimsbf_t>($1, $2);
     $$ = entry;
-    definitions[$1] = entry;
-}| IDENTIFIER INTEGER "tcimsbf" {
-    tcimsbf_t entry{$1, $2.value};
+}| IDENTIFIER "(" ")" {
+    auto entry = std::make_shared<compound_t>($1);
     $$ = entry;
-    definitions[$1] = entry;
-}| compound_signature {
-    $$ = $1;
-    auto it = definitions.find($1.name);
-    if( it == definitions.end() ){
-        definitions[$1.name] = compound_definition_t{};
-    }
-}| "if" "(" expression ")" compound_definition {
+}| "if" "(" expression ")" block {
     auto condition = $3;
     auto _then =  $5;
     auto _else = std::nullopt;
-    $$ = if_t{condition, _then, _else};
-}| "if" "(" expression ")" compound_definition "else" compound_definition {
+    $$ = std::make_shared<if_t>(condition, _then, _else);
+}| "if" "(" expression ")" block "else" block {
     auto condition = $3;
     auto _then =  $5;
     auto _else =  $7;
-    $$ = if_t{condition, _then, _else};
-}| "for" "(" expression ";" expression ";" expression ")" compound_definition {
+    $$ = std::make_shared<if_t>(condition, _then, _else);
+}| "for" "(" expression ";" expression ";" expression ")" block {
     auto initializer = $3;
     auto condition = $5;
     auto modifier = $7;
     auto body = $9;
-    $$ = for_t{initializer, condition, modifier, body};
-}| "for" "(" ";" expression ";" expression ")" compound_definition {
+    $$ = std::make_shared<for_t>(initializer, condition, modifier, body);
+}| "for" "(" ";" expression ";" expression ")" block {
+    auto initializer = std::nullopt;
     auto condition = $4;
     auto modifier = $6;
     auto body = $8;
-    $$ = for_t{ nullptr, condition, modifier, body};
-}| "for" "(" ";" expression ";" ")" compound_definition {
+    $$ = std::make_shared<for_t>(initializer, condition, modifier, body);
+}| "for" "(" ";" expression ";" ")" block {
+    auto initializer = std::nullopt;
     auto condition = $4;
+    auto modifier = std::nullopt;
     auto body = $7;
-    $$ = for_t{nullptr, condition, nullptr, body};
-}| "for" "(" ";" ";" ")" compound_definition {
+    $$ = std::make_shared<for_t>(initializer, condition, modifier, body);
+}| "for" "(" ";" ";" ")" block {
+    auto initializer = std::nullopt;
+    auto condition = std::nullopt;
+    auto modifier = std::nullopt;
     auto body = $6;
-    $$ = for_t{nullptr, nullptr, nullptr, body};
+    $$ = std::make_shared<for_t>(initializer, condition, modifier, body);
 }
 
 primary_expression
 : IDENTIFIER {
-    symbol_t symbol{$1};
-    $$ = std::make_shared<expression_t>(expression_t{symbol});
+    $$ = std::make_shared<identifier_t>($1);
 }| INTEGER {
-    $$ = std::make_shared<expression_t>(expression_t{$1});
+    $$ = std::make_shared<integer_t>($1);
 }| BITSTRING {
-    $$ = std::make_shared<expression_t>(expression_t{$1});
+    $$ = std::make_shared<bitstring_t>($1);
 }| "(" expression ")" {
     $$ = $2;
 }| postfix_expression{
@@ -195,86 +189,86 @@ primary_expression
 
 postfix_expression
 : IDENTIFIER "++" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{symbol_t{$1}, std::plus<>()}});
+    auto expr = std::make_shared<postincrement_t<std::plus<>>>($1);
     $$ = expr;
 
 }| IDENTIFIER "--" {
-    auto expr = std::make_shared<expression_t>(expression_t{postincrement_t{symbol_t{$1}, std::minus<>()}});
+    auto expr = std::make_shared<postincrement_t<std::minus<>>>($1);
     $$ = expr;
 }
 
 prefix_expression
 : "++" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{symbol_t{$2}, std::plus<>()}});
+    auto expr = std::make_shared<preincrement_t<std::plus<>>>($2);
     $$ = expr;
 }| "--" IDENTIFIER {
-    auto expr = std::make_shared<expression_t>(expression_t{preincrement_t{symbol_t{$2}, std::minus<>()}});
+    auto expr = std::make_shared<preincrement_t<std::minus<>>>($2);
     $$ = expr;
 }
 
 unary_expr
 : "-" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::negate<>(), $2}});
+    $$ = std::make_shared<unary_expression_t<std::minus<>>>($2);
 }| "!" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::logical_not<>(), $2}});
+    $$ = std::make_shared<unary_expression_t<std::logical_not<>>>($2);
 }| "~" primary_expression {
-    $$ = std::make_shared<expression_t>(expression_t{unary_expression_t{std::bit_not<>(), $2}});
+    $$ = std::make_shared<unary_expression_t<std::bit_not<>>>($2);
 }| primary_expression{
     $$ = $1;
 }
 
 multiplicative_expr
 : multiplicative_expr "*" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::multiplies<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::multiplies<>>>($1, $3);
 }| multiplicative_expr "/" unary_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::divides<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::divides<>>>($1, $3);
 }| multiplicative_expr "%" unary_expr {
-     $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::modulus<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::modulus<>>>($1, $3);
 }| unary_expr {
     $$ = $1;
 }
 
 additive_expression
 : additive_expression "+" multiplicative_expr {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::plus<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::plus<>>>($1, $3);
 }| additive_expression "-" multiplicative_expr{
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::minus<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::minus<>>>($1, $3);
 }| multiplicative_expr {
     $$ = $1;
 }
 
 relational_expression
 : additive_expression "<" additive_expression  {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::less<>>>($1, $3);
 }| additive_expression ">" additive_expression  {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::greater<>>>($1, $3);
 }| additive_expression "<=" additive_expression  {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::less_equal<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::less_equal<>>>($1, $3);
 }| additive_expression ">=" additive_expression  {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::greater_equal<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::greater_equal<>>>($1, $3);
 }| additive_expression {
     $$ = $1;
 }
 
 comparison_expression
 : relational_expression "==" relational_expression {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::equal_to<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::equal_to<>>>($1, $3);
 }| relational_expression "!=" relational_expression {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::not_equal_to<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::not_equal_to<>>>($1, $3);
 }| relational_expression {
     $$ = $1;
 }
 
 logical_and
 : logical_and "&&" comparison_expression {
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_and<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::logical_and<>>>($1, $3);
 }| comparison_expression{
     $$ = $1;
 }
 
 logical_or
 : logical_or "||" logical_and{
-    $$ = std::make_shared<expression_t>(expression_t{binary_expression_t{$1, std::logical_or<>(), $3}});
+    $$ = std::make_shared<binary_expression_t<std::logical_or<>>>($1, $3);
 }| logical_and{
     $$ = $1;
 }
@@ -282,17 +276,15 @@ logical_or
 expression
 : logical_or {
     $$ = $1;
-}| IDENTIFIER "=" logical_or {
-    assignment_t assignment{symbol_t{$1}, $3};
-    $$ = std::make_shared<expression_t>(expression_t{assignment});
-    definitions[$1] = assignment;
+}| IDENTIFIER "=" expression {
+    $$ = std::make_shared<assignment_t>($1, $3);
 }
 
-compound_definition
+block
 : "{" entries "}" {
-    $$ = std::make_shared<compound_definition_t>(compound_definition_t{$2});
+    $$ = $2;
 }| "{" "}" {
-    $$ = std::make_shared<compound_definition_t>();
+    $$ = {};
 }
 
 entries
@@ -303,20 +295,15 @@ entries
     $$ = $1;
 }
 
-compound_signature
-: IDENTIFIER "(" ")" {
-    $$ = symbol_t{$1};
-}
-
 bitstream
-: compound_signature compound_definition bitstream{
-    auto it = definitions.find($1.name);
-    if( it == definitions.end() ){
-        tree.push_front($1);
+: IDENTIFIER "(" ")" block bitstream{
+    auto compound = std::make_shared<compound_t>($1, $4);
+    if(document.symbols.find($1) == document.symbols.end() ){
+        document.hierarchy.push_back(compound);
     }
-    definitions[$1.name] = {*$2};
+    document.symbols[$1] = compound;
 }| IDENTIFIER "=" expression bitstream {
-    definitions[$1] = assignment_t{$1, $3};
+
 }| END
 ;
 

@@ -13,164 +13,133 @@
 
 namespace flavor{
 
-    struct compound_definition_t;
-    struct expression_t;
-    struct value_t;
+    struct node_t{
+        virtual ~node_t() = default;
+    };
+    typedef std::list<std::shared_ptr<node_t>> entries_t;
 
-    struct bslbf_t{
+    struct expression_t {
+        virtual ~expression_t() = default;
+    };
+
+    struct bslbf_t : node_t, expression_t{
+        bslbf_t(const std::string &name, uint64_t length)
+            : name(name), length(length) {}
+
         std::string name;
         uint64_t length;
     };
 
-    struct uimsbf_t{
+    struct uimsbf_t: node_t, expression_t{
+        uimsbf_t(const std::string &name, uint64_t length)
+            : name(name), length(length) {}
+
         std::string name;
         uint64_t length;
     };
 
-    struct tcimsbf_t{
-        std::string name;
-        uint64_t length;
-    };
+    struct bitstring_t : expression_t{
+        bitstring_t(const std::string &value)
+            : value(value) {}
 
-    struct symbol_t{
-        std::string name;
-    };
-
-    struct bitstring_t{
         std::string value;
     };
 
-    struct integer_t{
-        uint64_t value;
+    struct integer_t : expression_t{
+        integer_t(int64_t value)
+            : value(value) {}
+
+        int64_t value;
     };
 
-    struct if_t{
+    struct identifier_t : expression_t {
+        identifier_t(const std::string &name)
+            : name(name) {}
+
+        std::string name;
+    };
+
+    struct if_t : node_t{
+        if_t(const std::shared_ptr<expression_t> &condition, const entries_t &_then, const std::optional<entries_t> &_else)
+            : condition(condition), _then(_then), _else(_else) {}
+
         std::shared_ptr<expression_t> condition;
-        std::shared_ptr<compound_definition_t> _then;
-        std::optional<std::shared_ptr<compound_definition_t>> _else;
+        entries_t _then;
+        std::optional<entries_t> _else;
     };
 
-    struct for_t {
+    struct for_t : node_t{
+        for_t(const std::optional<std::shared_ptr<expression_t>> &initializer, const std::optional<std::shared_ptr<expression_t>> &condition,
+              const std::optional<std::shared_ptr<expression_t>> &modifier, const entries_t &body)
+            : initializer(initializer), condition(condition), modifier(modifier), body(body) {}
+
         std::optional<std::shared_ptr<expression_t>> initializer;
         std::optional<std::shared_ptr<expression_t>> condition;
         std::optional<std::shared_ptr<expression_t>> modifier;
-        std::shared_ptr<compound_definition_t> body;
+        entries_t body;
     };
 
-    typedef std::variant<
-        bslbf_t,
-        uimsbf_t,
-        tcimsbf_t,
-        if_t,
-        for_t,
-        symbol_t
-    > entry_t;
+    struct compound_t : node_t{
+        compound_t(const std::string &value, const entries_t &body = {})
+            : value(value), body(body) {}
 
-    typedef std::list<entry_t> entries_t;
-    struct compound_definition_t{
-        entries_t entries;
+        std::string value;
+        entries_t body;
     };
 
-    template<typename T>
-    struct cast_t{
-        template<typename U>
-        T operator()(const U& u){
-            return static_cast<T>(std::decay(u));
-        }
-    };
+    template<typename Function>
+    struct unary_expression_t : expression_t{
+        unary_expression_t(const std::shared_ptr<expression_t> &operand, Function operation = {})
+            : operand(operand), operation(operation) {}
 
-    struct unary_expression_t {
-        std::variant<
-            std::negate<>,
-            std::logical_not<>,
-            std::bit_not<>,
-            cast_t<bool>
-        > operation;
         std::shared_ptr<expression_t> operand;
+        Function operation;
     };
 
-    struct binary_expression_t {
+    template<typename Function>
+    struct binary_expression_t : expression_t {
+        binary_expression_t(const std::shared_ptr<expression_t> &left_operand, const std::shared_ptr<expression_t> &right_operand, Function operation = {})
+            : left_operand(left_operand), right_operand(right_operand), operation(operation) {}
+
         std::shared_ptr<expression_t> left_operand;
-        std::variant<
-            std::plus<>,
-            std::minus<>,
-            std::multiplies<>,
-            std::divides<>,
-            std::modulus<>,
-            std::logical_and<>,
-            std::logical_or<>,
-            std::not_equal_to<>,
-            std::equal_to<>,
-            std::less<>,
-            std::greater<>,
-            std::less_equal<>,
-            std::greater_equal<>
-        > operation;
         std::shared_ptr<expression_t> right_operand;
+        Function operation;
     };
 
-    struct assignment_t {
-        symbol_t symbol;
+    template<typename Function>
+    struct postincrement_t : expression_t{
+        postincrement_t(const std::string &operand, Function operation = {})
+            : operand(operand), operation(operation) {}
+
+        std::string operand;
+        Function operation;
+    };
+
+    template<typename Function>
+    struct preincrement_t : expression_t{
+        preincrement_t(const std::string &operand, Function operation = {})
+            : operand(operand), operation(operation) {}
+
+        std::string operand;
+        Function operation;
+    };
+
+    struct assignment_t : expression_t{
+        assignment_t(const std::string &symbol, const std::shared_ptr<expression_t> &expression)
+            : symbol(symbol), expression(expression) {}
+
+        std::string symbol;
         std::shared_ptr<expression_t> expression;
     };
 
-    struct postincrement_t{
-        symbol_t operand;
-        std::variant<
-            std::plus<>,
-            std::minus<>
-        > operation;
-    };
+    typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
-    struct preincrement_t{
-        symbol_t operand;
-        std::variant<
-            std::plus<>,
-            std::minus<>
-        > operation;
-    };
-
-    struct expression_t {
-        std::variant<
-            symbol_t,
-            integer_t,
-            bitstring_t,
-            unary_expression_t,
-            binary_expression_t,
-            postincrement_t,
-            preincrement_t,
-            assignment_t
-        > sentence;
-    };
-
-    typedef std::map<
-        const std::string, std::variant<
-            bslbf_t,
-            uimsbf_t,
-            tcimsbf_t,
-            compound_definition_t,
-            assignment_t>
-    > definitions_t;
-
-    typedef std::list<symbol_t> ast_t;
+    typedef std::list<std::shared_ptr<node_t>> ast_t;
 
     struct document_t{
         ast_t hierarchy;
         definitions_t symbols;
     };
-
-    struct value_t{
-        std::variant<
-            std::vector<bool>,
-            uint64_t,
-            int64_t,
-            bool,
-            std::pair<bool, std::shared_ptr<value_t>>,
-            std::list<std::shared_ptr<value_t>>
-        > value;
-    };
-
-    typedef std::unordered_multimap< std::string, value_t > values_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H

@@ -91,12 +91,12 @@ bits       [01]+
 }
 
 {integer_dec}|{integer_hex}|{integer_oct} {
-    uint64_t number = std::stoull(yytext, 0, 0);
+    auto number = std::stoll(yytext, 0, 0);
     return flavor::parser_t::make_INTEGER( {number}, _location);
 }
 
 {integer_bin} {
-    uint64_t number = std::stoull(yytext, 0, 2);
+    auto number = std::stoll(yytext, 0, 2);
     return flavor::parser_t::make_INTEGER( {number}, _location);
 }
 
