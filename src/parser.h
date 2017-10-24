@@ -16,8 +16,6 @@
 
 namespace khaotica {
     class parser_t {
-        class impl_t;
-
     public:
         static flavor::values_t parse(std::ifstream& in, const flavor::document_t& doc);
     };

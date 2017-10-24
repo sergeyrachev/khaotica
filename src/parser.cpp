@@ -16,70 +16,59 @@ namespace {
     public:
         template<typename T>
         flavor::value_t operator()(const T &v) {
-            return {F()(v)};
+            return {bool{false}};
         }
     };
 
     template<>
     class eval_unary_expression_t<std::negate<>>{
     public:
-        flavor::value_t operator()(const std::vector<bool> &v) {
-            assert(false && "It is really bad to apply negate operation to bitstring");
-            return {false};
+        flavor::value_t operator()(const uint64_t &v) {
+            return {-v};
         }
-        flavor::value_t operator()(const bool &v) {
-            assert(false && "It is really bad to apply negate operation to bool");
-            return {false};
+        flavor::value_t operator()(const int64_t &v) {
+            return {-v};
         }
-        flavor::value_t operator()(const std::pair<bool, std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply negate operation to if expression value");
-            return {false};
-        }
-        flavor::value_t operator()(const std::list<std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply negate operation to compound value");
-            return {false};
+
+        template<typename T>
+        flavor::value_t operator()(const T &v) {
+            return {bool{false}};
         }
     };
 
     template<>
     class eval_unary_expression_t<std::logical_not<>>{
     public:
-        flavor::value_t operator()(const std::vector<bool> &v) {
-            assert(false && "It is really bad to apply logical_not operation to bitstring");
-            return {false};
+        flavor::value_t operator()(const uint64_t &v) {
+            return {!v};
+        }
+        flavor::value_t operator()(const int64_t &v) {
+            return {!v};
         }
         flavor::value_t operator()(const bool &v) {
-            assert(false && "It is really bad to apply logical_not operation to bool");
-            return {false};
+            return {!v};
         }
-        flavor::value_t operator()(const std::pair<bool, std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply logical_not operation to if expression value");
-            return {false};
-        }
-        flavor::value_t operator()(const std::list<std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply logical_not operation to compound value");
-            return {false};
+        template<typename T>
+        flavor::value_t operator()(const T &v) {
+            return {bool{false}};
         }
     };
 
     template<>
     class eval_unary_expression_t<std::bit_not<>>{
     public:
-        flavor::value_t operator()(const std::vector<bool> &v) {
-            assert(false && "It is really bad to apply bit_not operation to bitstring");
-            return {false};
+        flavor::value_t operator()(const uint64_t &v) {
+            return {~v};
+        }
+        flavor::value_t operator()(const int64_t &v) {
+            return {~v};
         }
         flavor::value_t operator()(const bool &v) {
-            assert(false && "It is really bad to apply bit_not operation to bool");
-            return {false};
+            return {bool{~v}};
         }
-        flavor::value_t operator()(const std::pair<bool, std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply bit_not operation to if expression value");
-            return {false};
-        }
-        flavor::value_t operator()(const std::list<std::shared_ptr<flavor::value_t>> &v) {
-            assert(false && "It is really bad to apply bit_not operation to compound value");
-            return {false};
+        template<typename T>
+        flavor::value_t operator()(const T &v) {
+            return {bool{false}};
         }
     };
 
@@ -88,119 +77,89 @@ namespace {
     public:
         template<typename U, typename V>
         flavor::value_t operator()(const U &u, const V& v) {
-            return F()(u, v);
+            return {bool{false}};
         }
     };
 
-    template<typename... Args>
-    template<Args...args>
-    class eval_binary_expression_t{
+    template<>
+    class eval_binary_expression_t<std::minus<>>{
     public:
+        flavor::value_t operator()(const int64_t &u, const int64_t& v) {
+            return {u - v};
+        }
+
+        flavor::value_t operator()(const uint64_t &u, const uint64_t& v) {
+            return {u - v};
+        }
+
+        flavor::value_t operator()(const uint64_t &u, const bool& v) {
+            return {u - uint64_t(v)};
+        }
+
         template<typename U, typename V>
         flavor::value_t operator()(const U &u, const V& v) {
-            return args()(u, v);
+            return {bool{false}};
         }
     };
 
-    class evaluation_t{
+    template<>
+    class eval_binary_expression_t<std::greater<>>{
     public:
-        template<typename F, typename T>
-        flavor::value_t operator()(const F &op, const T &v) {
-            return {};
+        flavor::value_t operator()(const int64_t &u, const int64_t& v) {
+            return {u > v};
         }
 
-        template<typename L, typename F, typename R>
-        flavor::value_t operator()(const L &left_operand, const F &operation, const R &right_operand) {
-            return {};
+        flavor::value_t operator()(const uint64_t &u, const uint64_t& v) {
+            return {u > v};
         }
 
-//        flavor::value_t operator()(const std::negate<> &op, const int64_t &v) {
-//            return {int64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::logical_not<> &op, const int64_t &v) {
-//            return {int64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::logical_not<> &op, const uint64_t &v) {
-//            return {uint64_t(op(v))};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<> &op, const std::vector<bool> &v) {
-//            auto ret = v;
-//            ret.flip();
-//            return {ret};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<> &op, const uint64_t &v) {
-//            return {op(v)};
-//        }
-//
-//        flavor::value_t operator()(const std::bit_not<> &op, const int64_t &v) {
-//            return {op(v)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::less<> &operation, const int64_t &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::less<> &operation, const uint64_t &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::minus<> &operation, const int64_t &right_operand) {
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::minus<> &operation, const bool &right_operand) {
-//            return {operation(left_operand, (int64_t) right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const uint64_t &left_operand, const std::minus<> &operation, const bool &right_operand) {
-//            return {operation(left_operand, (uint64_t) right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::minus<> &operation, const uint64_t &right_operand) {
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::plus<> &operation, const int64_t &right_operand) {
-//            return {operation(left_operand, right_operand)};
-//        }
-//
-//        flavor::value_t operator()(const int64_t &left_operand, const std::greater<> &operation, const int64_t &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const uint64_t &left_operand, const std::greater<> &operation, const int64_t &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const uint64_t &left_operand, const std::logical_or<> &operation, const uint64_t &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool> &left_operand, const std::equal_to<> &operation, const std::vector<bool> &right_operand) {
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool> &left_operand, const std::less<> &operation, const std::vector<bool> &right_operand) {
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const std::vector<bool> &left_operand, const std::greater<> &operation, const std::vector<bool> &right_operand) {
-//            auto l = khaotica::algorithm::to_string(left_operand);
-//            auto r = khaotica::algorithm::to_string(right_operand);
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
-//
-//        flavor::value_t operator()(const bool &left_operand, const std::logical_or<> &operation, const bool &right_operand) {
-//            return {uint64_t(operation(left_operand, right_operand))};
-//        }
+        template<typename U, typename V>
+        flavor::value_t operator()(const U &u, const V& v) {
+            return {bool{false}};
+        }
+    };
+
+    template<>
+    class eval_binary_expression_t<std::less<>>{
+    public:
+        flavor::value_t operator()(const int64_t &u, const int64_t& v) {
+            return {u < v};
+        }
+
+        flavor::value_t operator()(const uint64_t &u, const uint64_t& v) {
+            return {u < v};
+        }
+
+        template<typename U, typename V>
+        flavor::value_t operator()(const U &u, const V& v) {
+            return {bool{false}};
+        }
+    };
+
+    template<>
+    class eval_binary_expression_t<std::logical_or<>>{
+    public:
+        flavor::value_t operator()(const bool &u, const bool& v) {
+            return {u || v};
+        }
+        template<typename U, typename V>
+        flavor::value_t operator()(const U &u, const V& v) {
+            return {bool{false}};
+        }
+    };
+
+    template<>
+    class eval_binary_expression_t<std::equal_to<>>{
+    public:
+        template<typename U>
+        flavor::value_t operator()(const U &u, const U& v) {
+            return {u == v};
+        }
+
+        template<typename U, typename V>
+        flavor::value_t operator()(const U &u, const V& v) {
+            return {bool{false}};
+        }
     };
 
     class parse_t {
@@ -299,7 +258,13 @@ namespace {
         }
 
         flavor::value_t on( const flavor::postincrement_t& node, traversal_t& traversal){
-            return {false};
+            auto range = values.equal_range(node.operand.name);
+            auto value = range.second->second;
+            auto ref = std::get<uint64_t>(value.value);
+
+            value = flavor::value_t{ref + 1};
+            values.emplace(node.operand.name, value);
+            return value;
         }
 
         flavor::value_t on( const flavor::preincrement_t& node, traversal_t& traversal){
@@ -307,19 +272,25 @@ namespace {
         }
 
         flavor::value_t on( const flavor::assignment_t& node, traversal_t& traversal){
-            return traversal(*node.expression);
+            auto value = traversal(*node.expression);
+            values.emplace(node.symbol.name, value);
+            return value;
         }
 
         flavor::value_t on( const flavor::symbol_t& node, const flavor::bslbf_t& definition, traversal_t& traversal){
-            return {false};
+            return values.equal_range(node.name).first->second;
         }
 
         flavor::value_t on( const flavor::symbol_t& node, const flavor::uimsbf_t& definition, traversal_t& traversal){
-            return {false};
+            auto range = values.equal_range(node.name);
+            if(range.first == range.second){
+                return {uint64_t{0}};
+            }
+            return range.second->second;
         }
 
         flavor::value_t on( const flavor::symbol_t& node, const flavor::tcimsbf_t& definition, traversal_t& traversal){
-            return {false};
+            return values.equal_range(node.name).first->second;
         }
 
         flavor::value_t on( const flavor::symbol_t& node, const flavor::compound_definition_t& definition, traversal_t& traversal){
@@ -327,7 +298,13 @@ namespace {
         }
 
         flavor::value_t on( const flavor::symbol_t& node, const flavor::assignment_t& definition, traversal_t& traversal){
-            return {false};
+            auto range = values.equal_range(node.name);
+            if(range.first == range.second){
+                auto value = traversal(*definition.expression);
+                values.emplace(node.name, value);
+                return value;
+            }
+            return range.second->second;
         }
 
         flavor::values_t values;
@@ -337,7 +314,8 @@ namespace {
 
             std::list<std::shared_ptr<flavor::value_t>> sequence;
             for (auto &&entry : node.entries) {
-                sequence.push_back( std::make_shared<flavor::value_t>(std::visit(traversal, entry)));
+                auto value = std::visit(traversal, entry);
+                sequence.push_back( std::make_shared<flavor::value_t>(value));
             }
 
             return {sequence};

@@ -39,9 +39,9 @@ int main( int argc, char* argv[] ) {
     khaotica::printer_t::print(doc, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-//    while(!bitstream.bad() && !bitstream.eof()){
-//
-//    }
+    while(!bitstream.bad() && !bitstream.eof()){
+        khaotica::parser_t::parse(bitstream, doc);
+    }
 
     return 0;
 }
