@@ -111,17 +111,17 @@
 %type <entries_t> entries
 %type <entries_t> block
 
-%type <std::shared_ptr<expression_t>> expression
-%type <std::shared_ptr<expression_t>> primary_expression
-%type <std::shared_ptr<expression_t>> unary_expr
-%type <std::shared_ptr<expression_t>> multiplicative_expr
-%type <std::shared_ptr<expression_t>> additive_expression
-%type <std::shared_ptr<expression_t>> logical_and
-%type <std::shared_ptr<expression_t>> logical_or
-%type <std::shared_ptr<expression_t>> postfix_expression
-%type <std::shared_ptr<expression_t>> prefix_expression
-%type <std::shared_ptr<expression_t>> relational_expression
-%type <std::shared_ptr<expression_t>> comparison_expression
+%type <std::shared_ptr<node_t>> expression
+%type <std::shared_ptr<node_t>> primary_expression
+%type <std::shared_ptr<node_t>> unary_expr
+%type <std::shared_ptr<node_t>> multiplicative_expr
+%type <std::shared_ptr<node_t>> additive_expression
+%type <std::shared_ptr<node_t>> logical_and
+%type <std::shared_ptr<node_t>> logical_or
+%type <std::shared_ptr<node_t>> postfix_expression
+%type <std::shared_ptr<node_t>> prefix_expression
+%type <std::shared_ptr<node_t>> relational_expression
+%type <std::shared_ptr<node_t>> comparison_expression
 
 %%
 %start bitstream;

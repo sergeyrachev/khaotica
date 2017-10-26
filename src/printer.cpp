@@ -3,18 +3,13 @@
 #include <boost/core/demangle.hpp>
 
 namespace {
-    class print_t{
+    class print_t : public flavor::traversal_t{
     public:
         explicit print_t(std::ostream& out):out(out), indentation(0){
 
         }
 
-        template<typename T>
-        void traversal(T& v){
-
-        }
-
-        void on(const flavor::bslbf_t &node){
+        virtual void on(flavor::bslbf_t& node ) final {
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
@@ -22,9 +17,8 @@ namespace {
                 << " "
                 << "bslbf"
                 << std::endl;
-        }
-
-        void on(const flavor::uimsbf_t &node){
+        };
+        virtual void on(flavor::uimsbf_t& node )final {
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
@@ -32,119 +26,191 @@ namespace {
                 << " "
                 << "uimsbf"
                 << std::endl;
-        }
-        
-        void on(const flavor::if_t& node){
+        };
+        virtual void on(flavor::bitstring_t& node )final {
+            out << "'" << node.value << "'";
+        };
+        virtual void on(flavor::integer_t& node )final {
+            out << node.value;
+        };
+        virtual void on(flavor::identifier_t& node )final {
+            out << node.name;
+        };
+        virtual void on(flavor::if_t& node )final {
             out << std::string(indentation, ' ') << "if" << "( ";
 
-            traversal(*node.condition);
+            node.condition->process(*this);
 
             out << " )";
 
-            on_(*node._then);
+            on_(node._then);
 
             if(node._else){
                 out << "else";
-                on_(**node._else);
+                on_(*node._else);
             }
 
             out << std::endl;
-        }
-
-        void on(const flavor::for_t& node){
+        };
+        virtual void on(flavor::for_t& node )final {
             out << std::string(indentation, ' ') << "for" << "(";
 
             if(node.initializer){
-                traversal(**node.initializer);
+                (*node.initializer)->process(*this);
             }
 
             out << ";";
 
             if(node.condition){
-                traversal(**node.condition);
+                (*node.condition)->process(*this);
             }
 
             out << ";";
 
             if(node.modifier){
-                traversal(**node.modifier);
+                (*node.modifier)->process(*this);
             }
 
             out << ")";
 
-            on_(*node.body);
+            on_(node.body);
 
             out << std::endl;
-        }
-
-        void on( const flavor::integer_t& node){
-            out << node.value;
-        }
-
-        void on( const flavor::bitstring_t& node){
-            out << "'" << node.value << "'";
-        }
-
-        void on( const auto& operation, const flavor::expression_t& operand){
-            out << "( ";
-            out << boost::core::demangle(typeid(operation).name()) << "(";
-            traversal(operand);
-            out << ") )";
-        }
-
-        void on( const flavor::expression_t& left, const auto& operation, const flavor::expression_t& right){
-            out << "( ";
-            traversal(left);
-            out << " " << boost::core::demangle(typeid(operation).name()) << " ";
-            traversal(right);
-            out << " )";
-        }
-
-        void on( const flavor::postincrement_t& node){
-            out << "(" << node.operand << "??" <<")";
-        }
-
-        void on( const flavor::preincrement_t& node){
-            out << "( ??" << node.operand <<")";
-        }
-
-        void on( const flavor::assignment_t& node){
+        };
+        virtual void on(flavor::compound_t& node )final {
+            out<< std::string(indentation, ' ') << node.name << "()";
+            on_(node.body);
+            out << std::endl;
+        };
+        virtual void on(flavor::assignment_t& node )final {
             out << node.symbol << "=";
-            traversal(*node.expression);
-        }
-
-        void on( const flavor::identifier_t& node, const flavor::bslbf_t& definition){
-            out << node.name << "<" <<  "bslbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::symbol_t& node, const flavor::uimsbf_t& definition){
-            out << node.name << "<" <<  "uimsbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::symbol_t& node, const flavor::tcimsbf_t& definition){
-            out << node.name << "<" <<  "tcimsbf("<< definition.length << ")>";
-        }
-
-        void on( const flavor::symbol_t& node, const flavor::compound_definition_t& definition){
-            out << std::string(indentation, ' ') << node.name << "()<";
-
-            on_(definition, traversal);
-
-            out << ">" << std::endl;
-        }
-
-        void on( const flavor::symbol_t& node, const flavor::assignment_t& definition){
-            out << node.name << "<";
-            traversal(*definition.expression);
+            node.expression->process(*this);
+        };
+        virtual void on(flavor::preincrement_t<std::plus<>>& node )final {
+            out << "( " << "++" << node.operand << " )";
+        };
+        virtual void on(flavor::preincrement_t<std::minus<>>& node )final {
+            out << "( " << "--" << node.operand << " )";
+        };
+        virtual void on(flavor::postincrement_t<std::plus<>>& node )final {
+            out << "( " << node.operand << "++" << " )";
+        };
+        virtual void on(flavor::postincrement_t<std::minus<>>& node )final {
+            out << "( " << node.operand << "--" << " )";
+        };
+        virtual void on(flavor::unary_expression_t<std::bit_not<>>& node )final {
+            out << "( " << "~";
+            node.operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::unary_expression_t<std::minus<>>& node )final {
+            out << "( " << "-";
+            node.operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::unary_expression_t<std::logical_not<>>& node )final {
+            out << "( " << "!";
+            node.operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::plus<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "+";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::minus<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "-";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::multiplies<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "*";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::divides<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "/";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::modulus<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "%";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::less<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "<";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::greater<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
             out << ">";
-        }
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::less_equal<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "<=";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::greater_equal<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << ">=";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::equal_to<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "==";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::not_equal_to<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "!=";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::logical_and<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "&&";
+            node.right_operand->process(*this);
+            out << " )";
+        };
+        virtual void on(flavor::binary_expression_t<std::logical_or<>>& node )final {
+            out << "( ";
+            node.left_operand->process(*this);
+            out << "||";
+            node.right_operand->process(*this);
+            out << " )";
+        };
     private:
-        void on_(const flavor::compound_definition_t& body){
+        void on_(const flavor::entries_t& body){
             out << "{" << std::endl;
             indentation++;
 
-            for (auto &&entry : body.entries) {
-                //std::visit(traversal, entry);
+            for (auto &&entry : body) {
+                entry->process(*this);
             }
 
             indentation--;
@@ -160,7 +226,6 @@ namespace {
 void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out) {
 
     print_t print(out);
-
 
     for(auto&& entry : doc.hierarchy){
         entry->process(print);
