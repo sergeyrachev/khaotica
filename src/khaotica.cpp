@@ -9,6 +9,7 @@
 
 #include "interpreter.h"
 #include "printer.h"
+#include "syntax.h"
 
 int main( int argc, char* argv[] ) {
     std::string input_definition_filename;
@@ -36,6 +37,7 @@ int main( int argc, char* argv[] ) {
     std::ifstream flavor_script(input_definition_filename);
 
     auto doc = flavor::interpreter_t::parse(flavor_script, true);
+    bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
     khaotica::printer_t::print(doc, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);

@@ -107,10 +107,8 @@
 %token <std::string> BITSTRING
 %token <int64_t> INTEGER
 %type <std::shared_ptr<node_t>> entry
-
-%type <entries_t> entries
-%type <entries_t> block
-
+%type <std::shared_ptr<block_t>> entries
+%type <std::shared_ptr<block_t>> block
 %type <std::shared_ptr<node_t>> expression
 %type <std::shared_ptr<node_t>> primary_expression
 %type <std::shared_ptr<node_t>> unary_expr
@@ -134,13 +132,13 @@ entry
     auto entry = std::make_shared<uimsbf_t>($1, $2);
     $$ = entry;
 }| IDENTIFIER "(" ")" {
-    auto entry = std::make_shared<compound_t>($1);
-
-    if(document.definitions.find($1) == document.definitions.end() ){
+    if(auto it = document.definitions.find($1); it != document.definitions.end() ){
+        $$ = it->second;
+    } else {
+        auto entry = std::make_shared<compound_t>($1);
         document.definitions[$1] = entry;
+        $$ = entry;
     }
-
-    $$ = entry;
 }| "if" "(" expression ")" block {
     auto condition = $3;
     auto _then =  $5;
@@ -289,27 +287,27 @@ block
 : "{" entries "}" {
     $$ = $2;
 }| "{" "}" {
-    $$ = {};
+    $$ = std::make_shared<block_t>();
 }
 
 entries
 : entry {
-    $$.push_back($1);
+    auto p = std::make_shared<block_t>();
+    p->entries.push_back($1);
+    $$ = p;
 }| entries entry{
-    $1.push_back($2);
+    $1->entries.push_back($2);
     $$ = $1;
 }
 
 bitstream
 : IDENTIFIER "(" ")" block bitstream{
-    auto compound = std::make_shared<compound_t>($1, $4);
-
     auto it = document.definitions.find($1);
     if( it == document.definitions.end() ){
+        auto compound = std::make_shared<compound_t>($1, $4);
         document.hierarchy.push_back(compound);
     }
-
-    document.definitions[$1] = compound;
+    document.definitions[$1] = $4;
 }| IDENTIFIER "=" expression bitstream {
     document.definitions[$1] = $3;
 }| END

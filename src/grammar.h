@@ -27,8 +27,6 @@ namespace flavor{
         }
     };
 
-    typedef std::list<std::shared_ptr<node_t>> entries_t;
-
     struct bslbf_t : mixin_t<bslbf_t>{
         bslbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
@@ -67,31 +65,38 @@ namespace flavor{
     };
 
     struct if_t : mixin_t<if_t>{
-        if_t(const std::shared_ptr<node_t> &condition, const entries_t &_then, const std::optional<entries_t> &_else)
+        if_t(const std::shared_ptr<node_t> &condition, const std::shared_ptr<node_t> &_then, const std::optional<std::shared_ptr<node_t>> &_else)
             : condition(condition), _then(_then), _else(_else) {}
 
         std::shared_ptr<node_t> condition;
-        entries_t _then;
-        std::optional<entries_t> _else;
+        std::shared_ptr<node_t> _then;
+        std::optional<std::shared_ptr<node_t>> _else;
     };
 
     struct for_t : mixin_t<for_t>{
         for_t(const std::optional<std::shared_ptr<node_t>> &initializer, const std::optional<std::shared_ptr<node_t>> &condition,
-              const std::optional<std::shared_ptr<node_t>> &modifier, const entries_t &body)
+              const std::optional<std::shared_ptr<node_t>> &modifier, const std::shared_ptr<node_t> &body)
             : initializer(initializer), condition(condition), modifier(modifier), body(body) {}
 
         std::optional<std::shared_ptr<node_t>> initializer;
         std::optional<std::shared_ptr<node_t>> condition;
         std::optional<std::shared_ptr<node_t>> modifier;
-        entries_t body;
+        std::shared_ptr<node_t> body;
     };
 
     struct compound_t : mixin_t<compound_t>{
-        compound_t(const std::string &name, const entries_t &body = {})
+        compound_t(const std::string &name, const std::shared_ptr<node_t> &body = nullptr)
             : name(name), body(body) {}
 
         std::string name;
-        entries_t body;
+        std::shared_ptr<node_t> body;
+    };
+
+    struct block_t : mixin_t<block_t>{
+        block_t(const std::list<std::shared_ptr<node_t>> &entries = {})
+            : entries(entries) {}
+
+        std::list<std::shared_ptr<node_t>> entries;
     };
 
     template<typename Function>
@@ -157,6 +162,7 @@ namespace flavor{
         virtual void on(if_t&) = 0;
         virtual void on(for_t&) = 0;
         virtual void on(compound_t&) = 0;
+        virtual void on(block_t&) = 0;
         virtual void on(assignment_t&) = 0;
         virtual void on(preincrement_t<std::plus<>>&) = 0;
         virtual void on(preincrement_t<std::minus<>>&) = 0;
