@@ -1,7 +1,7 @@
 #ifndef KHAOTICA_INTERPRETER_H
 #define KHAOTICA_INTERPRETER_H
 
-#include "syntax.h"
+#include "grammar.h"
 
 #include <istream>
 #include <memory>

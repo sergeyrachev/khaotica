@@ -5,7 +5,7 @@
 #ifndef KHAOTICA_PRINTER_H
 #define KHAOTICA_PRINTER_H
 
-#include "syntax.h"
+#include "grammar.h"
 #include "bit.h"
 #include "eval.h"
 

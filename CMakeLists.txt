@@ -61,7 +61,7 @@ target_sources( khaotica PRIVATE
     src/logging.cpp src/logging.h
     src/options.cpp src/options.h
     src/interpreter.cpp src/interpreter.h
-    src/syntax.h src/syntax.cpp
+    src/grammar.h src/grammar.cpp
     src/bitreader.cpp src/bitreader.h
     src/bit.h
     src/printer.h src/printer.cpp

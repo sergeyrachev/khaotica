@@ -1,6 +1,6 @@
 #pragma once
 
-#include "syntax.h"
+#include "grammar.h"
 #include "logging.h"
 #include "bit.h"
 #include "bitreader.h"

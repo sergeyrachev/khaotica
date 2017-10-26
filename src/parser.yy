@@ -16,7 +16,7 @@
 
 %code requires{
     //Header file
-    #include "syntax.h"
+    #include "grammar.h"
 
     #include <list>
 
