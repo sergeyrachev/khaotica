@@ -2,6 +2,7 @@
 
 #include <stack>
 #include <cassert>
+#include <iostream>
 
 namespace {
     class validation_t : public flavor::traversal_t{
@@ -51,10 +52,10 @@ namespace {
                 (*node.initializer)->process(*this);
             }
             if(node.condition){
-                (*node.initializer)->process(*this);
+                (*node.condition)->process(*this);
             }
             if(node.modifier){
-                (*node.initializer)->process(*this);
+                (*node.modifier)->process(*this);
             }
 
             node.body->process(*this);
@@ -74,8 +75,7 @@ namespace {
             if(node.body){
                 node.body->process(*this);
             } else {
-                is_valid = false;
-                assert(is_valid);
+                not_defined.push_back(node.name);
             }
         };
 
@@ -169,13 +169,14 @@ namespace {
             node.right_operand->process(*this);
         };
 
-        bool is_valid{true};
+        std::list<std::string> not_defined;
     private:
         void on_(const std::string& name){
             const auto& scope = scopes.top();
             auto it = scope.find(name);
-            is_valid &= it != scope.end();
-            assert( is_valid );
+            if(  it == scope.end() ){
+                not_defined.push_back(name);
+            }
         }
 
     private:
@@ -192,5 +193,5 @@ bool khaotica::syntax_t::is_valid(const flavor::document_t &doc, std::ostream &o
         entry->process(valid);
     }
 
-    return valid.is_valid;
+    return !valid.not_defined.empty();
 }

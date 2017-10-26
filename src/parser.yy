@@ -133,11 +133,12 @@ entry
     $$ = entry;
 }| IDENTIFIER "(" ")" {
     if(auto it = document.definitions.find($1); it != document.definitions.end() ){
-        $$ = it->second;
+        auto entry = std::make_shared<compound_t>($1, it->second);
+        $$ = entry;
     } else {
         auto entry = std::make_shared<compound_t>($1);
-        document.definitions[$1] = entry;
         $$ = entry;
+        document.definitions[$1] = {};
     }
 }| "if" "(" expression ")" block {
     auto condition = $3;
@@ -305,7 +306,7 @@ bitstream
     auto it = document.definitions.find($1);
     if( it == document.definitions.end() ){
         auto compound = std::make_shared<compound_t>($1, $4);
-        document.hierarchy.push_back(compound);
+        document.hierarchy.push_front(compound);
     }
     document.definitions[$1] = $4;
 }| IDENTIFIER "=" expression bitstream {

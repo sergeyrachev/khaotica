@@ -77,7 +77,9 @@ namespace {
         };
         void on(flavor::compound_t& node )final {
             out<< std::string(indentation, ' ') << node.name << "()";
-            node.body->process(*this);
+            if(node.body){
+                node.body->process(*this);
+            }
             out << std::endl;
         };
 
