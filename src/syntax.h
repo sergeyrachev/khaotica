@@ -13,7 +13,15 @@
 
 namespace flavor{
 
-    struct node_t{
+    template<typename T>
+    struct mixin_t{
+        template<typename Visitor>
+        void process(Visitor& visitor) {
+            visitor.on(*this);
+        }
+    };
+
+    struct node_t : mixin_t<node_t>{
         virtual ~node_t() = default;
     };
     typedef std::list<std::shared_ptr<node_t>> entries_t;
@@ -22,7 +30,7 @@ namespace flavor{
         virtual ~expression_t() = default;
     };
 
-    struct bslbf_t : expression_t{
+    struct bslbf_t : expression_t, mixin_t<bslbf_t>{
         bslbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
 
