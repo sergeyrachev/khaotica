@@ -135,6 +135,11 @@ entry
     $$ = entry;
 }| IDENTIFIER "(" ")" {
     auto entry = std::make_shared<compound_t>($1);
+
+    if(document.definitions.find($1) == document.definitions.end() ){
+        document.definitions[$1] = entry;
+    }
+
     $$ = entry;
 }| "if" "(" expression ")" block {
     auto condition = $3;
@@ -298,12 +303,15 @@ entries
 bitstream
 : IDENTIFIER "(" ")" block bitstream{
     auto compound = std::make_shared<compound_t>($1, $4);
-    if(document.symbols.find($1) == document.symbols.end() ){
+
+    auto it = document.definitions.find($1);
+    if( it == document.definitions.end() ){
         document.hierarchy.push_back(compound);
     }
-    document.symbols[$1] = compound;
-}| IDENTIFIER "=" expression bitstream {
 
+    document.definitions[$1] = compound;
+}| IDENTIFIER "=" expression bitstream {
+    document.definitions[$1] = $3;
 }| END
 ;
 

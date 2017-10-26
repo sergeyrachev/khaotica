@@ -18,11 +18,11 @@ namespace flavor{
     };
     typedef std::list<std::shared_ptr<node_t>> entries_t;
 
-    struct expression_t {
+    struct expression_t : node_t {
         virtual ~expression_t() = default;
     };
 
-    struct bslbf_t : node_t, expression_t{
+    struct bslbf_t : expression_t{
         bslbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
 
@@ -30,7 +30,7 @@ namespace flavor{
         uint64_t length;
     };
 
-    struct uimsbf_t: node_t, expression_t{
+    struct uimsbf_t: expression_t{
         uimsbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
 
@@ -138,7 +138,7 @@ namespace flavor{
 
     struct document_t{
         ast_t hierarchy;
-        definitions_t symbols;
+        definitions_t definitions;
     };
 }
 
