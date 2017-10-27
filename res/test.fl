@@ -19,7 +19,7 @@ adaptation_field(){
     adaptation_field_length                                 8 uimsbf
              if(adaptation_field_length > 0 ) {
                 for (j=0;j<adaptation_field_length;j++){
-                    fakerest2  8 uimsbf
+                    fakerest  8 uimsbf
                 }
              }
 }

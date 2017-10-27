@@ -15,7 +15,7 @@ namespace flavor{
 
     struct traversal_t;
 
-    struct node_t{
+    struct node_t : std::enable_shared_from_this<node_t>{
         virtual ~node_t() = default;
         virtual void process(traversal_t& traversal) = 0;
     };
@@ -23,7 +23,7 @@ namespace flavor{
     template<typename T>
     struct mixin_t : node_t{
         virtual void process(traversal_t& traversal) final {
-            traversal.on(static_cast<T&>(*this));
+            traversal.on(static_cast<T&>(*this), shared_from_this());
         }
     };
 
@@ -154,37 +154,36 @@ namespace flavor{
     };
 
     struct traversal_t{
-        virtual void on(bslbf_t&) = 0;
-        virtual void on(uimsbf_t&) = 0;
-        virtual void on(bitstring_t&) = 0;
-        virtual void on(integer_t&) = 0;
-        virtual void on(identifier_t&) = 0;
-        virtual void on(if_t&) = 0;
-        virtual void on(for_t&) = 0;
-        virtual void on(compound_t&) = 0;
-        virtual void on(block_t&) = 0;
-        virtual void on(assignment_t&) = 0;
-        virtual void on(preincrement_t<std::plus<>>&) = 0;
-        virtual void on(preincrement_t<std::minus<>>&) = 0;
-        virtual void on(postincrement_t<std::plus<>>&) = 0;
-        virtual void on(postincrement_t<std::minus<>>&) = 0;
-        virtual void on(unary_expression_t<std::bit_not<>>&) = 0;
-        virtual void on(unary_expression_t<std::minus<>>&) = 0;
-        virtual void on(unary_expression_t<std::logical_not<>>&) = 0;
-        virtual void on(binary_expression_t<std::plus<>>&) = 0;
-        virtual void on(binary_expression_t<std::minus<>>&) = 0;
-        virtual void on(binary_expression_t<std::multiplies<>>&) = 0;
-        virtual void on(binary_expression_t<std::divides<>>&) = 0;
-        virtual void on(binary_expression_t<std::modulus<>>&) = 0;
-        virtual void on(binary_expression_t<std::less<>>&) = 0;
-        virtual void on(binary_expression_t<std::greater<>>&) = 0;
-        virtual void on(binary_expression_t<std::less_equal<>>&) = 0;
-        virtual void on(binary_expression_t<std::greater_equal<>>&) = 0;
-        virtual void on(binary_expression_t<std::equal_to<>>&) = 0;
-        virtual void on(binary_expression_t<std::not_equal_to<>>&) = 0;
-        virtual void on(binary_expression_t<std::logical_and<>>&) = 0;
-        virtual void on(binary_expression_t<std::logical_or<>>&) = 0;
-
+        virtual void on(bslbf_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(uimsbf_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(bitstring_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(integer_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(identifier_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(if_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(for_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(compound_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(block_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(assignment_t& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(preincrement_t<std::plus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(preincrement_t<std::minus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(postincrement_t<std::plus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(postincrement_t<std::minus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(unary_expression_t<std::bit_not<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(unary_expression_t<std::minus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(unary_expression_t<std::logical_not<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::plus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::minus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::multiplies<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::divides<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::modulus<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::less<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::greater<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::less_equal<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::greater_equal<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::equal_to<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::not_equal_to<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::logical_and<>>& node, std::shared_ptr<node_t> knot) = 0;
+        virtual void on(binary_expression_t<std::logical_or<>>& node, std::shared_ptr<node_t> knot) = 0;
     };
 }
 

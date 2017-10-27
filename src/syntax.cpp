@@ -11,31 +11,31 @@ namespace {
             scopes.push(definitions);
         }
 
-        void on(flavor::bslbf_t& node ) final {
+        void on(flavor::bslbf_t& node , std::shared_ptr<node_t> knot ) final {
             auto& scope = scopes.top();
             auto it = scope.find(node.name);
             assert( it == scope.end());
             scope[node.name] = {};
         };
 
-        void on(flavor::uimsbf_t& node ) final {
+        void on(flavor::uimsbf_t& node , std::shared_ptr<node_t> knot ) final {
             auto& scope = scopes.top();
             auto it = scope.find(node.name);
             assert( it == scope.end());
             scope[node.name] = {};
         };
 
-        void on(flavor::bitstring_t& node ) final {
+        void on(flavor::bitstring_t& node , std::shared_ptr<node_t> knot ) final {
 
         };
-        void on(flavor::integer_t& node ) final {
+        void on(flavor::integer_t& node , std::shared_ptr<node_t> knot ) final {
 
         };
-        void on(flavor::identifier_t& node ) final {
+        void on(flavor::identifier_t& node , std::shared_ptr<node_t> knot ) final {
             on_(node.name);
         };
 
-        void on(flavor::if_t& node ) final {
+        void on(flavor::if_t& node , std::shared_ptr<node_t> knot ) final {
             node.condition->process(*this);
 
             node._then->process(*this);
@@ -44,7 +44,7 @@ namespace {
                 (*node._else)->process(*this);
             }
         };
-        void on(flavor::for_t& node ) final {
+        void on(flavor::for_t& node , std::shared_ptr<node_t> knot ) final {
 
             scopes.push(scopes.top());
 
@@ -62,7 +62,7 @@ namespace {
 
             scopes.pop();
         };
-        void on(flavor::compound_t& node ) final {
+        void on(flavor::compound_t& node , std::shared_ptr<node_t> knot ) final {
 
             if(!node.body ){
                 auto& scope = scopes.top();
@@ -89,82 +89,82 @@ namespace {
             scopes.pop();
         }
 
-        void on(flavor::assignment_t& node ) final {
+        void on(flavor::assignment_t& node , std::shared_ptr<node_t> knot ) final {
             node.expression->process(*this);
             auto& scope = scopes.top();
             scope[node.symbol] = {};
         };
 
-        void on(flavor::preincrement_t<std::plus<>>& node ) final {
+        void on(flavor::preincrement_t<std::plus<>>& node , std::shared_ptr<node_t> knot ) final {
             on_(node.operand);
         };
-        void on(flavor::preincrement_t<std::minus<>>& node ) final {
+        void on(flavor::preincrement_t<std::minus<>>& node , std::shared_ptr<node_t> knot ) final {
             on_(node.operand);
         };
-        void on(flavor::postincrement_t<std::plus<>>& node ) final {
+        void on(flavor::postincrement_t<std::plus<>>& node , std::shared_ptr<node_t> knot ) final {
             on_(node.operand);
         };
-        void on(flavor::postincrement_t<std::minus<>>& node ) final {
+        void on(flavor::postincrement_t<std::minus<>>& node , std::shared_ptr<node_t> knot ) final {
             on_(node.operand);
         };
-        void on(flavor::unary_expression_t<std::bit_not<>>& node ) final {
+        void on(flavor::unary_expression_t<std::bit_not<>>& node , std::shared_ptr<node_t> knot ) final {
             node.operand->process(*this);
         };
-        void on(flavor::unary_expression_t<std::minus<>>& node ) final {
+        void on(flavor::unary_expression_t<std::minus<>>& node , std::shared_ptr<node_t> knot ) final {
             node.operand->process(*this);
         };
-        void on(flavor::unary_expression_t<std::logical_not<>>& node ) final {
+        void on(flavor::unary_expression_t<std::logical_not<>>& node , std::shared_ptr<node_t> knot ) final {
             node.operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::plus<>>& node ) final {
+        void on(flavor::binary_expression_t<std::plus<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::minus<>>& node ) final {
+        void on(flavor::binary_expression_t<std::minus<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::multiplies<>>& node ) final {
+        void on(flavor::binary_expression_t<std::multiplies<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::divides<>>& node ) final {
+        void on(flavor::binary_expression_t<std::divides<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::modulus<>>& node ) final {
+        void on(flavor::binary_expression_t<std::modulus<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::less<>>& node ) final {
+        void on(flavor::binary_expression_t<std::less<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::greater<>>& node ) final {
+        void on(flavor::binary_expression_t<std::greater<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::less_equal<>>& node ) final {
+        void on(flavor::binary_expression_t<std::less_equal<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::greater_equal<>>& node ) final {
+        void on(flavor::binary_expression_t<std::greater_equal<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::equal_to<>>& node ) final {
+        void on(flavor::binary_expression_t<std::equal_to<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::not_equal_to<>>& node ) final {
+        void on(flavor::binary_expression_t<std::not_equal_to<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::logical_and<>>& node ) final {
+        void on(flavor::binary_expression_t<std::logical_and<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
-        void on(flavor::binary_expression_t<std::logical_or<>>& node ) final {
+        void on(flavor::binary_expression_t<std::logical_or<>>& node , std::shared_ptr<node_t> knot ) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
         };
