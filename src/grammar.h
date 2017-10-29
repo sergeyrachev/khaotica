@@ -15,19 +15,19 @@ namespace flavor{
 
     struct traversal_t;
 
-    struct node_t : std::enable_shared_from_this<node_t>{
+    struct node_t{
         virtual ~node_t() = default;
         virtual void process(traversal_t& traversal) = 0;
     };
 
     template<typename T>
-    struct mixin_t : node_t{
+    struct traversable_t : node_t{
         virtual void process(traversal_t& traversal) final {
-            traversal.on(static_cast<T&>(*this), shared_from_this());
+            traversal.on(static_cast<T&>(*this), nullptr);
         }
     };
 
-    struct bslbf_t : mixin_t<bslbf_t>{
+    struct bslbf_t : traversable_t<bslbf_t>{
         bslbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
 
@@ -35,7 +35,7 @@ namespace flavor{
         uint64_t length;
     };
 
-    struct uimsbf_t : mixin_t<uimsbf_t> {
+    struct uimsbf_t : traversable_t<uimsbf_t> {
         uimsbf_t(const std::string &name, uint64_t length)
             : name(name), length(length) {}
 
@@ -43,28 +43,28 @@ namespace flavor{
         uint64_t length;
     };
 
-    struct bitstring_t : mixin_t<bitstring_t>{
+    struct bitstring_t : traversable_t<bitstring_t>{
         bitstring_t(const std::string &value)
             : value(value) {}
 
         std::string value;
     };
 
-    struct integer_t : mixin_t<integer_t>{
+    struct integer_t : traversable_t<integer_t>{
         integer_t(int64_t value)
             : value(value) {}
 
         int64_t value;
     };
 
-    struct identifier_t : mixin_t<identifier_t> {
+    struct identifier_t : traversable_t<identifier_t> {
         identifier_t(const std::string &name)
             : name(name) {}
 
         std::string name;
     };
 
-    struct if_t : mixin_t<if_t>{
+    struct if_t : traversable_t<if_t>{
         if_t(const std::shared_ptr<node_t> &condition, const std::shared_ptr<node_t> &_then, const std::optional<std::shared_ptr<node_t>> &_else)
             : condition(condition), _then(_then), _else(_else) {}
 
@@ -73,7 +73,7 @@ namespace flavor{
         std::optional<std::shared_ptr<node_t>> _else;
     };
 
-    struct for_t : mixin_t<for_t>{
+    struct for_t : traversable_t<for_t>{
         for_t(const std::optional<std::shared_ptr<node_t>> &initializer, const std::optional<std::shared_ptr<node_t>> &condition,
               const std::optional<std::shared_ptr<node_t>> &modifier, const std::shared_ptr<node_t> &body)
             : initializer(initializer), condition(condition), modifier(modifier), body(body) {}
@@ -84,7 +84,7 @@ namespace flavor{
         std::shared_ptr<node_t> body;
     };
 
-    struct compound_t : mixin_t<compound_t>{
+    struct compound_t : traversable_t<compound_t>{
         compound_t(const std::string &name, const std::shared_ptr<node_t> &body = nullptr)
             : name(name), body(body) {}
 
@@ -92,7 +92,7 @@ namespace flavor{
         std::shared_ptr<node_t> body;
     };
 
-    struct block_t : mixin_t<block_t>{
+    struct block_t : traversable_t<block_t>{
         block_t(const std::list<std::shared_ptr<node_t>> &entries = {})
             : entries(entries) {}
 
@@ -100,7 +100,7 @@ namespace flavor{
     };
 
     template<typename Function>
-    struct unary_expression_t : mixin_t<unary_expression_t<Function>>{
+    struct unary_expression_t : traversable_t<unary_expression_t<Function>>{
         unary_expression_t(const std::shared_ptr<node_t> &operand, Function operation = {})
             : operand(operand), operation(operation) {}
 
@@ -109,7 +109,7 @@ namespace flavor{
     };
 
     template<typename Function>
-    struct binary_expression_t : mixin_t<binary_expression_t<Function>> {
+    struct binary_expression_t : traversable_t<binary_expression_t<Function>> {
         binary_expression_t(const std::shared_ptr<node_t> &left_operand, const std::shared_ptr<node_t> &right_operand, Function operation = {})
             : left_operand(left_operand), right_operand(right_operand), operation(operation) {}
 
@@ -119,7 +119,7 @@ namespace flavor{
     };
 
     template<typename Function>
-    struct postincrement_t : mixin_t<postincrement_t<Function>>{
+    struct postincrement_t : traversable_t<postincrement_t<Function>>{
         postincrement_t(const std::string &operand, Function operation = {})
             : operand(operand), operation(operation) {}
 
@@ -128,7 +128,7 @@ namespace flavor{
     };
 
     template<typename Function>
-    struct preincrement_t : mixin_t<preincrement_t<Function>>{
+    struct preincrement_t : traversable_t<preincrement_t<Function>>{
         preincrement_t(const std::string &operand, Function operation = {})
             : operand(operand), operation(operation) {}
 
@@ -136,7 +136,7 @@ namespace flavor{
         Function operation;
     };
 
-    struct assignment_t : mixin_t<assignment_t>{
+    struct assignment_t : traversable_t<assignment_t>{
         assignment_t(const std::string &symbol, const std::shared_ptr<node_t> &expression)
             : symbol(symbol), expression(expression) {}
 
