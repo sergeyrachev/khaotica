@@ -15,7 +15,7 @@ namespace flavor{
 
     struct traversal_t;
 
-    struct node_t{
+    struct node_t : public std::enable_shared_from_this<node_t>{
         virtual ~node_t() = default;
         virtual void process(traversal_t& traversal) = 0;
     };
@@ -23,7 +23,7 @@ namespace flavor{
     template<typename T>
     struct traversable_t : node_t{
         virtual void process(traversal_t& traversal) final {
-            traversal.on(static_cast<T&>(*this), nullptr);
+            traversal.on(static_cast<T&>(*this), shared_from_this());
         }
     };
 
