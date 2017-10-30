@@ -310,7 +310,7 @@ bitstream
     }
     document.definitions[$1] = $4;
 }| IDENTIFIER "=" expression bitstream {
-    document.definitions[$1] = $3;
+    document.definitions[$1] = std::make_shared<assignment_t>($1, $3);
 }| END
 ;
 
