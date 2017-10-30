@@ -131,7 +131,7 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) < cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::greater<>> &node, std::shared_ptr<flavor::node_t> knot) final {
@@ -139,7 +139,7 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) > cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::less_equal<>> &node, std::shared_ptr<flavor::node_t> knot) final {
@@ -147,7 +147,7 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) <= cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::greater_equal<>> &node, std::shared_ptr<flavor::node_t> knot) final {
@@ -155,15 +155,15 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) >= cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::equal_to<>> &node, std::shared_ptr<flavor::node_t> knot) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
 
-            auto value = cast(values[node.left_operand]->value) == cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            auto value = values[node.left_operand]->value == values[node.right_operand]->value;
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::not_equal_to<>> &node, std::shared_ptr<flavor::node_t> knot) final {
@@ -171,7 +171,7 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) != cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::logical_and<>> &node, std::shared_ptr<flavor::node_t> knot) final {
@@ -179,13 +179,15 @@ namespace {
             node.right_operand->process(*this);
 
             auto value = cast(values[node.left_operand]->value) && cast(values[node.right_operand]->value);
-            values[knot] = values[knot] = std::make_shared<value_t>(value_t{value});
+            values[knot] =  std::make_shared<value_t>(value_t{value});
         };
 
         void on(flavor::binary_expression_t<std::logical_or<>> & node, std::shared_ptr<flavor::node_t> knot) final {
             node.left_operand->process(*this);
             node.right_operand->process(*this);
-            values[knot] = autocast<std::logical_or<>>( values[node.left_operand]->value, values[node.right_operand]->value);
+            
+            auto value = std::get<bool>(values[node.left_operand]->value) || std::get<bool>(values[node.right_operand]->value);
+            values[knot] = std::make_shared<value_t>(value_t{value});
         };
 
         struct value_t{
@@ -196,16 +198,6 @@ namespace {
         std::map<std::string, std::shared_ptr<flavor::node_t>> definitions;
 
     private:
-        template<typename F>
-        std::shared_ptr<value_t> autocast(const std::variant<int64_t, uint64_t, bool, std::vector<bool>, std::list<std::shared_ptr<value_t>>>& left, const std::variant<int64_t, uint64_t, bool, std::vector<bool>, std::list<std::shared_ptr<value_t>>>& right){
-
-            if(left.index() == right.index()){
-
-            } else {
-                assert(false && "Wat?!");
-            }
-            return nullptr;
-        }
         bool cast(const std::variant<int64_t, uint64_t, bool, std::vector<bool>, std::list<std::shared_ptr<value_t>>>& value) {
             bool condition_value(false);
             if( std::holds_alternative<bool>(value) ){
