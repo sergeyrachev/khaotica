@@ -38,7 +38,7 @@ int main( int argc, char* argv[] ) {
 
     auto doc = flavor::interpreter_t::parse(flavor_script, true);
     bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
-    khaotica::printer_t::print(doc, std::cout);
+    khaotica::printer_t::print(doc, {}, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::bitreader_t bitreader(bitstream);
