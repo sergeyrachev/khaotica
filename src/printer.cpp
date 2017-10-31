@@ -3,15 +3,16 @@
 namespace {
     class print_t{
     public:
-        explicit print_t(std::ostream& out, const flavor::document_t &doc):out(out), indentation(0), doc(doc){
+        explicit print_t(const flavor::document_t &doc):indentation(0), doc(doc){
 
         }
 
-        void on(std::shared_ptr<flavor::node_t> node){
-            std::visit(*this, node->payload);
+        std::string on(const flavor::node_t& node){
+            return std::visit(*this, node.payload);
         }
 
-        void operator()(flavor::bslbf_t& node )  {
+        std::string operator()(const flavor::bslbf_t& node )  {
+            std::ostringstream out;
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
@@ -19,8 +20,10 @@ namespace {
                 << " "
                 << "bslbf"
                 << std::endl;
+            return out.str();
         };
-        void operator()(flavor::uimsbf_t& node  )  {
+        std::string operator()(const flavor::uimsbf_t& node  )  {
+            std::ostringstream out;
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
@@ -28,117 +31,143 @@ namespace {
                 << " "
                 << "uimsbf"
                 << std::endl;
+            return out.str();
         };
-        void operator()(flavor::bitstring_t& node  )  {
+        std::string operator()(const flavor::bitstring_t& node  )  {
+            std::ostringstream out;
             out << "'" << node.value << "'";
+            return out.str();
         };
-        void operator()(flavor::integer_t& node  )  {
+        std::string operator()(const flavor::integer_t& node  )  {
+            std::ostringstream out;
             out << node.value;
+            return out.str();
         };
-        void operator()(flavor::identifier_t& node  )  {
+        std::string operator()(const flavor::identifier_t& node  )  {
+            std::ostringstream out;
             out << node.name;
+            return out.str();
         };
-        void operator()(flavor::reference_t& node  )  {
+        std::string operator()(const flavor::reference_t& node  )  {
+            std::ostringstream out;
+
             out << std::string(indentation, ' ') << node.name << "() -> { " << std::endl;
             indentation++;
 
             auto& compound = std::get<flavor::compound_t>(doc.definitions.at(node.name)->payload);
 
             for (auto &&item : compound.body) {
-                on(item);
+                out << on(*item);
             }
 
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
+            return out.str();
         };
-        void operator()(flavor::if_t& node  )  {
+        std::string operator()(const flavor::if_t& node  )  {
+            std::ostringstream out;
+
             out << std::string(indentation, ' ') << "if" << "( ";
 
-            on(node.condition);
+            out << on(*node.condition);
 
             out << " ) {" << std::endl;
 
             indentation++;
             for (auto &&item : node._then) {
-                on(item);
+                out << on(*item);
             }
 
             out << (node._else.empty()?"":"}else{");
 
             for (auto &&item : node._else) {
-                on(item);
+                out << on(*item);
             }
 
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
+            return out.str();
         };
-        void operator()(flavor::for_t& node  )  {
+        std::string operator()(const flavor::for_t& node  )  {
+            std::ostringstream out;
             out << std::string(indentation, ' ') << "for" << "(";
 
             if(node.initializer){
-                on(*node.initializer);
+                out << on(**node.initializer);
             }
 
             out << ";";
 
             if(node.condition){
-                on(*node.condition);
+                out << on(**node.condition);
             }
 
             out << ";";
 
             if(node.modifier){
-                on(*node.modifier);
+                out << on(**node.modifier);
             }
 
             out << ") {" << std::endl;
             indentation++;
 
             for (auto &&item : node.body) {
-                on(item);
+                out << on(*item);
             }
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
+            return out.str();
         };
-        void operator()(flavor::compound_t& node  )  {
+        std::string operator()(const flavor::compound_t& node  )  {
+            std::ostringstream out;
             out<< std::string(indentation, ' ') << node.name << "() {" << std::endl;
             indentation++;
             for (auto &&item :node.body) {
-                on(item);
+                out << on(*item);
             }
             indentation--;
             out << std::string(indentation, ' ') << "}" <<std::endl;
+            return out.str();
         };
 
 
-        void operator()(flavor::assignment_t& node  )  {
+        std::string operator()(const flavor::assignment_t& node  )  {
+            std::ostringstream out;
             out << node.symbol << "=";
-            on(node.expression);
+            out << on(*node.expression);
+            return out.str();
         };
-        void operator()(flavor::preincrement_t& node  )  {
+        std::string operator()(const flavor::preincrement_t& node  )  {
+            std::ostringstream out;
             out << "( " << "??" << node.operand << " )";
+            return out.str();
         };
 
-        void operator()(flavor::postincrement_t& node  )  {
+        std::string operator()(const flavor::postincrement_t& node  )  {
+            std::ostringstream out;
             out << "( " << node.operand << "++" << " )";
+            return out.str();
         };
 
-        void operator()(flavor::unary_expression_t& node  )  {
+        std::string operator()(const flavor::unary_expression_t& node  )  {
+            std::ostringstream out;
             out << "( " << "~";
-            on(node.operand);
+            out << on(*node.operand);
             out << " )";
+            return out.str();
         };
 
-        void operator()(flavor::binary_expression_t& node  )  {
+        std::string operator()(const flavor::binary_expression_t& node  )  {
+            std::ostringstream out;
             out << "( ";
-            on(node.left_operand);
+            out << on(*node.left_operand);
             out << "+";
-            on(node.right_operand);
+            out << on(*node.right_operand);
             out << " )";
+            return out.str();
         };
 
     private:
-        std::ostream& out;
         size_t indentation;
         const flavor::document_t &doc;
     };
@@ -146,9 +175,9 @@ namespace {
 
 void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out) {
 
-    print_t print(out, doc);
+    print_t print(doc);
 
     for(auto&& entry : doc.structure){
-        print.on(entry);
+        out << print.on(*entry);
     }
 }
