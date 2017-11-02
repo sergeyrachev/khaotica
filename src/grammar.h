@@ -33,6 +33,10 @@ namespace flavor{
         int64_t value;
     };
 
+    struct identifier_t {
+        std::string name;
+    };
+
     struct reference_t{
         std::string name;
     };
@@ -40,10 +44,6 @@ namespace flavor{
     struct compound_t{
         std::string name;
         std::list<std::shared_ptr<node_t>> body;
-    };
-
-    struct identifier_t {
-        std::string name;
     };
 
     struct if_t {
@@ -91,9 +91,9 @@ namespace flavor{
             uimsbf_t,
             bitstring_t,
             integer_t,
+            identifier_t,
             reference_t,
             compound_t,
-            identifier_t,
             if_t,
             for_t,
             unary_expression_t,
@@ -118,9 +118,16 @@ namespace flavor{
     typedef std::list<std::shared_ptr<node_t>> structure_t;
     typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
+    struct scope_t{
+        scope_t* parent{nullptr};
+        std::list<std::shared_ptr<scope_t>> childs;
+        definitions_t definitions;
+    };
+
     struct document_t{
         structure_t structure;
         definitions_t definitions;
+        scope_t global;
     };
 
     struct value_t;

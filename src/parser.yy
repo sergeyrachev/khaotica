@@ -50,6 +50,7 @@
 
 %parse-param {lexer_t& lexer}
 %parse-param {document_t& document}
+%parse-param {scope_t* scope}
 
 %locations
 
@@ -130,11 +131,11 @@ entry
 : IDENTIFIER INTEGER "bslbf"  {
     auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
     $$ = entry;
-    document.definitions[$1] = entry;
+    scope->definitions[$1] = entry;
 }| IDENTIFIER INTEGER "uimsbf"  {
     auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
     $$ = entry;
-    document.definitions[$1] = entry;
+    scope->definitions[$1] = entry;
 }| IDENTIFIER "(" ")" {
     auto it = document.definitions.find($1);
     if( it == document.definitions.end()){
@@ -142,39 +143,57 @@ entry
     }
     auto entry = std::make_shared<node_t>(node_t{reference_t{$1}});
     $$ = entry;
-}| "if" "(" expression ")" block {
-    auto condition = $3;
-    auto _then =  $5;
+}| if_block "(" expression ")" block {
+    auto condition = $expression;
+    auto _then =  $block;
     $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}}});
-}| "if" "(" expression ")" block "else" block {
-    auto condition = $3;
-    auto _then =  $5;
-    auto _else =  $7;
+    scope = scope->parent;
+}| if_block "(" expression ")" block[then] "else" block[else] {
+    auto condition = $expression;
+    auto _then =  $then;
+    auto _else =  $else;
     $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, _else}});
-}| "for" "(" expression ";" expression ";" expression ")" block {
-    auto initializer = $3;
-    auto condition = $5;
-    auto modifier = $7;
-    auto body = $9;
+    scope = scope->parent;
+}| for_block "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
+    auto initializer = $initializer;
+    auto condition = $condition;
+    auto modifier = $modifier;
+    auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
-}| "for" "(" ";" expression ";" expression ")" block {
+    scope = scope->parent;
+}| for_block "(" ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = std::nullopt;
-    auto condition = $4;
-    auto modifier = $6;
-    auto body = $8;
+    auto condition = $condition;
+    auto modifier = $modifier;
+    auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
-}| "for" "(" ";" expression ";" ")" block {
+    scope = scope->parent;
+}| for_block "(" ";" expression[condition] ";" ")" block[body] {
     auto initializer = std::nullopt;
-    auto condition = $4;
+    auto condition = $condition;
     auto modifier = std::nullopt;
-    auto body = $7;
+    auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
-}| "for" "(" ";" ";" ")" block {
+    scope = scope->parent;
+}| for_block "(" ";" ";" ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = std::nullopt;
     auto modifier = std::nullopt;
-    auto body = $6;
+    auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    scope = scope->parent;
+}
+
+if_block: "if" {
+    auto p = std::make_shared<scope_t>(scope_t{scope});
+    scope->childs.push_back(p);
+    scope = p.get();
+}
+
+for_block: "for" {
+    auto p = std::make_shared<scope_t>(scope_t{scope});
+    scope->childs.push_back(p);
+    scope = p.get();
 }
 
 block
@@ -299,20 +318,20 @@ expression
 }| IDENTIFIER "=" expression {
     auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
     $$ = entry;
-    document.definitions[$1] = entry;
+    scope->definitions[$1] = entry;
 }
 
 bitstream
-: IDENTIFIER "(" ")" block bitstream{
-    auto entry = std::make_shared<node_t>(node_t{compound_t{$1, $4}});
-    auto it = document.definitions.find($1);
+: IDENTIFIER "(" ")" { auto p = std::make_shared<scope_t>(scope_t{scope}); scope->childs.push_back(p); scope = p.get(); } block[body] {     scope = scope->parent; } bitstream {
+    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body}});
+    auto it = document.definitions.find($IDENTIFIER);
     if(it == document.definitions.end()){
         document.structure.push_back(entry);
     }
-    document.definitions[$1] = entry;
+    document.definitions[$IDENTIFIER] = entry;
 }| IDENTIFIER "=" expression bitstream {
     auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
-    document.definitions[$1] = entry;
+    scope->definitions[$1] = entry;
 }| END
 ;
 

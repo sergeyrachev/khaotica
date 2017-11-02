@@ -13,7 +13,7 @@ flavor::document_t flavor::interpreter_t::parse(std::istream &in, bool enable_ve
     flavor::lexer_t _scanner(in, serr);
 
     flavor::document_t document;
-    flavor::parser_t _parser(_scanner, document);
+    flavor::parser_t _parser(_scanner, document, &document.global);
 
     _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);
