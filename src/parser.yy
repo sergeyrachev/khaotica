@@ -130,9 +130,11 @@ entry
 : IDENTIFIER INTEGER "bslbf"  {
     auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
     $$ = entry;
+    document.definitions[$1] = entry;
 }| IDENTIFIER INTEGER "uimsbf"  {
     auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
     $$ = entry;
+    document.definitions[$1] = entry;
 }| IDENTIFIER "(" ")" {
     auto it = document.definitions.find($1);
     if( it == document.definitions.end()){
@@ -295,7 +297,9 @@ expression
 : logical_or {
     $$ = $1;
 }| IDENTIFIER "=" expression {
-    $$ = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
+    auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
+    $$ = entry;
+    document.definitions[$1] = entry;
 }
 
 bitstream

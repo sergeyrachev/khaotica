@@ -104,15 +104,23 @@ namespace flavor{
         > payload;
     };
 
+    typedef std::variant<
+        integer_t,
+        bitstring_t,
+        identifier_t,
+        unary_expression_t,
+        binary_expression_t,
+        postincrement_t,
+        preincrement_t,
+        assignment_t
+    > expression_t;
+
     typedef std::list<std::shared_ptr<node_t>> structure_t;
     typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
-    typedef std::list<std::string> scope_t;
-    typedef std::map<std::shared_ptr<node_t>, scope_t> scopes_t;
 
     struct document_t{
         structure_t structure;
         definitions_t definitions;
-        scopes_t scopes;
     };
 
     struct value_t;
@@ -126,31 +134,22 @@ namespace flavor{
         std::vector<iteration_t> value;
     };
 
-    struct expression_v {
-        std::variant<
-            std::vector<bool>,
-            uint64_t,
-            int64_t,
-            bool
-        > value;
-    };
+    typedef std::variant<
+        std::vector<bool>,
+        uint64_t,
+        int64_t,
+        bool
+    > expression_v;
 
     struct value_t{
         std::variant<
             std::pair<bslbf_t, std::vector<bool>>,
             std::pair<uimsbf_t, uint64_t>,
-            std::pair<bitstring_t, std::vector<bool>>,
-            std::pair<integer_t, int64_t>,
             std::pair<reference_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<if_t, if_v>,
             std::pair<for_t, for_v>,
-            std::pair<identifier_t, expression_v>,
-            std::pair<unary_expression_t, expression_v>,
-            std::pair<binary_expression_t, expression_v>,
-            std::pair<postincrement_t, expression_v>,
-            std::pair<preincrement_t, expression_v>,
-            std::pair<assignment_t, expression_v>
+            std::pair<expression_t, expression_v>
         > payload;
     };
 
