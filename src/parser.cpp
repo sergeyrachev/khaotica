@@ -580,7 +580,7 @@ namespace {
                 }
             }
 
-            scope = scope->parent;
+            scope = node.scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::if_v{ conditional_expression_value, value} )});
         };
 
@@ -618,7 +618,7 @@ namespace {
                     conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
                 }
             }
-            scope = scope->parent;
+            scope = node.scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::for_v{value} )});
         };
 
@@ -629,7 +629,7 @@ namespace {
             for (auto &&item : node.body) {
                 value.push_back(on(item));
             }
-            scope = scope->parent;
+            scope = node.scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, value)});
         };
 
@@ -646,7 +646,12 @@ namespace {
 
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::postincrement_t &node) {
-            return nullptr;
+            auto previous_value = symbols.find(node.operand)->second;
+            auto& previous_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(previous_value->payload);
+            auto value = std::visit(find_functor(node.operation), previous_payload.second, flavor::expression_v{uint64_t{1}});
+
+            previous_payload.second = value;
+            return previous_value;
         };
 
 
@@ -717,7 +722,7 @@ namespace {
         bitreader_t &bitreader;
         const flavor::document_t &doc;
         std::map<std::string, std::shared_ptr<flavor::value_t>> symbols;
-        flavor::scope_t* scope;
+        flavor::scope_t* scope{nullptr};
     };
 }
 
