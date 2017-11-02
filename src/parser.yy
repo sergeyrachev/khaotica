@@ -143,44 +143,44 @@ entry
     }
     auto entry = std::make_shared<node_t>(node_t{reference_t{$1}});
     $$ = entry;
-}| if_block "(" expression ")" block {
+}| if_block "(" expression ")" block[then] {
     auto condition = $expression;
-    auto _then =  $block;
-    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}}});
+    auto _then =  $then;
+    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}, scope}});
     scope = scope->parent;
 }| if_block "(" expression ")" block[then] "else" block[else] {
     auto condition = $expression;
     auto _then =  $then;
     auto _else =  $else;
-    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, _else}});
+    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, _else, scope}});
     scope = scope->parent;
 }| for_block "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = $initializer;
     auto condition = $condition;
     auto modifier = $modifier;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
 }| for_block "(" ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = $condition;
     auto modifier = $modifier;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
 }| for_block "(" ";" expression[condition] ";" ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = $condition;
     auto modifier = std::nullopt;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
 }| for_block "(" ";" ";" ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = std::nullopt;
     auto modifier = std::nullopt;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
 }
 
@@ -323,7 +323,7 @@ expression
 
 bitstream
 : IDENTIFIER "(" ")" { auto p = std::make_shared<scope_t>(scope_t{scope}); scope->childs.push_back(p); scope = p.get(); } block[body] {     scope = scope->parent; } bitstream {
-    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body}});
+    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body, scope}});
     auto it = document.definitions.find($IDENTIFIER);
     if(it == document.definitions.end()){
         document.structure.push_back(entry);

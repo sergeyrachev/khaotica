@@ -538,14 +538,20 @@ namespace {
                 return v;
             }
 
-            // TODO: Scope processing
-            auto definition = doc.definitions.find(node.name);
-            if (definition != doc.definitions.end()) {
-                assert(false && "Really REALLY bad idea to use unavailable symbol!!!");
+            auto definition = lookup(node.name, scope);
+            if (definition) {
+                auto value = on(definition);
+                return value;
             }
 
-            auto value = std::visit(default_t(), definition->second->payload);
-            return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, value)});
+            definition = deep_lookup(node.name, scope);
+            if(definition){
+                auto value = std::visit(default_t(), definition->payload);
+                return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, value)});
+            }
+
+            assert(false && "It is REALLY bad to be there and try to use unresolved symbol");
+            return nullptr;
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::reference_t &node) {
@@ -557,6 +563,7 @@ namespace {
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::if_t &node) {
+            scope = node.scope;
 
             auto conditional_expression = on(node.condition);
             auto conditional_expression_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(conditional_expression->payload);
@@ -573,10 +580,13 @@ namespace {
                 }
             }
 
+            scope = scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::if_v{ conditional_expression_value, value} )});
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::for_t &node) {
+
+            scope = node.scope;
 
             if(node.initializer){
                 auto initializer = on(*node.initializer);
@@ -608,14 +618,18 @@ namespace {
                     conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
                 }
             }
+            scope = scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::for_v{value} )});
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::compound_t &node) {
+            scope = node.scope;
+
             std::list<std::shared_ptr<flavor::value_t>> value;
             for (auto &&item : node.body) {
                 value.push_back(on(item));
             }
+            scope = scope->parent;
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, value)});
         };
 
@@ -663,10 +677,47 @@ namespace {
             assert(false && "No way to be there");
             return false;
         }
+
+        std::shared_ptr<flavor::node_t> lookup(const std::string& name, flavor::scope_t* scope) {
+
+            auto it = scope->definitions.find(name);
+            if(it != scope->definitions.end()){
+                return it->second;
+            }
+
+            if( scope->parent){
+                return lookup(name, scope->parent);
+            }
+
+            return nullptr;
+        }
+
+        std::shared_ptr<flavor::node_t> deep_lookup(const std::string& name, flavor::scope_t* scope) {
+
+            auto it = scope->definitions.find(name);
+            if(it != scope->definitions.end()){
+                return it->second;
+            }
+
+            if( scope->parent){
+                for (auto &&sibling : scope->parent->childs) {
+                    it = sibling->definitions.find(name);
+                    if(it != sibling->definitions.end()){
+                        return it->second;
+                    }
+                }
+
+                return deep_lookup(name, scope->parent);
+            }
+
+            return nullptr;
+        }
+
     private:
         bitreader_t &bitreader;
         const flavor::document_t &doc;
         std::map<std::string, std::shared_ptr<flavor::value_t>> symbols;
+        flavor::scope_t* scope;
     };
 }
 

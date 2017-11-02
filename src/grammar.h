@@ -14,6 +14,7 @@
 namespace flavor{
 
     struct node_t;
+    struct scope_t;
 
     struct bslbf_t {
         std::string name;
@@ -44,12 +45,14 @@ namespace flavor{
     struct compound_t{
         std::string name;
         std::list<std::shared_ptr<node_t>> body;
+        scope_t* scope;
     };
 
     struct if_t {
         std::shared_ptr<node_t> condition;
         std::list<std::shared_ptr<node_t>> _then;
         std::list<std::shared_ptr<node_t>> _else;
+        scope_t* scope;
     };
 
     struct for_t {
@@ -57,6 +60,7 @@ namespace flavor{
         std::optional<std::shared_ptr<node_t>> condition;
         std::optional<std::shared_ptr<node_t>> modifier;
         std::list<std::shared_ptr<node_t>> body;
+        scope_t* scope;
     };
 
     struct unary_expression_t {
