@@ -156,7 +156,6 @@ namespace flavor{
         std::variant<
             std::pair<bslbf_t, std::vector<bool>>,
             std::pair<uimsbf_t, uint64_t>,
-            std::pair<reference_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<if_t, if_v>,
             std::pair<for_t, for_v>,

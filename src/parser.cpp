@@ -544,6 +544,7 @@ namespace {
                 return value;
             }
 
+            // FIXME: Fix this shit with a correct scope handling. Note! WHAT is a scope in bitstream is not clear yet.
             definition = deep_lookup(node.name, scope);
             if(definition){
                 auto value = std::visit(default_t(), definition->payload);
@@ -726,12 +727,12 @@ namespace {
     };
 }
 
-void parser_t::parse(bitreader_t &in, const flavor::document_t &doc) {
+flavor::snapshot_t parser_t::parse(bitreader_t &in, const flavor::document_t &doc) {
     parse_t parse(in, doc);
     flavor::snapshot_t snapshot;
     for (auto &&entry : doc.structure) {
         snapshot[entry] = parse.on(entry);
     }
 
-    int i = 0;
+    return snapshot;
 }

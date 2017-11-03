@@ -1,9 +1,122 @@
 #include "printer.h"
 
 namespace {
+
+    class dump_t{
+    public:
+        explicit dump_t(const flavor::document_t &doc, const flavor::snapshot_t& snapshot):indentation(0), doc(doc), snapshot(snapshot){
+
+        }
+
+        std::string on( std::shared_ptr<flavor::node_t> node ){
+            auto value = snapshot.at(node);
+            return std::visit(*this, value->payload);
+        }
+
+        std::string operator()(const std::pair<flavor::bslbf_t, std::vector<bool>>& node )  {
+            std::ostringstream out;
+
+            const auto& field = node.first;
+            const auto& value = node.second;
+
+            out << std::string(indentation, ' ')
+                << field.name
+                << " "
+                << field.length
+                << " "
+                << "bslbf"
+                << " -> "
+                << khaotica::algorithm::to_string(value)
+                << "(" << khaotica::algorithm::to_hex(value) << ")"
+                << std::endl;
+            return out.str();
+        };
+
+        std::string operator()(const std::pair<flavor::uimsbf_t, uint64_t>&node){
+            std::ostringstream out;
+            const auto& field = node.first;
+            const auto& value = node.second;
+            out << std::string(indentation, ' ')
+                << field.name
+                << " "
+                << field.length
+                << " "
+                << "uimsbf"
+                << " -> "
+                << value
+                << "(0x" << khaotica::algorithm::to_hex(value) << ")"
+                << std::endl;
+            return out.str();
+        }
+
+        std::string operator()(const std::pair<flavor::compound_t, std::list<std::shared_ptr<flavor::value_t>>>&node){
+
+            const auto& field = node.first;
+            const auto& value = node.second;
+
+            std::ostringstream out;
+            out<< std::string(indentation, ' ') << field.name << "() {" << std::endl;
+            indentation++;
+            for (auto &&item : value) {
+                out << std::visit(*this, item->payload);
+            }
+            indentation--;
+            out << std::string(indentation, ' ') << "}" <<std::endl;
+            return out.str();
+        }
+        std::string operator()(const std::pair<flavor::if_t, flavor::if_v> &node){
+            const auto& field = node.first;
+            const auto& value = node.second;
+
+            std::ostringstream out;
+
+            out << std::string(indentation, ' ') << "if" << "( " << value.condition << " ) -> " << (value.condition ? "then" : "else");
+            out << "{" << std::endl;
+
+            indentation++;
+            for (auto &&item : value.value) {
+                out << std::visit(*this, item->payload);
+            }
+            indentation--;
+            out << std::string(indentation, ' ') << "}" << std::endl;
+            return out.str();
+        }
+        std::string operator()(const std::pair<flavor::for_t, flavor::for_v> &node){
+            const auto& field = node.first;
+            const auto& value = node.second;
+
+            std::ostringstream out;
+            out << std::string(indentation, ' ') << "for" << "(" << value.value.size() << " iterations";
+
+            out << ") {" << std::endl;
+            indentation++;
+
+            for (auto &&iteration : value.value) {
+                out << std::string(indentation, ' ') << "[" << std::endl;
+                indentation++;
+                for (auto &&item : iteration) {
+                    out << std::visit(*this, item->payload);
+                }
+                indentation--;
+                out << std::string(indentation, ' ') << "] " << std::endl;
+            }
+            indentation--;
+            out << std::string(indentation, ' ') << "}" << std::endl;
+            return out.str();
+        }
+        std::string operator()(const std::pair<flavor::expression_t, flavor::expression_v> &node){
+            return "'expr'";
+        }
+
+    private:
+        size_t indentation;
+        const flavor::document_t &doc;
+        const flavor::snapshot_t &snapshot;
+    };
+
     class print_t{
     public:
-        explicit print_t(const flavor::document_t &doc, const flavor::snapshot_t snapshot):indentation(0), doc(doc), snapshot(snapshot){
+        explicit print_t(const flavor::document_t &doc):indentation(0), doc(doc){
 
         }
 
@@ -139,19 +252,19 @@ namespace {
         };
         std::string operator()(const flavor::preincrement_t& node  )  {
             std::ostringstream out;
-            out << "( " << "??" << node.operand << " )";
+            out << "( " << node.operation << node.operation << node.operand << " )";
             return out.str();
         };
 
         std::string operator()(const flavor::postincrement_t& node  )  {
             std::ostringstream out;
-            out << "( " << node.operand << "++" << " )";
+            out << "( " << node.operand << node.operation << node.operation << " )";
             return out.str();
         };
 
         std::string operator()(const flavor::unary_expression_t& node  )  {
             std::ostringstream out;
-            out << "( " << "~";
+            out << "( " << node.operation;
             out << on(node.operand);
             out << " )";
             return out.str();
@@ -161,7 +274,7 @@ namespace {
             std::ostringstream out;
             out << "( ";
             out << on(node.left_operand);
-            out << "+";
+            out << node.operation;
             out << on(node.right_operand);
             out << " )";
             return out.str();
@@ -170,13 +283,21 @@ namespace {
     private:
         size_t indentation;
         const flavor::document_t &doc;
-        const flavor::snapshot_t snapshot;
     };
 }
 
-void khaotica::printer_t::print(const flavor::document_t &doc, const flavor::snapshot_t snapshot, std::ostream &out) {
+void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out) {
 
-    print_t print(doc, snapshot);
+    print_t print(doc);
+
+    for(auto&& entry : doc.structure){
+        out << print.on(entry);
+    }
+}
+
+void khaotica::printer_t::dump(const flavor::document_t &doc, const flavor::snapshot_t snapshot, std::ostream &out) {
+
+    dump_t print(doc, snapshot);
 
     for(auto&& entry : doc.structure){
         out << print.on(entry);

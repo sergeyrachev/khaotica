@@ -17,6 +17,6 @@
 namespace khaotica {
     class parser_t {
     public:
-        static void parse(bitreader_t& in, const flavor::document_t& doc);
+        static flavor::snapshot_t parse(bitreader_t& in, const flavor::document_t& doc);
     };
 }

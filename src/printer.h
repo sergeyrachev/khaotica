@@ -14,7 +14,8 @@
 namespace khaotica{
     class printer_t{
     public:
-        static void print(const flavor::document_t& doc, const flavor::snapshot_t snapshot, std::ostream& out);
+        static void print(const flavor::document_t& doc, std::ostream& out);
+        static void dump(const flavor::document_t& doc, const flavor::snapshot_t snapshot, std::ostream& out);
     };
 }
 #endif //KHAOTICA_PRINTER_H

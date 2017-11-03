@@ -36,17 +36,17 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto doc = flavor::interpreter_t::parse(flavor_script, true);
+    auto doc = flavor::interpreter_t::parse(flavor_script, false);
     bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
-    khaotica::printer_t::print(doc, {}, std::cout);
+    khaotica::printer_t::print(doc, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::bitreader_t bitreader(bitstream);
-    khaotica::parser_t::parse(bitreader, doc);
 
-//    while(!bitstream.bad() && !bitstream.eof()){
-//        khaotica::parser_t::parse(bitstream, doc);
-//    }
+    while(!bitstream.bad() && !bitstream.eof()){
+        auto snapshot = khaotica::parser_t::parse(bitreader, doc);
+        khaotica::printer_t::dump(doc, snapshot, std::cout);
+    }
 
     return 0;
 }
