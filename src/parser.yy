@@ -70,6 +70,7 @@
 %token ELSE "else"
 %token FUNCTION_NEXTBITS "nextbits"
 %token FUNCTION_LENGTHOF "lengthof"
+%token FUNCTION_POSITION "__position"
 
 //0b1000000 -> 0 0 0 0 0 0 0 1
 %token MNEMONIC_BSLBF "bslbf"
@@ -123,6 +124,8 @@
 %type <std::shared_ptr<node_t>> prefix_expression
 %type <std::shared_ptr<node_t>> relational_expression
 %type <std::shared_ptr<node_t>> comparison_expression
+
+%type <std::shared_ptr<node_t>> internal_function
 
 %%
 %start bitstream;
@@ -211,6 +214,13 @@ entries
     $$.push_back($1);
 }
 
+internal_function
+: FUNCTION_POSITION "(" IDENTIFIER ")" {
+    $$ = std::make_shared<node_t>(node_t{position_t{$IDENTIFIER}});
+}|FUNCTION_POSITION "(" ")" {
+      $$ = std::make_shared<node_t>(node_t{position_t{}});
+}
+
 primary_expression
 : IDENTIFIER {
     $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
@@ -223,6 +233,8 @@ primary_expression
 }| postfix_expression{
     $$ = $1;
 }| prefix_expression{
+    $$ = $1;
+}| internal_function {
     $$ = $1;
 }
 

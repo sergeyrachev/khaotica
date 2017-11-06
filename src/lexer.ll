@@ -47,6 +47,7 @@ bits       [01]+
 "else" return parser_t::make_ELSE(_location);
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
 "lengthof" return parser_t::make_FUNCTION_LENGTHOF(_location);
+"__position" return parser_t::make_FUNCTION_POSITION(_location);
 "==" return parser_t::make_EQUAL(_location);
 "!=" return parser_t::make_NOTEQUAL(_location);
 "bslbf" return parser_t::make_MNEMONIC_BSLBF(_location);

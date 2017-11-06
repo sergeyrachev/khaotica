@@ -81,6 +81,11 @@ namespace {
             assert(false && "Must never be there");
             return false;
         }
+
+        flavor::expression_v operator()(const flavor::position_t &node) {
+            assert(false && "Must never be there");
+            return false;
+        }
     };
 
     struct conditional_t {
@@ -506,15 +511,17 @@ namespace {
         }
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::bslbf_t &node) {
+            auto position = bitreader.position();
             auto value = bitreader.read(node.length);
-            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, value)});
+            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::bslbf_v{value, position})});
             symbols[node.name] = v;
             return v;
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::uimsbf_t &node) {
+            auto position = bitreader.position();
             auto value = khaotica::algorithm::to_ull_msbf(bitreader.read(node.length));
-            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, value)});
+            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::uimsbf_v{value, position})});
             symbols[node.name] = v;
             return v;
         };
@@ -645,7 +652,6 @@ namespace {
             return nullptr;
         };
 
-
         std::shared_ptr<flavor::value_t> operator()(const flavor::postincrement_t &node) {
             auto previous_value = symbols.find(node.operand)->second;
             auto& previous_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(previous_value->payload);
@@ -671,14 +677,39 @@ namespace {
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, flavor::expression_v{value})});
         };
 
+        std::shared_ptr<flavor::value_t> operator()(const flavor::position_t &node) {
+
+            uint64_t value(0);
+            if( node.name){
+                auto symbol = symbols.find(*node.name);
+                if (symbol != symbols.end()) {
+                    value = extract_location(*symbol->second);
+                }
+            } else {
+                value = bitreader.position();
+            }
+
+            return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, flavor::expression_v{value})});
+        };
+
     private:
         flavor::expression_v extract(const flavor::value_t &value) {
-            if( const auto&& val = std::get_if<std::pair<flavor::bslbf_t, std::vector<bool>>>(&value.payload)){
-                return val->second;
-            } else if(const auto&& val = std::get_if<std::pair<flavor::uimsbf_t, uint64_t>>(&value.payload)) {
-                return val->second;
+            if( const auto&& val = std::get_if<std::pair<flavor::bslbf_t, flavor::bslbf_v>>(&value.payload)){
+                return val->second.value;
+            } else if(const auto&& val = std::get_if<std::pair<flavor::uimsbf_t, flavor::uimsbf_v>>(&value.payload)) {
+                return val->second.value;
             } else if(const auto&& val = std::get_if<std::pair<flavor::expression_t, flavor::expression_v>>(&value.payload)){
                 return val->second;
+            }
+            assert(false && "No way to be there");
+            return false;
+        }
+
+        uint64_t extract_location(const flavor::value_t &value) {
+            if( const auto&& val = std::get_if<std::pair<flavor::bslbf_t, flavor::bslbf_v>>(&value.payload)){
+                return val->second.location;
+            } else if(const auto&& val = std::get_if<std::pair<flavor::uimsbf_t, flavor::uimsbf_v>>(&value.payload)) {
+                return val->second.location;
             }
             assert(false && "No way to be there");
             return false;

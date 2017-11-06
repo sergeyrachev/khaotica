@@ -13,11 +13,11 @@ namespace {
             return std::visit(*this, value->payload);
         }
 
-        std::string operator()(const std::pair<flavor::bslbf_t, std::vector<bool>>& node )  {
+        std::string operator()(const std::pair<flavor::bslbf_t, flavor::bslbf_v>& node )  {
             std::ostringstream out;
 
             const auto& field = node.first;
-            const auto& value = node.second;
+            const auto& value = node.second.value;
 
             out << std::string(indentation, ' ')
                 << field.name
@@ -32,10 +32,10 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const std::pair<flavor::uimsbf_t, uint64_t>&node){
+        std::string operator()(const std::pair<flavor::uimsbf_t, flavor::uimsbf_v>&node){
             std::ostringstream out;
             const auto& field = node.first;
-            const auto& value = node.second;
+            const auto& value = node.second.value;
             out << std::string(indentation, ' ')
                 << field.name
                 << " "
@@ -276,6 +276,14 @@ namespace {
             out << on(node.left_operand);
             out << node.operation;
             out << on(node.right_operand);
+            out << " )";
+            return out.str();
+        };
+
+        std::string operator()(const flavor::position_t& node  )  {
+            std::ostringstream out;
+            out << "__position(";
+            out << (node.name ? *node.name : ".");
             out << " )";
             return out.str();
         };

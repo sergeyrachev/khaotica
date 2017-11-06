@@ -89,6 +89,10 @@ namespace flavor{
         std::shared_ptr<node_t> expression;
     };
 
+    struct position_t{
+        std::optional<std::string> name;
+    };
+
     struct node_t{
         std::variant<
             bslbf_t,
@@ -104,7 +108,8 @@ namespace flavor{
             binary_expression_t,
             postincrement_t,
             preincrement_t,
-            assignment_t
+            assignment_t,
+            position_t
         > payload;
     };
 
@@ -116,7 +121,8 @@ namespace flavor{
         binary_expression_t,
         postincrement_t,
         preincrement_t,
-        assignment_t
+        assignment_t,
+        position_t
     > expression_t;
 
     typedef std::list<std::shared_ptr<node_t>> structure_t;
@@ -135,6 +141,17 @@ namespace flavor{
     };
 
     struct value_t;
+
+    struct bslbf_v{
+        std::vector<bool> value;
+        uint64_t location;
+    };
+
+    struct uimsbf_v {
+        uint64_t value;
+        uint64_t location;
+    };
+
     struct if_v{
         bool condition;
         std::list<std::shared_ptr<value_t>> value;
@@ -154,8 +171,8 @@ namespace flavor{
 
     struct value_t{
         std::variant<
-            std::pair<bslbf_t, std::vector<bool>>,
-            std::pair<uimsbf_t, uint64_t>,
+            std::pair<bslbf_t, bslbf_v>,
+            std::pair<uimsbf_t, uimsbf_v>,
             std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<if_t, if_v>,
             std::pair<for_t, for_v>,

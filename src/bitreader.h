@@ -33,6 +33,11 @@ namespace khaotica{
             return ret;
         }
 
+        uint64_t position(){
+            uint64_t pos = in.tellg();
+            return pos;
+        }
+
     private:
         void cache(std::istream& in){
             using khaotica::algorithm::unpack;
