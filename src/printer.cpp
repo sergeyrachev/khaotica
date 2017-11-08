@@ -48,6 +48,41 @@ namespace {
             return out.str();
         }
 
+        std::string operator()(const std::pair<flavor::bslbf_ranged_t, std::pair<flavor::bslbf_v, flavor::bslbf_ranged_v>>&node){
+            std::ostringstream out;
+            const auto& field = node.first;
+            const auto& value = node.second.first;
+            const auto& mask = node.second.second.mask;
+            const auto& sequence = node.second.second.value;
+            out << std::string(indentation, ' ')
+                << field.bits.name
+                << "["
+                << field.range.first
+                << ".."
+                << field.range.second
+                << "]"
+                << " "
+                << field.bits.length
+                << " "
+                << "bslbf"
+                << " -> "
+                << "(" << khaotica::algorithm::to_hex(value.value) << ")"
+                << " => (0b"
+                << [](const auto& v, const auto& mask){
+                    std::ostringstream out;
+                    for (int i = mask.size() - 1 ; i >= 0; --i) {
+                        if(mask[i]){
+                            out << v[i];
+                        } else {
+                            out << "x";
+                        }
+                    }
+                    return out.str();
+                }(sequence, mask) << ")"
+                << std::endl;
+            return out.str();
+        }
+
         std::string operator()(const std::pair<flavor::compound_t, std::list<std::shared_ptr<flavor::value_t>>>&node){
 
             const auto& field = node.first;

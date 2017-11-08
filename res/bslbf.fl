@@ -1,11 +1,9 @@
  TSPacket() {
-    sync_byte                                               8 bslbf
-    transport_error_indicator                               1 bslbf
-    payload_unit_start_indicator                            1 bslbf
-    transport_priority                                      1 bslbf
-    PID                                                    13 uimsbf
-    transport_scrambling_control                            2 bslbf
-    adaptation_field_control                                2 bslbf
-    continuity_counter                                      4 uimsbf
-    rest  1472 bslbf
+
+    DTS_next_AU[32..24]   8       bslbf
+
+
+
+    DTS_next_AU[14..0]   15       bslbf
+
  }

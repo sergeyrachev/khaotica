@@ -153,6 +153,11 @@ namespace flavor{
         uint64_t location;
     };
 
+    struct bslbf_ranged_v{
+        std::vector<bool> value;
+        std::vector<bool> mask;
+    };
+
     struct uimsbf_v {
         uint64_t value;
         uint64_t location;
@@ -178,6 +183,7 @@ namespace flavor{
     struct value_t{
         std::variant<
             std::pair<bslbf_t, bslbf_v>,
+            std::pair<bslbf_ranged_t, std::pair<bslbf_v, bslbf_ranged_v>>,
             std::pair<uimsbf_t, uimsbf_v>,
             std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<if_t, if_v>,

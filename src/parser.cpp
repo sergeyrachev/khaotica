@@ -515,13 +515,46 @@ namespace {
             return v;
         };
 
+        std::tuple<std::vector<bool>, std::vector<bool>> update(const std::vector<bool>& initial_value, const std::vector<bool>& initial_mask, const std::vector<bool>& slice_value, const std::pair<uint64_t, uint64_t>& range){
+
+            auto right = std::min(range.first, range.second);
+            auto left = std::max(range.first, range.second) + 1;
+
+            auto upper_bound = std::max( initial_mask.size(), left);
+            std::vector<bool> mask = initial_mask;
+            mask.resize(upper_bound);
+            std::fill(mask.begin() + right, mask.begin() + left, true);
+
+            std::vector<bool> value = initial_value;
+            value.resize(upper_bound);
+
+            auto it = value.begin();
+            std::advance(it, right);
+            std::copy(slice_value.begin(), slice_value.end(), it);
+
+            return {value, mask};
+        }
+
         std::shared_ptr<flavor::value_t> operator()(const flavor::bslbf_ranged_t &node) {
-            return nullptr;
-//            auto position = bitreader.position();
-//            auto value = bitreader.read(node.length);
-//            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::bslbf_v{value, position})});
-//            symbols[node.name] = v;
-//            return v;
+            auto position = bitreader.position();
+            auto value = bitreader.read(node.bits.length);
+
+            auto it = symbols.find(node.bits.name);
+            if( it == symbols.end()){
+                auto [bits, mask] = update({}, {}, value, node.range);
+
+                auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, std::make_pair(flavor::bslbf_v{value, position}, flavor::bslbf_ranged_v{bits, mask}))});
+                symbols[node.bits.name] = v;
+                return v;
+            } else {
+                auto previous = std::get<std::pair<flavor::bslbf_ranged_t, std::pair<flavor::bslbf_v, flavor::bslbf_ranged_v>>>(it->second->payload);
+                auto previous_value = previous.second.second;
+                auto [bits, mask] = update(previous_value.value, previous_value.mask, value, node.range);
+
+                auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, std::make_pair(flavor::bslbf_v{value, position}, flavor::bslbf_ranged_v{bits, mask}))});
+                symbols[node.bits.name] = v;
+                return v;
+            }
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::uimsbf_t &node) {
