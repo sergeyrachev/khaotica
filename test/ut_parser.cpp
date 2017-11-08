@@ -50,11 +50,11 @@ namespace {
             std::istringstream in(text);
             flavor::lexer_t _scanner(in, serr);
 
-            flavor::definitions_t symbols;
-            flavor::ast_t ast;
-            flavor::parser_t _parser(_scanner, symbols, ast);
+            flavor::document_t doc;
+
+            flavor::parser_t _parser(_scanner, doc, &doc.global);
             //_parser.set_debug_level(1);
-            return {_parser.parse(), {ast, symbols}};
+            return {_parser.parse(), doc};
         }
     };
 }
