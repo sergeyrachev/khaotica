@@ -21,6 +21,11 @@ namespace flavor{
         uint64_t length;
     };
 
+    struct bslbf_ranged_t {
+        bslbf_t bits;
+        std::pair<uint64_t, uint64_t> range;
+    };
+
     struct uimsbf_t {
         std::string name;
         uint64_t length;
@@ -96,6 +101,7 @@ namespace flavor{
     struct node_t{
         std::variant<
             bslbf_t,
+            bslbf_ranged_t,
             uimsbf_t,
             bitstring_t,
             integer_t,

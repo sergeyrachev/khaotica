@@ -15,6 +15,9 @@ namespace {
             return std::vector<bool>();
         }
 
+        flavor::expression_v operator()(const flavor::bslbf_ranged_t &node) {
+            return std::vector<bool>();
+        }
 
         flavor::expression_v operator()(const flavor::uimsbf_t &node) {
             return uint64_t{0};
@@ -510,6 +513,15 @@ namespace {
             auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::bslbf_v{value, position})});
             symbols[node.name] = v;
             return v;
+        };
+
+        std::shared_ptr<flavor::value_t> operator()(const flavor::bslbf_ranged_t &node) {
+            return nullptr;
+//            auto position = bitreader.position();
+//            auto value = bitreader.read(node.length);
+//            auto v = std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(node, flavor::bslbf_v{value, position})});
+//            symbols[node.name] = v;
+//            return v;
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::uimsbf_t &node) {

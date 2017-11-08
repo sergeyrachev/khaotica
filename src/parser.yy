@@ -139,6 +139,10 @@ entry
     auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
     $$ = entry;
     scope->definitions[$1] = entry;
+}| IDENTIFIER "[" INTEGER[from] ".." INTEGER[to] "]" INTEGER[length] "bslbf"  {
+    auto entry = std::make_shared<node_t>(node_t{bslbf_ranged_t{ {$IDENTIFIER, $length}, {$from, $to}}});
+    $$ = entry;
+    scope->definitions[$1] = entry;
 }| IDENTIFIER "(" ")" {
     auto it = document.definitions.find($1);
     if( it == document.definitions.end()){

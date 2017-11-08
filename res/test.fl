@@ -61,11 +61,11 @@ adaptation_field(){
 			}
 			if (seamless_splice_flag == '1'){
 				splice_type   4       bslbf
-				DTS_next_AU_32_30   3       bslbf
+				DTS_next_AU[32..30]   3       bslbf
 				marker_bit   1       bslbf
-				DTS_next_AU_29_15   15       bslbf
+				DTS_next_AU[29..15]   15       bslbf
 				marker_bit   1       bslbf
-				DTS_next_AU_14_0   15       bslbf
+				DTS_next_AU[14..0]   15       bslbf
 				marker_bit   1       bslbf
 			}
 			for ( i=__position() - __position(adaptation_field_length) - 1;i<adaptation_field_length;i++) {

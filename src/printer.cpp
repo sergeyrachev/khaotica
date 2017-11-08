@@ -143,6 +143,24 @@ namespace {
                 << std::endl;
             return out.str();
         };
+
+        std::string operator()(const flavor::bslbf_ranged_t& node  )  {
+            std::ostringstream out;
+            out << std::string(indentation, ' ')
+                << node.bits.name
+                << "["
+                << node.range.first
+                << ".."
+                << node.range.second
+                << "]"
+                << " "
+                << node.bits.length
+                << " "
+                << "bslbf"
+                << std::endl;
+            return out.str();
+        };
+
         std::string operator()(const flavor::bitstring_t& node  )  {
             std::ostringstream out;
             out << "'" << node.value << "'";
