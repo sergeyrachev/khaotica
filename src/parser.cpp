@@ -89,48 +89,88 @@ namespace {
     };
 
     struct conditional_t {
-        bool operator()(const int64_t &left) {
-            return left != 0;
+        bool operator()(const int64_t &operand) {
+            return operand != 0;
         }
 
-        bool operator()(const uint64_t &left) {
-            return left != 0;
+        bool operator()(const uint64_t &operand) {
+            return operand != 0;
         }
 
-        bool operator()(const bool &left) {
-            return left;
+        bool operator()(const bool &operand) {
+            return operand;
         }
 
-        bool operator()(const std::vector<bool> &left) {
+        bool operator()(const std::vector<bool> &operand) {
             assert(false && "WAT?!");
-            return left.empty();
+            return operand.empty();
         }
     };
 
+    struct logical_not_t{
+        bool operator()(const int64_t &operand) {
+            return !operand;
+        }
+
+        bool operator()(const uint64_t &operand) {
+            return !operand;
+        }
+
+        bool operator()(const bool &operand) {
+            return !operand;
+        }
+
+        bool operator()(const std::vector<bool> &operand) {
+            assert(false && "WAT?!");
+            return operand.empty();
+        }
+    };
+
+    struct bitwise_not_t {
+        flavor::expression_v operator()(const int64_t &operand) {
+            return ~operand;
+        }
+
+        flavor::expression_v operator()(const uint64_t &operand) {
+            return ~operand;
+        }
+
+        flavor::expression_v operator()(const bool &operand) {
+            return static_cast<int64_t>(~operand);
+        }
+
+        flavor::expression_v operator()(const std::vector<bool> &operand) {
+            auto ret = operand;
+            ret.flip();
+            return ret;
+        }
+    };
+
+    template<typename F>
     struct equality_t {
 
         bool operator()(const uint64_t &left, const uint64_t &right) {
-            return left == right;
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const int64_t &right) {
-            return left == right;
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const bool &right) {
-            return left == right;
+            return F()(left, right);
         }
 
         bool operator()(const std::vector<bool> &left, const std::vector<bool> &right) {
-            return left == right;
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const uint64_t &right) {
-            return left == static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const bool &right) {
-            return left == static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const std::vector<bool> &right) {
@@ -139,11 +179,11 @@ namespace {
         }
 
         bool operator()(const uint64_t &left, const int64_t &right) {
-            return static_cast<int64_t>(left) == right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const bool &right) {
-            return static_cast<int64_t>(left) == right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const std::vector<bool> &right) {
@@ -152,11 +192,11 @@ namespace {
         }
 
         bool operator()(const bool &left, const uint64_t &right) {
-            return static_cast<uint64_t>(left) == right;
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const int64_t &right) {
-            return static_cast<int64_t>(left) == right;
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const std::vector<bool> &right) {
@@ -180,17 +220,18 @@ namespace {
         }
     };
 
-    struct logicar_or_t {
+    template<typename F>
+    struct logical_t {
         bool operator()(const int64_t &left, const int64_t &right) {
-            return left || static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const uint64_t &right) {
-            return left || static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const bool &right) {
-            return left || static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const std::vector<bool> &right) {
@@ -199,15 +240,15 @@ namespace {
         }
 
         bool operator()(const uint64_t &left, const int64_t &right) {
-            return static_cast<int64_t>(left) || right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const uint64_t &right) {
-            return left || static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const bool &right) {
-            return static_cast<int64_t>(left) || right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const std::vector<bool> &right) {
@@ -216,93 +257,15 @@ namespace {
         }
 
         bool operator()(const bool &left, const uint64_t &right) {
-            return static_cast<uint64_t>(left) || right;
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const int64_t &right) {
-            return static_cast<int64_t>(left) || right;
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const bool &right) {
-            return left || static_cast<int64_t>(right);
-        }
-
-        bool operator()(const bool &left, const std::vector<bool> &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const std::vector<bool> &left, const int64_t &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const std::vector<bool> &left, const bool &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const std::vector<bool> &left, const uint64_t &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const std::vector<bool> &left, const std::vector<bool> &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-    };
-
-    struct less_t {
-        bool operator()(const int64_t &left, const int64_t &right) {
-            return left < static_cast<int64_t>(right);
-        }
-
-        bool operator()(const int64_t &left, const uint64_t &right) {
-            return left < static_cast<int64_t>(right);
-        }
-
-        bool operator()(const int64_t &left, const bool &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const int64_t &left, const std::vector<bool> &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const uint64_t &left, const int64_t &right) {
-            return static_cast<int64_t>(left) < right;
-        }
-
-        bool operator()(const uint64_t &left, const uint64_t &right) {
-            return left < right;
-        }
-
-        bool operator()(const uint64_t &left, const bool &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const uint64_t &left, const std::vector<bool> &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const bool &left, const uint64_t &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const bool &left, const int64_t &right) {
-            assert(false && "WAT?!");
-            return {false};
-        }
-
-        bool operator()(const bool &left, const bool &right) {
-            assert(false && "WAT?!");
-            return {false};
+            return F()(left, right);
         }
 
         bool operator()(const bool &left, const std::vector<bool> &right) {
@@ -331,13 +294,14 @@ namespace {
         }
     };
 
-    struct greater_t {
+    template<typename F>
+    struct comparison_t {
         bool operator()(const int64_t &left, const int64_t &right) {
-            return left > static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const uint64_t &right) {
-            return left > static_cast<int64_t>(right);
+            return F()(left, right);
         }
 
         bool operator()(const int64_t &left, const bool &right) {
@@ -351,11 +315,11 @@ namespace {
         }
 
         bool operator()(const uint64_t &left, const int64_t &right) {
-            return static_cast<int64_t>(left) > right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const uint64_t &right) {
-            return left > right;
+            return F()(left, right);
         }
 
         bool operator()(const uint64_t &left, const bool &right) {
@@ -485,15 +449,45 @@ namespace {
 
     typedef arithmetical_t<std::minus<>> minus_t;
     typedef arithmetical_t<std::plus<>> plus_t;
+    typedef arithmetical_t<std::multiplies<>> multiplies_t;
+    typedef arithmetical_t<std::divides<>> divides_t;
+    typedef arithmetical_t<std::modulus<>> modulus_t;
 
-    auto find_functor(const std::string &op) {
+    typedef logical_t<std::logical_or<>> logical_or_t;
+    typedef logical_t<std::logical_and<>> logical_and_t;
+
+    typedef equality_t<std::equal_to<>> equal_t;
+    typedef equality_t<std::not_equal_to<>> not_equal_t;
+
+    typedef comparison_t<std::less<>> less_t;
+    typedef comparison_t<std::greater<>> greater_t;
+    typedef comparison_t<std::less_equal<>> less_equal_t;
+    typedef comparison_t<std::greater_equal<>> greater_equal_t;
+
+
+    auto find_binary_functor(const std::string &op) {
         static const std::map<std::string, std::function<flavor::expression_v(const flavor::expression_v &, const flavor::expression_v &)>> functors{
-            {"||", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(logicar_or_t(), left, right); }},
-            {"==", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(equality_t(), left, right); }},
+            {"||", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(logical_or_t(), left, right); }},
+            {"&&", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(logical_and_t(), left, right); }},
+            {"==", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(equal_t(), left, right); }},
+            {"!=", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(not_equal_t(), left, right); }},
             {"<", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(less_t(), left, right); }},
             {">", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(greater_t(), left, right); }},
+            {"<=", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(less_equal_t(), left, right); }},
+            {">=", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(greater_equal_t(), left, right); }},
             {"-", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(minus_t(), left, right); }},
             {"+", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(plus_t(), left, right); }},
+            {"*", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(multiplies_t(), left, right); }},
+            {"/", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(divides_t(), left, right); }},
+            {"%", [](const flavor::expression_v &left, const flavor::expression_v &right) { return std::visit(modulus_t(), left, right); }},
+        };
+        return functors.at(op);
+    }
+
+    auto find_unary_functor(const std::string &op){
+        static const std::map<std::string, std::function<flavor::expression_v(const flavor::expression_v &)>> functors{
+            {"!", [](const flavor::expression_v &operand) { return std::visit(logical_not_t(), operand); }},
+            {"~", [](const flavor::expression_v &operand) { return std::visit(bitwise_not_t(), operand); }},
         };
 
         return functors.at(op);
@@ -649,13 +643,18 @@ namespace {
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::preincrement_t &node) {
-            return nullptr;
+            auto previous_value = symbols.find(node.operand)->second;
+            auto& previous_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(previous_value->payload);
+            auto value = std::visit(find_binary_functor(node.operation), previous_payload.second, flavor::expression_v{int64_t{1}});
+
+            previous_payload.second = value;
+            return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, value)});
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::postincrement_t &node) {
             auto previous_value = symbols.find(node.operand)->second;
             auto& previous_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(previous_value->payload);
-            auto value = std::visit(find_functor(node.operation), previous_payload.second, flavor::expression_v{uint64_t{1}});
+            auto value = std::visit(find_binary_functor(node.operation), previous_payload.second, flavor::expression_v{int64_t{1}});
 
             previous_payload.second = value;
             return previous_value;
@@ -663,7 +662,12 @@ namespace {
 
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::unary_expression_t &node) {
-            return nullptr;
+            auto operand = on(node.operand);
+
+            auto operand_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(operand->payload);
+
+            auto value = std::visit(find_unary_functor(node.operation), operand_payload.second);
+            return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, flavor::expression_v{value})});
         };
 
         std::shared_ptr<flavor::value_t> operator()(const flavor::binary_expression_t &node) {
@@ -673,7 +677,7 @@ namespace {
             auto left_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(left->payload);
             auto right_payload = std::get<std::pair<flavor::expression_t, flavor::expression_v>>(right->payload);
 
-            auto value = std::visit(find_functor(node.operation), left_payload.second, right_payload.second);
+            auto value = std::visit(find_binary_functor(node.operation), left_payload.second, right_payload.second);
             return std::make_shared<flavor::value_t>(flavor::value_t{std::make_pair(flavor::expression_t{node}, flavor::expression_v{value})});
         };
 
@@ -762,7 +766,7 @@ flavor::snapshot_t parser_t::parse(bitreader_t &in, const flavor::document_t &do
     parse_t parse(in, doc);
     flavor::snapshot_t snapshot;
     for (auto &&entry : doc.structure) {
-        snapshot[entry] = parse.on(entry);
+        snapshot.push_back(parse.on(entry));
     }
 
     return snapshot;

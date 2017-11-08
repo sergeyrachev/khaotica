@@ -180,7 +180,7 @@ namespace flavor{
         > payload;
     };
 
-    typedef std::map<std::shared_ptr<node_t>, std::shared_ptr<value_t>> snapshot_t;
+    typedef std::list<std::shared_ptr<value_t>> snapshot_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H

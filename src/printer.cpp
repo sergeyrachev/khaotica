@@ -4,13 +4,12 @@ namespace {
 
     class dump_t{
     public:
-        explicit dump_t(const flavor::document_t &doc, const flavor::snapshot_t& snapshot):indentation(0), doc(doc), snapshot(snapshot){
+        explicit dump_t():indentation(0){
 
         }
 
-        std::string on( std::shared_ptr<flavor::node_t> node ){
-            auto value = snapshot.at(node);
-            return std::visit(*this, value->payload);
+        std::string on( std::shared_ptr<flavor::value_t> node ){
+            return std::visit(*this, node->payload);
         }
 
         std::string operator()(const std::pair<flavor::bslbf_t, flavor::bslbf_v>& node )  {
@@ -110,8 +109,6 @@ namespace {
 
     private:
         size_t indentation;
-        const flavor::document_t &doc;
-        const flavor::snapshot_t &snapshot;
     };
 
     class print_t{
@@ -305,9 +302,9 @@ void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out
 
 void khaotica::printer_t::dump(const flavor::document_t &doc, const flavor::snapshot_t snapshot, std::ostream &out) {
 
-    dump_t print(doc, snapshot);
+    dump_t print;
 
-    for(auto&& entry : doc.structure){
+    for(auto&& entry : snapshot){
         out << print.on(entry);
     }
 }
