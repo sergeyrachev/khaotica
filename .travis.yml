@@ -3,20 +3,20 @@ os:
     - linux
 
 dist: trusty
+sudo: required
 
 cache:
   directories:
-  - $HOME/deps/llvm
   - $HOME/deps/boost
 
 notifications:
   email: false
-  
+
 before_install:
-    - sudo add-apt-repository ppa:josh-bialkowski/cmake -y 
-    - sudo apt-get update -qq 
-    - sudo apt-get remove -qq flex bison
-    - sudo apt-get install -y -qq cmake m4 autoconf automake
+    - sudo apt-get remove -qq flex bison cmake gcc g++
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update -qq
+    - sudo apt-get install -y -qq gcc-7 m4 autoconf automake
 
 install:
     - mkdir -p build
@@ -51,6 +51,12 @@ install:
         pushd flex-2.6.3
             ./configure && make && sudo make install
         popd
+      popd
+
+    - |
+      pushd build
+        wget https://cmake.org/files/v3.9/cmake-3.9.5-Linux-x86_64.sh
+        sudo sh cmake-3.9.5-Linux-x86_64.sh --skip-license --prefix=/usr/local
       popd
 
 script:
