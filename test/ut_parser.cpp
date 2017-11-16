@@ -44,15 +44,15 @@ namespace {
     std::vector<std::string> increment{"i++", "i--"};
 
     struct interpreter_t : public ::testing::Test{
-        std::tuple<int, flavor::document_t> parse(const std::string& text){
+        std::tuple<int, khaotica::document_t> parse(const std::string& text){
 
             std::ostringstream serr;
             std::istringstream in(text);
-            flavor::lexer_t _scanner(in, serr);
+            khaotica::lexer_t _scanner(in, serr);
 
-            flavor::document_t doc;
+            khaotica::document_t doc;
 
-            flavor::parser_t _parser(_scanner, doc, &doc.global);
+            khaotica::parser_t _parser(_scanner, doc, &doc.global);
             //_parser.set_debug_level(1);
             return {_parser.parse(), doc};
         }

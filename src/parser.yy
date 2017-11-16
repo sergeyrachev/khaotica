@@ -9,7 +9,7 @@
 
 %define parser_class_name {parser_t}
 
-%define api.namespace {flavor}
+%define api.namespace {khaotica}
 %define api.token.constructor
 %define api.value.type variant
 %define api.token.prefix {TOKEN_}
@@ -20,9 +20,9 @@
 
     #include <list>
 
-    namespace flavor{
+    namespace khaotica{
         class lexer_t;
-}
+    }
 }
 
 %code top {
@@ -34,16 +34,16 @@
     #include <sstream>
     #include <iostream>
 
-    flavor::parser_t::symbol_type yylex(flavor::lexer_t &lexer) {
+    khaotica::parser_t::symbol_type yylex(khaotica::lexer_t &lexer) {
         return lexer.next_token();
-}
+    }
 
-    void flavor::parser_t::error( const location &loc, const std::string &err_message )
+    void khaotica::parser_t::error( const location &loc, const std::string &err_message )
     {
         std::ostringstream ss;
         ss << loc;
         logging::debug() << "Parsing error: '" << err_message << "' " << ss.str();
-}
+    }
 }
 
 %lex-param {lexer_t& lexer}

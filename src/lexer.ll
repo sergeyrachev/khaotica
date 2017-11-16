@@ -4,9 +4,9 @@
 #include "lexer.h"
 
 #define YY_USER_ACTION { _location.step(); _location.columns(yyleng); }
-#define yyterminate() flavor::parser_t::make_END(_location);
+#define yyterminate() khaotica::parser_t::make_END(_location);
 
-using namespace flavor;
+using namespace khaotica;
 
 %}
 
@@ -93,12 +93,12 @@ bits       [01]+
 
 {integer_dec}|{integer_hex}|{integer_oct} {
     auto number = std::stoll(yytext, 0, 0);
-    return flavor::parser_t::make_INTEGER( {number}, _location);
+    return khaotica::parser_t::make_INTEGER( {number}, _location);
 }
 
 {integer_bin} {
     auto number = std::stoll(yytext, 0, 2);
-    return flavor::parser_t::make_INTEGER( {number}, _location);
+    return khaotica::parser_t::make_INTEGER( {number}, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);

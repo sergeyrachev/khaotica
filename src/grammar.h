@@ -11,7 +11,7 @@
 #include <memory>
 #include <cstddef>
 
-namespace flavor{
+namespace khaotica{
 
     struct node_t;
     struct scope_t;

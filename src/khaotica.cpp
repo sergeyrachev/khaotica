@@ -2,7 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "khaotica.h"
-#include "parser.h"
+#include "bsparser.h"
 
 #include "logging.h"
 #include "options.h"
@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto doc = flavor::interpreter_t::parse(flavor_script, false);
+    auto doc = khaotica::interpreter_t::parse(flavor_script, false);
     bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
     khaotica::printer_t::print(doc, std::cout);
 
@@ -44,7 +44,7 @@ int main( int argc, char* argv[] ) {
     khaotica::bitreader_t bitreader(bitstream);
 
     while(!bitstream.bad() && !bitstream.eof()){
-        auto snapshot = khaotica::parser_t::parse(bitreader, doc);
+        auto snapshot = khaotica::bsparser_t::parse(bitreader, doc);
         khaotica::printer_t::dump(doc, snapshot, std::cout);
     }
 

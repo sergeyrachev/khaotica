@@ -10,12 +10,12 @@
 #include <FlexLexer.h>
 #endif
 #undef  YY_DECL
-#define YY_DECL flavor::parser_t::symbol_type flavor::lexer_t::next_token()
+#define YY_DECL khaotica::parser_t::symbol_type khaotica::lexer_t::next_token()
 
 #include "parser.hpp"
 #include "location.hh"
 
-namespace flavor{
+namespace khaotica{
     class interpreter_t;
 
     class lexer_t : public yyFlexLexer {
@@ -24,10 +24,10 @@ namespace flavor{
 
         };
 
-        flavor::parser_t::symbol_type next_token();
+        khaotica::parser_t::symbol_type next_token();
 
     private:
-        flavor::location _location;
+        khaotica::location _location;
     };
 }
 

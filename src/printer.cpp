@@ -8,11 +8,11 @@ namespace {
 
         }
 
-        std::string on( std::shared_ptr<flavor::value_t> node ){
+        std::string on( std::shared_ptr<khaotica::value_t> node ){
             return std::visit(*this, node->payload);
         }
 
-        std::string operator()(const std::pair<flavor::bslbf_t, flavor::bslbf_v>& node )  {
+        std::string operator()(const std::pair<khaotica::bslbf_t, khaotica::bslbf_v>& node )  {
             std::ostringstream out;
 
             const auto& field = node.first;
@@ -31,7 +31,7 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const std::pair<flavor::uimsbf_t, flavor::uimsbf_v>&node){
+        std::string operator()(const std::pair<khaotica::uimsbf_t, khaotica::uimsbf_v>&node){
             std::ostringstream out;
             const auto& field = node.first;
             const auto& value = node.second.value;
@@ -48,7 +48,7 @@ namespace {
             return out.str();
         }
 
-        std::string operator()(const std::pair<flavor::bslbf_ranged_t, std::pair<flavor::bslbf_v, flavor::bslbf_ranged_v>>&node){
+        std::string operator()(const std::pair<khaotica::bslbf_ranged_t, std::pair<khaotica::bslbf_v, khaotica::bslbf_ranged_v>>&node){
             std::ostringstream out;
             const auto& field = node.first;
             const auto& value = node.second.first;
@@ -83,7 +83,7 @@ namespace {
             return out.str();
         }
 
-        std::string operator()(const std::pair<flavor::compound_t, std::list<std::shared_ptr<flavor::value_t>>>&node){
+        std::string operator()(const std::pair<khaotica::compound_t, std::list<std::shared_ptr<khaotica::value_t>>>&node){
 
             const auto& field = node.first;
             const auto& value = node.second;
@@ -98,7 +98,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" <<std::endl;
             return out.str();
         }
-        std::string operator()(const std::pair<flavor::if_t, flavor::if_v> &node){
+        std::string operator()(const std::pair<khaotica::if_t, khaotica::if_v> &node){
             const auto& field = node.first;
             const auto& value = node.second;
 
@@ -115,7 +115,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         }
-        std::string operator()(const std::pair<flavor::for_t, flavor::for_v> &node){
+        std::string operator()(const std::pair<khaotica::for_t, khaotica::for_v> &node){
             const auto& field = node.first;
             const auto& value = node.second;
 
@@ -138,7 +138,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         }
-        std::string operator()(const std::pair<flavor::expression_t, flavor::expression_v> &node){
+        std::string operator()(const std::pair<khaotica::expression_t, khaotica::expression_v> &node){
             return "'expr'";
         }
 
@@ -148,15 +148,15 @@ namespace {
 
     class print_t{
     public:
-        explicit print_t(const flavor::document_t &doc):indentation(0), doc(doc){
+        explicit print_t(const khaotica::document_t &doc):indentation(0), doc(doc){
 
         }
 
-        std::string on( std::shared_ptr<flavor::node_t> node){
+        std::string on( std::shared_ptr<khaotica::node_t> node){
             return std::visit(*this, node->payload);
         }
 
-        std::string operator()(const flavor::bslbf_t& node )  {
+        std::string operator()(const khaotica::bslbf_t& node )  {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << node.name
@@ -167,7 +167,7 @@ namespace {
                 << std::endl;
             return out.str();
         };
-        std::string operator()(const flavor::uimsbf_t& node  )  {
+        std::string operator()(const khaotica::uimsbf_t& node  )  {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << node.name
@@ -179,7 +179,7 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const flavor::bslbf_ranged_t& node  )  {
+        std::string operator()(const khaotica::bslbf_ranged_t& node  )  {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << node.bits.name
@@ -196,28 +196,28 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const flavor::bitstring_t& node  )  {
+        std::string operator()(const khaotica::bitstring_t& node  )  {
             std::ostringstream out;
             out << "'" << node.value << "'";
             return out.str();
         };
-        std::string operator()(const flavor::integer_t& node  )  {
+        std::string operator()(const khaotica::integer_t& node  )  {
             std::ostringstream out;
             out << node.value;
             return out.str();
         };
-        std::string operator()(const flavor::identifier_t& node  )  {
+        std::string operator()(const khaotica::identifier_t& node  )  {
             std::ostringstream out;
             out << node.name;
             return out.str();
         };
-        std::string operator()(const flavor::reference_t& node  )  {
+        std::string operator()(const khaotica::reference_t& node  )  {
             std::ostringstream out;
 
             out << std::string(indentation, ' ') << node.name << "() -> { " << std::endl;
             indentation++;
 
-            auto& compound = std::get<flavor::compound_t>(doc.definitions.at(node.name)->payload);
+            auto& compound = std::get<khaotica::compound_t>(doc.definitions.at(node.name)->payload);
 
             for (auto &&item : compound.body) {
                 out << on(item);
@@ -227,7 +227,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         };
-        std::string operator()(const flavor::if_t& node  )  {
+        std::string operator()(const khaotica::if_t& node  )  {
             std::ostringstream out;
 
             out << std::string(indentation, ' ') << "if" << "( ";
@@ -251,7 +251,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         };
-        std::string operator()(const flavor::for_t& node  )  {
+        std::string operator()(const khaotica::for_t& node  )  {
             std::ostringstream out;
             out << std::string(indentation, ' ') << "for" << "(";
 
@@ -281,7 +281,7 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         };
-        std::string operator()(const flavor::compound_t& node  )  {
+        std::string operator()(const khaotica::compound_t& node  )  {
             std::ostringstream out;
             out<< std::string(indentation, ' ') << node.name << "() {" << std::endl;
             indentation++;
@@ -294,25 +294,25 @@ namespace {
         };
 
 
-        std::string operator()(const flavor::assignment_t& node  )  {
+        std::string operator()(const khaotica::assignment_t& node  )  {
             std::ostringstream out;
             out << node.symbol << "=";
             out << on(node.expression);
             return out.str();
         };
-        std::string operator()(const flavor::preincrement_t& node  )  {
+        std::string operator()(const khaotica::preincrement_t& node  )  {
             std::ostringstream out;
             out << "( " << node.operation << node.operation << node.operand << " )";
             return out.str();
         };
 
-        std::string operator()(const flavor::postincrement_t& node  )  {
+        std::string operator()(const khaotica::postincrement_t& node  )  {
             std::ostringstream out;
             out << "( " << node.operand << node.operation << node.operation << " )";
             return out.str();
         };
 
-        std::string operator()(const flavor::unary_expression_t& node  )  {
+        std::string operator()(const khaotica::unary_expression_t& node  )  {
             std::ostringstream out;
             out << "( " << node.operation;
             out << on(node.operand);
@@ -320,7 +320,7 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const flavor::binary_expression_t& node  )  {
+        std::string operator()(const khaotica::binary_expression_t& node  )  {
             std::ostringstream out;
             out << "( ";
             out << on(node.left_operand);
@@ -330,7 +330,7 @@ namespace {
             return out.str();
         };
 
-        std::string operator()(const flavor::position_t& node  )  {
+        std::string operator()(const khaotica::position_t& node  )  {
             std::ostringstream out;
             out << "__position(";
             out << (node.name ? *node.name : ".");
@@ -340,11 +340,11 @@ namespace {
 
     private:
         size_t indentation;
-        const flavor::document_t &doc;
+        const khaotica::document_t &doc;
     };
 }
 
-void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out) {
+void khaotica::printer_t::print(const khaotica::document_t &doc, std::ostream &out) {
 
     print_t print(doc);
 
@@ -353,7 +353,7 @@ void khaotica::printer_t::print(const flavor::document_t &doc, std::ostream &out
     }
 }
 
-void khaotica::printer_t::dump(const flavor::document_t &doc, const flavor::snapshot_t snapshot, std::ostream &out) {
+void khaotica::printer_t::dump(const khaotica::document_t &doc, const khaotica::snapshot_t& snapshot, std::ostream &out) {
 
     dump_t print;
 

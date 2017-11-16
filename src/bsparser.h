@@ -4,7 +4,6 @@
 #include "logging.h"
 #include "bit.h"
 #include "bitreader.h"
-#include "eval.h"
 
 #include <map>
 #include <string>
@@ -15,8 +14,8 @@
 #include <cassert>
 
 namespace khaotica {
-    class parser_t {
+    class bsparser_t {
     public:
-        static flavor::snapshot_t parse(bitreader_t& in, const flavor::document_t& doc);
+        static khaotica::snapshot_t parse(bitreader_t& in, const khaotica::document_t& doc);
     };
 }
