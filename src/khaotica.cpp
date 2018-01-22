@@ -36,7 +36,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto doc = khaotica::interpreter_t::parse(flavor_script, false);
+    auto doc = khaotica::interpreter_t::parse(flavor_script, true);
     bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
     khaotica::printer_t::print(doc, std::cout);
 

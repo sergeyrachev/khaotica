@@ -14,6 +14,7 @@
 namespace khaotica{
 
     struct node_t;
+    struct value_t;
     struct scope_t;
 
     struct bslbf_t {
@@ -45,11 +46,13 @@ namespace khaotica{
 
     struct reference_t{
         std::string name;
+        std::list<std::shared_ptr<node_t>> args;
     };
 
     struct compound_t{
         std::string name;
         std::list<std::shared_ptr<node_t>> body;
+        std::list<std::string> args;
         scope_t* scope;
     };
 
@@ -64,6 +67,18 @@ namespace khaotica{
         std::optional<std::shared_ptr<node_t>> initializer;
         std::optional<std::shared_ptr<node_t>> condition;
         std::optional<std::shared_ptr<node_t>> modifier;
+        std::list<std::shared_ptr<node_t>> body;
+        scope_t* scope;
+    };
+
+    struct do_t{
+        std::optional<std::shared_ptr<node_t>> condition;
+        std::list<std::shared_ptr<node_t>> body;
+        scope_t* scope;
+    };
+
+    struct while_t{
+        std::optional<std::shared_ptr<node_t>> condition;
         std::list<std::shared_ptr<node_t>> body;
         scope_t* scope;
     };
@@ -98,6 +113,10 @@ namespace khaotica{
         std::optional<std::string> name;
     };
 
+    struct nextbits_t{
+        std::optional<uint64_t> length;
+    };
+
     struct node_t{
         std::variant<
             bslbf_t,
@@ -110,12 +129,15 @@ namespace khaotica{
             compound_t,
             if_t,
             for_t,
+            do_t,
+            while_t,
             unary_expression_t,
             binary_expression_t,
             postincrement_t,
             preincrement_t,
             assignment_t,
-            position_t
+            position_t,
+            nextbits_t
         > payload;
     };
 
@@ -146,8 +168,6 @@ namespace khaotica{
         scope_t global;
     };
 
-    struct value_t;
-
     struct bslbf_v{
         std::vector<bool> value;
         uint64_t location;
@@ -168,7 +188,7 @@ namespace khaotica{
         std::list<std::shared_ptr<value_t>> value;
     };
 
-    struct for_v{
+    struct loop_v{
         typedef std::list<std::shared_ptr<value_t>> iteration_t;
         std::vector<iteration_t> value;
     };
@@ -187,7 +207,9 @@ namespace khaotica{
             std::pair<uimsbf_t, uimsbf_v>,
             std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
             std::pair<if_t, if_v>,
-            std::pair<for_t, for_v>,
+            std::pair<for_t, loop_v>,
+            std::pair<do_t, loop_v>,
+            std::pair<while_t, loop_v>,
             std::pair<expression_t, expression_v>
         > payload;
     };

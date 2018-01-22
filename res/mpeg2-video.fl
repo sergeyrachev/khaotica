@@ -1,0 +1,382 @@
+video_sequence() {
+    next_start_code()
+    sequence_header()
+    if ( nextbits() == extension_start_code ) {
+        sequence_extension()
+        do {
+            extension_and_user_data( 0 )
+            do {
+                if (nextbits() == group_start_code) {
+                    group_of_pictures_header()
+                    extension_and_user_data( 1 )
+                }
+                picture_header()
+                picture_coding_extension()
+                extensions_and_user_data( 2 )
+                picture_data()
+            } while ( (nextbits() == picture_start_code) || (nextbits() == group_start_code) )
+            if ( nextbits() != sequence_end_code ) {
+                sequence_header()
+                sequence_extension()
+            }
+        } while ( nextbits() != sequence_end_code )
+    } else {
+    /* ISO/IEC 11172-2 */
+    }
+    sequence_end_code 32 bslbf
+}
+
+sequence_header() {
+    sequence_header_code 32 bslbf
+    horizontal_size_value 12 uimsbf
+    vertical_size_value 12 uimsbf
+    aspect_ratio_information 4 uimsbf
+    frame_rate_code 4 uimsbf
+    bit_rate_value 18 uimsbf
+    marker_bit 1 bslbf
+    vbv_buffer_size_value 10 uimsbf
+    constrained_parameters_flag 1
+    load_intra_quantiser_matrix 1
+    if ( load_intra_quantiser_matrix )
+        intra_quantiser_matrix[64] 8*64 uimsbf
+    load_non_intra_quantiser_matrix 1
+    if ( load_non_intra_quantiser_matrix )
+        non_intra_quantiser_matrix[64] 8*64 uimsbf
+    next_start_code()
+}
+
+extension_and_user_data( i ) {
+    while ( ( nextbits()== extension_start_code ) || ( nextbits()== user_data_start_code ) ) {
+        if ( i != 1 )
+            if ( nextbits()== extension_start_code )
+                extension_data( i )
+        if ( nextbits()== user_data_start_code )
+            user_data()
+    }
+}
+
+extension_data( i ) {
+    while ( nextbits()== extension_start_code ) {
+        extension_start_code 32 bslbf
+        if (i == 0) { /* follows sequence_extension() */
+            if ( nextbits()== “Sequence Display Extension ID” )
+                sequence_display_extension()
+            if ( nextbits()== “Sequence Scalable Extension ID” )
+                sequence_scalable_extension()
+        }
+        /* Note: extension never follows a group_of_pictures_header() */
+        if (i == 2) { /* follows picture_coding_extension() */
+            if ( nextbits()== “Quant Matrix Extension ID” )
+                quant_matrix_extension()
+        if ( nextbits()== “Picture Pan Scan Extension ID” )
+            picture_display_extension()
+        if ( nextbits()== “Picture Spatial Scalable Extension ID” )
+            picture_spatial_scalable_extension()
+        if ( nextbits()== “Picture Temporal Scalable Ext. ID” )
+            picture_temporal_scalable_extension()
+        }
+    }
+}
+
+user_data() {
+    user_data_start_code 32 bslbf
+    while( nextbits() != ‘0000 0000 0000 0000 0000 0001’ ) {
+        user_data 8
+    }
+    next_start_code()
+}
+
+sequence_extension() {
+    extension_start_code 32 bslbf
+    extension_start_code_identifier 4 uimsbf
+    profile_and_level_indication 8 uimsbf
+    progressive_sequence 1 uimsbf
+    chroma_format 2 uimsbf
+    horizontal_size_extension 2 uimsbf
+    vertical_size_extension 2 uimsbf
+    bit_rate_extension 12 uimsbf
+    marker_bit 1 bslbf
+    vbv_buffer_size_extension 8 uimsbf
+    low_delay 1 uimsbf
+    frame_rate_extension_n 2 uimsbf
+    frame_rate_extension_d 5 uimsbf
+    next_start_code()
+}
+
+sequence_display_extension() {
+    extension_start_code_identifier 4 uimsbf
+    video_format 3 uimsbf
+    colour_description 1 uimsbf
+    if ( colour_description ) {
+        colour_primaries 8 uimsbf
+        transfer_characteristics 8 uimsbf
+        matrix_coefficients 8 uimsbf
+    }
+    display_horizontal_size 14 uimsbf
+    marker_bit 1 bslbf
+    display_vertical_size 14 uimsbf
+    next_start_code()
+}
+
+sequence_scalable_extension() {
+    extension_start_code_identifier 4 uimsbf
+    scalable_mode 2 uimsbf
+    layer_id 4 uimsbf
+    if (scalable_mode == “spatial scalability”) {
+        lower_layer_prediction_horizontal_size 14 uimsbf
+        marker_bit 1 bslbf
+        lower_layer_prediction_vertical_size 14 uimsbf
+        horizontal_subsampling_factor_m 5 uimsbf
+        horizontal_subsampling_factor_n 5 uimsbf
+        vertical_subsampling_factor_m 5 uimsbf
+        vertical_subsampling_factor_n 5 uimsbf
+    }
+    if ( scalable_mode == “temporal scalability” ) {
+        picture_mux_enable 1 uimsbf
+        if ( picture_mux_enable )
+            mux_to_progressive_sequence 1 uimsbf
+        picture_mux_order 3 uimsbf
+        picture_mux_factor 3 uimsbf
+    }
+    next_start_code()
+}
+
+group_of_pictures_header() {
+    group_start_code 32 bslbf
+    time_code 25 bslbf
+    closed_gop 1 uimsbf
+    broken_link 1 uimsbf
+    next_start_code()
+}
+
+picture_header() {
+    picture_start_code 32 bslbf
+    temporal_reference 10 uimsbf
+    picture_coding_type 3 uimsbf
+    vbv_delay 16 uimsbf
+    if ( picture_coding_type == 2 || picture_coding_type == 3) {
+        full_pel_forward_vector 1
+        forward_f_code 3 uimsbf
+    }
+    if ( picture_coding_type == 3 ) {
+        full_pel_backward_vector 1
+        backward_f_code 3 uimsbf
+    }
+    while ( nextbits() == '1' ) {
+        extra_bit_picture /* with the value “1” */ 1 uimsbf
+        extra_information_picture 8
+    }
+    extra_bit_picture /* with the value “0” */ 1 uimsbf
+    next_start_code()
+}
+
+picture_coding_extension() {
+    extension_start_code 32 bslbf
+    extension_start_code_identifier 4 uimsbf
+    f_code[0][0] /* forward horizontal */ 4 uimsbf
+    f_code[0][1] /* forward vertical */ 4 uimsbf
+    f_code[1][0] /* backward horizontal */ 4 uimsbf
+    f_code[1][1] /* backward vertical */ 4 uimsbf
+    intra_dc_precision 2 uimsbf
+    picture_structure 2 uimsbf
+    top_field_first 1 uimsbf
+    frame_pred_frame_dct 1 uimsbf
+    concealment_motion_vectors 1 uimsbf
+    q_scale_type 1 uimsbf
+    intra_vlc_format 1 uimsbf
+    alternate_scan 1 uimsbf
+    repeat_first_field 1 uimsbf
+    chroma_420_type 1 uimsbf
+    progressive_frame 1 uimsbf
+    composite_display_flag 1 uimsbf
+    if ( composite_display_flag ) {
+        v_axis 1 uimsbf
+        field_sequence 3 uimsbf
+        sub_carrier 1 uimsbf
+        burst_amplitude 7 uimsbf
+        sub_carrier_phase 8 uimsbf
+    }
+    next_start_code()
+}
+
+quant_matrix_extension() {
+    extension_start_code_identifier 4 uimsbf
+    load_intra_quantiser_matrix 1 uimsbf
+    if ( load_intra_quantiser_matrix )
+        intra_quantiser_matrix[64] 8 * 64 uimsbf
+    load_non_intra_quantiser_matrix 1 uimsbf
+    if ( load_non_intra_quantiser_matrix )
+        non_intra_quantiser_matrix[64] 8 * 64 uimsbf
+    load_chroma_intra_quantiser_matrix 1 uimsbf
+    if ( load_chroma_intra_quantiser_matrix )
+        chroma_intra_quantiser_matrix[64] 8 * 64 uimsbf
+    load_chroma_non_intra_quantiser_matrix 1 uimsbf
+    if ( load_chroma_non_intra_quantiser_matrix )
+        chroma_non_intra_quantiser_matrix[64] 8 * 64 uimsbf
+    next_start_code()
+}
+
+picture_display_extension() {
+    extension_start_code_identifier 4 uimsbf
+    for ( i=0; i<number_of_frame_centre_offsets; i++ ) {
+        frame_centre_horizontal_offset 16 simsbf
+        marker_bit 1 bslbf
+        frame_centre_vertical_offset 16 simsbf
+        marker_bit 1 bslbf
+    }
+    next_start_code()
+}
+
+picture_temporal_scalable_extension() {
+    extension_start_code_identifier 4 uimsbf
+    reference_select_code 2 uimsbf
+    forward_temporal_reference 10 uimsbf
+    marker_bit 1 bslbf
+    backward_temporal_reference 10 uimsbf
+    next_start_code()
+}
+
+picture_spatial_scalable_extension() {
+    extension_start_code_identifier 4 uimsbf
+    lower_layer_temporal_reference 10 uimsbf
+    marker_bit 1 bslbf
+    lower_layer_horizontal_offset 15 simsbf
+    marker_bit 1 bslbf
+    lower_layer_vertical_offset 15 simsbf
+    spatial_temporal_weight_code_table_index 2 uimsbf
+    lower_layer_progressive_frame 1 uimsbf
+    lower_layer_deinterlaced_field_select 1 uimsbf
+    next_start_code()
+}
+
+picture_data() {
+    do {
+        slice()
+    } while ( nextbits() == slice_start_code )
+    next_start_code()
+}
+
+slice() {
+    slice_start_code 32 bslbf
+    if (vertical_size > 2800)
+    slice_vertical_position_extension 3 uimsbf
+    if ( <sequence_scalable_extension() is present in the bitstream> )
+        if (scalable_mode == “data partitioning” )
+            priority_breakpoint 7 uimsbf
+    quantiser_scale_code 5 uimsbf
+    if ( nextbits() == '1' ) {
+        intra_slice_flag 1 bslbf
+        intra_slice 1 uimsbf
+        reserved_bits 7 uimsbf
+        while ( nextbits() == '1' ) {
+            extra_bit_slice /* with the value “1” */ 1 uimsbf
+            extra_information_slice 8
+        }
+    }
+
+    extra_bit_slice /* with the value “0” */ 1 uimsbf
+    do {
+        macroblock()
+    } while ( nextbits() != '000 0000 0000 0000 0000 0000' )
+    next_start_code()
+}
+
+macroblock() {
+    while ( nextbits() == '0000 0001 000' )
+        macroblock_escape 11 bslbf
+    macroblock_address_increment 1-11 vlclbf
+    macroblock_modes()
+    if ( macroblock_quant )
+        quantiser_scale_code 5 uimsbf
+    if ( macroblock_motion_forward || ( macroblock_intra && concealment_motion_vectors) )
+        motion_vectors( 0 )
+    if ( macroblock_motion_backward )
+        motion_vectors( 1 )
+    if ( macroblock_intra && concealment_motion_vectors)
+        marker_bit 1 bslbf
+    if ( macroblock_pattern )
+        coded_block_pattern()
+    for ( i=0; i<block_count; i++ ) {
+        block( i )
+    }
+}
+
+macroblock_modes() {
+    macroblock_type 1-9 vlclbf
+    if ( ( spatial_temporal_weight_code_flag == 1 ) && ( spatial_temporal_weight_code_table_index != ‘00’) ) {
+        spatial_temporal_weight_code 2 uimsbf
+    }
+    if ( macroblock_motion_forward || macroblock_motion_backward ) {
+        if ( picture_structure == ‘frame’ ) {
+            if ( frame_pred_frame_dct == 0 )
+                frame_motion_type 2 uimsbf
+        } else {
+            field_motion_type 2 uimsbf
+        }
+    }
+    if ( decode_dct_type ) {
+        dct_type 1 uimsbf
+    }
+}
+
+motion_vectors ( s ) {
+    if ( motion_vector_count == 1 ) {
+        if (( mv_format == field ) && ( dmv != 1))
+            motion_vertical_field_select[0][s] 1 uimsbf
+        motion_vector( 0, s )
+    } else {
+        motion_vertical_field_select[0][s] 1 uimsbf
+        motion_vector( 0, s )
+        motion_vertical_field_select[1][s] 1 uimsbf
+        motion_vector(1, s )
+    }
+}
+
+motion_vector ( r, s ) {
+    motion_code[r][s][0] 1-11 vlclbf
+    if ( ( f_code[s][0] != 1) && ( motion_code[r][s][0] != 0 ) )
+        motion_residual[r][s][0] 1-8 uimsbf
+    if (dmv == 1)
+        dmvector[0] 1-2 vlclbf
+    motion_code[r][s][1] 1-11 vlclbf
+    if ( ( f_code[s][0] != 1) && ( motion_code[r][s][1] != 0 ) )
+        motion_residual[r][s][1] 1-8 uimsbf
+    if (dmv == 1)
+        dmvector[1] 1-2 vlclbf
+}
+
+coded_block_pattern () {
+    coded_block_pattern_420 3-9 vlclbf
+    if ( chroma_format == 4:2:2 )
+        coded_block_pattern_1 2 uimsbf
+    if ( chroma_format == 4:4:4 )
+        coded_block_pattern_2 6 uimsbf
+}
+
+block( i ) {
+    if ( pattern_code[i] ) {
+        if ( macroblock_intra ) {
+            if ( i<4 ) {
+                dct_dc_size_luminance 2-9 vlclbf
+                if(dct_dc_size_luminance != 0)
+                    dct_dc_differential 1-11 uimsbf
+            } else {
+                dct_dc_size_chrominance 2-10 vlclbf
+                if(dct_dc_size_chrominance !=0)
+                    dct_dc_differential 1-11 uimsbf
+            }
+        } else {
+            First DCT coefficient
+        }
+        while ( nextbits() != End of block )
+            Subsequent DCT coefficients
+        End of block
+    }
+}
+
+next_start_code() {
+    while ( !bytealigned() )
+        zero_bit 1 "0"
+    while ( nextbits() != '0000 0000 0000 0000 0000 0001' )
+        zero_byte 8 "0000 0000"
+}

@@ -115,7 +115,13 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         }
-        std::string operator()(const std::pair<khaotica::for_t, khaotica::for_v> &node){
+        std::string operator()(const std::pair<khaotica::do_t, khaotica::loop_v> &node){
+            return "do{}while()";
+        }
+        std::string operator()(const std::pair<khaotica::while_t, khaotica::loop_v> &node){
+            return "while(){}";
+        }
+        std::string operator()(const std::pair<khaotica::for_t, khaotica::loop_v> &node){
             const auto& field = node.first;
             const auto& value = node.second;
 
@@ -281,6 +287,12 @@ namespace {
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
         };
+        std::string operator()(const khaotica::do_t& node  )  {
+            return "do{}while()";
+        }
+        std::string operator()(const khaotica::while_t& node  )  {
+            return "while(){}";
+        }
         std::string operator()(const khaotica::compound_t& node  )  {
             std::ostringstream out;
             out<< std::string(indentation, ' ') << node.name << "() {" << std::endl;
@@ -334,6 +346,13 @@ namespace {
             std::ostringstream out;
             out << "__position(";
             out << (node.name ? *node.name : ".");
+            out << " )";
+            return out.str();
+        };
+
+        std::string operator()(const khaotica::nextbits_t& node  )  {
+            std::ostringstream out;
+            out << "nextbits(";
             out << " )";
             return out.str();
         };

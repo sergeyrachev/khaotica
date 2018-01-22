@@ -60,6 +60,16 @@ namespace {
             return false;
         }
 
+        khaotica::expression_v operator()(const khaotica::do_t &node) {
+            assert(false && "Must never be there");
+            return false;
+        }
+
+        khaotica::expression_v operator()(const khaotica::while_t &node) {
+            assert(false && "Must never be there");
+            return false;
+        }
+
         khaotica::expression_v operator()(const khaotica::unary_expression_t &node) {
             assert(false && "Must never be there");
             return false;
@@ -86,6 +96,11 @@ namespace {
         }
 
         khaotica::expression_v operator()(const khaotica::position_t &node) {
+            assert(false && "Must never be there");
+            return false;
+        }
+
+        khaotica::expression_v operator()(const khaotica::nextbits_t &node) {
             assert(false && "Must never be there");
             return false;
         }
@@ -646,10 +661,10 @@ namespace {
                 conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
             }
 
-            std::vector<khaotica::for_v::iteration_t> value;
+            std::vector<khaotica::loop_v::iteration_t> value;
             while(conditional_expression_value){
 
-                khaotica::for_v::iteration_t iteration;
+                khaotica::loop_v::iteration_t iteration;
                 for (auto &&item : node.body) {
                     iteration.push_back(on(item));
                 }
@@ -666,8 +681,16 @@ namespace {
                 }
             }
             scope = node.scope->parent;
-            return std::make_shared<khaotica::value_t>(khaotica::value_t{std::make_pair(node, khaotica::for_v{value} )});
+            return std::make_shared<khaotica::value_t>(khaotica::value_t{std::make_pair(node, khaotica::loop_v{value} )});
         };
+
+        std::shared_ptr<khaotica::value_t> operator()(const khaotica::do_t &node) {
+
+        }
+
+        std::shared_ptr<khaotica::value_t> operator()(const khaotica::while_t &node) {
+
+        }
 
         std::shared_ptr<khaotica::value_t> operator()(const khaotica::compound_t &node) {
             scope = node.scope;
@@ -741,6 +764,9 @@ namespace {
             return std::make_shared<khaotica::value_t>(khaotica::value_t{std::make_pair(khaotica::expression_t{node}, khaotica::expression_v{value})});
         };
 
+        std::shared_ptr<khaotica::value_t> operator()(const khaotica::nextbits_t &node) {
+            return nullptr;
+        }
     private:
         khaotica::expression_v extract(const khaotica::value_t &value) {
             if( const auto&& val = std::get_if<std::pair<khaotica::bslbf_t, khaotica::bslbf_v>>(&value.payload)){

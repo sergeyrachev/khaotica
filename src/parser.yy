@@ -109,6 +109,9 @@
 %token <std::string> BITSTRING
 %token <int64_t> INTEGER
 
+%type <std::list<std::shared_ptr<node_t>>> parameters
+%type <std::list<std::string>> arguments
+
 %type <std::list<std::shared_ptr<node_t>>> block
 %type <std::list<std::shared_ptr<node_t>>> entries
 
@@ -130,12 +133,32 @@
 %%
 %start bitstream;
 
+arguments
+: IDENTIFIER "," arguments {
+    $$ = {};
+}| IDENTIFIER {
+    $$ = {};
+}| {
+}
+
+parameters
+: expression "," parameters {
+    $$.push_front($1);
+} | expression {
+    $$.push_back($1);
+}
+
+
 entry
 : IDENTIFIER INTEGER "bslbf"  {
     auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
     $$ = entry;
     scope->definitions[$1] = entry;
-}| IDENTIFIER INTEGER "uimsbf"  {
+}| IDENTIFIER INTEGER "bslbf"  {
+      auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+      $$ = entry;
+      scope->definitions[$1] = entry;
+  }| IDENTIFIER INTEGER "uimsbf"  {
     auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
     $$ = entry;
     scope->definitions[$1] = entry;
@@ -148,8 +171,15 @@ entry
     if( it == document.definitions.end()){
         document.definitions[$1] = nullptr;
     }
-    auto entry = std::make_shared<node_t>(node_t{reference_t{$1}});
+    auto entry = std::make_shared<node_t>(node_t{reference_t{$1, {}}});
     $$ = entry;
+}| IDENTIFIER "(" parameters ")" {
+     auto it = document.definitions.find($1);
+     if( it == document.definitions.end()){
+         document.definitions[$1] = nullptr;
+     }
+     auto entry = std::make_shared<node_t>(node_t{reference_t{$1, $parameters}});
+     $$ = entry;
 }| if_block "(" expression ")" block[then] {
     auto condition = $expression;
     auto _then =  $then;
@@ -189,6 +219,17 @@ entry
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
+}| do_block block[body] "while" "(" expression[condition] ")" {
+    auto condition = $condition;
+    auto body = $body;
+    $$ = std::make_shared<node_t>(node_t{do_t{condition, body, scope}});
+    scope = scope->parent;
+}
+
+do_block: "do" {
+    auto p = std::make_shared<scope_t>(scope_t{scope});
+    scope->childs.push_back(p);
+    scope = p.get();
 }
 
 if_block: "if" {
@@ -221,8 +262,10 @@ entries
 internal_function
 : FUNCTION_POSITION "(" IDENTIFIER ")" {
     $$ = std::make_shared<node_t>(node_t{position_t{$IDENTIFIER}});
-}|FUNCTION_POSITION "(" ")" {
-      $$ = std::make_shared<node_t>(node_t{position_t{}});
+}| FUNCTION_POSITION "(" ")" {
+    $$ = std::make_shared<node_t>(node_t{position_t{}});
+}| FUNCTION_NEXTBITS "(" ")" {
+    $$ = std::make_shared<node_t>(node_t{nextbits_t{}});
 }
 
 primary_expression
@@ -338,8 +381,8 @@ expression
 }
 
 bitstream
-: IDENTIFIER "(" ")" { auto p = std::make_shared<scope_t>(scope_t{scope}); scope->childs.push_back(p); scope = p.get(); } block[body] {     scope = scope->parent; } bitstream {
-    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body, scope}});
+: IDENTIFIER "(" arguments ")" { auto p = std::make_shared<scope_t>(scope_t{scope}); scope->childs.push_back(p); scope = p.get(); } block[body] { scope = scope->parent; } bitstream {
+    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body, {}, scope}});
     auto it = document.definitions.find($IDENTIFIER);
     if(it == document.definitions.end()){
         document.structure.push_back(entry);
