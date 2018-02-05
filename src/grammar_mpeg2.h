@@ -14,7 +14,6 @@ namespace khaotica{
         struct node_t;
         struct scope_t;
 
-
         struct bslbf_t{};
         struct uimsbf_t{};
         struct simsbf_t{};
@@ -22,12 +21,9 @@ namespace khaotica{
         struct bitstring_t{};
 
         struct integer_t{};
-        struct complex_t{};
         struct variable_t{};
 
-        struct simple_t{
-            std::string name;
-        };
+
         struct array_t{
             std::string name;
             size_t size;
@@ -37,24 +33,20 @@ namespace khaotica{
             std::vector<std::shared_ptr<node_t>> indices;
         };
 
-        struct entry_t{
-            std::variant<
-                simple_t,
-                array_t,
-                slot_t
-            > identifier;
+        struct field_t{
+            std::string name;
+            std::variant<integer_t, variable_t> length;
+            std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t, bitstring_t> mnemonic;
+        };
 
-            std::variant<
-                integer_t,
-                complex_t,
-                variable_t
-            > size;
+        struct collection_t{
+            field_t entry;
+            size_t size;
+        };
 
-            std::variant<
-                bslbf_t,
-                uimsbf_t,
-                bitstring_t
-            > mnemonic;
+        struct slot_t{
+            field_t entry;
+            std::vector<size_t> indices;
         };
 
         struct identifier_t {
@@ -70,14 +62,14 @@ namespace khaotica{
             std::string name;
             std::list<std::shared_ptr<node_t>> body;
             std::list<std::string> args;
-            scope_t* scope;
+            std::shared_ptr<scope_t> scope;
         };
 
         struct if_t {
             std::shared_ptr<node_t> condition;
             std::list<std::shared_ptr<node_t>> _then;
             std::list<std::shared_ptr<node_t>> _else;
-            scope_t* scope;
+            std::shared_ptr<scope_t> scope;
         };
 
         struct for_t {
@@ -85,19 +77,19 @@ namespace khaotica{
             std::optional<std::shared_ptr<node_t>> condition;
             std::optional<std::shared_ptr<node_t>> modifier;
             std::list<std::shared_ptr<node_t>> body;
-            scope_t* scope;
+            std::shared_ptr<scope_t> scope;
         };
 
         struct do_t{
             std::optional<std::shared_ptr<node_t>> condition;
             std::list<std::shared_ptr<node_t>> body;
-            scope_t* scope;
+            std::shared_ptr<scope_t> scope;
         };
 
         struct while_t{
             std::optional<std::shared_ptr<node_t>> condition;
             std::list<std::shared_ptr<node_t>> body;
-            scope_t* scope;
+            std::shared_ptr<scope_t> scope;
         };
 
         struct unary_expression_t {
@@ -173,7 +165,7 @@ namespace khaotica{
         typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
         struct scope_t{
-            scope_t* parent{nullptr};
+            std::weak_ptr<scope_t> parent;
             std::list<std::shared_ptr<scope_t>> childs;
             definitions_t definitions;
         };
