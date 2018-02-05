@@ -25,8 +25,8 @@ integer_dec    [0-9]+[0-9]*
 integer_hex    0x[0-9a-fA-F]+[0-9a-fA-F]*
 integer_oct    0[0-7]+[0-7]*
 integer_bin    0b[01]+[01]*
-bits       [[01]+{blank}*]+
-alphanum [a-zA-Z_ \t0-9]+
+bits       [01][01[ \t]*]*
+alphanum [a-zA-Z_ \t0-9.,]+
 
 %x quoted
 %x double_quoted

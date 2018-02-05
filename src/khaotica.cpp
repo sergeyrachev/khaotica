@@ -14,14 +14,15 @@
 int main( int argc, char* argv[] ) {
     std::string input_definition_filename;
     std::string input_bitstream_filename;
-
+    bool enable_verbose{false};
     namespace po = boost::program_options;
     po::options_description opt_desc( "Options" );
     opt_desc.add_options( )
         ( "help,h", "Produce this message" )
         ( "input-definition,i", po::value(&input_definition_filename)->required(), "Flavor definition for input bitstream" )
         ( "input-bitstream,I", po::value(&input_bitstream_filename)->required(), "input bitstream")
-       ;
+        ( "verbose,v", po::value(&enable_verbose)->implicit_value(true), "Enable verbosity")
+        ;
 
     po::positional_options_description pos_opt_desc;
     pos_opt_desc.add( "input-definition", 1 );
@@ -36,7 +37,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto doc = khaotica::interpreter_t::parse(flavor_script, true);
+    auto doc = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
     bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
     khaotica::printer_t::print(doc, std::cout);
 

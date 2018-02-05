@@ -19,6 +19,10 @@ namespace {
             return std::vector<bool>();
         }
 
+        khaotica::expression_v operator()(const std::vector<khaotica::uimsbf_t>& node ) {
+            return std::vector<bool>(node.size());
+        }
+
         khaotica::expression_v operator()(const khaotica::uimsbf_t &node) {
             return uint64_t{0};
 
@@ -529,6 +533,10 @@ namespace {
             symbols[node.name] = v;
             return v;
         };
+
+        std::shared_ptr<khaotica::value_t>operator()(const std::vector<khaotica::uimsbf_t>& node )  {
+            return nullptr;
+        }
 
         std::tuple<std::vector<bool>, std::vector<bool>> update(const std::vector<bool>& initial_value, const std::vector<bool>& initial_mask, const std::vector<bool>& slice_value, const std::pair<uint64_t, uint64_t>& range){
 

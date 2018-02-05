@@ -154,12 +154,20 @@ entry
     auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
     $$ = entry;
     scope->definitions[$1] = entry;
+}| IDENTIFIER INTEGER {
+    auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+    $$ = entry;
+    scope->definitions[$1] = entry;
 }| IDENTIFIER INTEGER "bslbf"  {
-      auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
-      $$ = entry;
-      scope->definitions[$1] = entry;
-  }| IDENTIFIER INTEGER "uimsbf"  {
+    auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+    $$ = entry;
+    scope->definitions[$1] = entry;
+}| IDENTIFIER INTEGER "uimsbf"  {
     auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
+    $$ = entry;
+    scope->definitions[$1] = entry;
+}| IDENTIFIER "[" INTEGER[size] "]" INTEGER "*" INTEGER "uimsbf" {
+    auto entry = std::make_shared<node_t>(node_t{std::vector<uimsbf_t>($size)});
     $$ = entry;
     scope->definitions[$1] = entry;
 }| IDENTIFIER "[" INTEGER[from] ".." INTEGER[to] "]" INTEGER[length] "bslbf"  {
@@ -224,6 +232,11 @@ entry
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{do_t{condition, body, scope}});
     scope = scope->parent;
+}| while_block "(" expression[condition] ")" block[body] {
+     auto condition = $condition;
+     auto body = $body;
+     $$ = std::make_shared<node_t>(node_t{while_t{condition, body, scope}});
+     scope = scope->parent;
 }
 
 do_block: "do" {
@@ -244,11 +257,19 @@ for_block: "for" {
     scope = p.get();
 }
 
+while_block: "while" {
+    auto p = std::make_shared<scope_t>(scope_t{scope});
+    scope->childs.push_back(p);
+    scope = p.get();
+}
+
 block
 : "{" entries "}" {
     $$ = $2;
 }| "{" "}" {
     $$ = {};
+}| entry {
+   $$.push_back($1);
 }
 
 entries

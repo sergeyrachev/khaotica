@@ -162,6 +162,10 @@ namespace {
             return std::visit(*this, node->payload);
         }
 
+        std::string operator()(const std::vector<khaotica::uimsbf_t>& node )  {
+            return "vector";
+        }
+
         std::string operator()(const khaotica::bslbf_t& node )  {
             std::ostringstream out;
             out << std::string(indentation, ' ')

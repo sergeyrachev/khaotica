@@ -51,7 +51,7 @@ add_custom_target( dummy
 
     )
 
-add_executable( khaotica src/khaotica.cpp src/syntax.cpp src/syntax.h )
+add_executable( khaotica src/khaotica.cpp src/syntax.cpp src/syntax.h src/grammar_mpeg2.h)
 target_sources( khaotica PRIVATE
     ${GRAMMAR_DIR}/${BisonOutput} ${GRAMMAR_DIR}/${BisonOutputH}
     ${GRAMMAR_DIR}/${FlexOutput} src/lexer.h

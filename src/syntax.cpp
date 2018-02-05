@@ -22,6 +22,10 @@ namespace {
             scope[node.name] = {};
         };
 
+        void  operator()(const std::vector<khaotica::bslbf_t>& node )  {
+
+        }
+
         void on(khaotica::uimsbf_t& node )  {
             auto& scope = scopes.top();
             auto it = scope.find(node.name);

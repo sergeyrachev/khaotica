@@ -121,6 +121,7 @@ namespace khaotica{
         std::variant<
             bslbf_t,
             bslbf_ranged_t,
+            std::vector<uimsbf_t>,
             uimsbf_t,
             bitstring_t,
             integer_t,
