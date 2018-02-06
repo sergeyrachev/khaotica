@@ -1,135 +1,176 @@
-#pragma once
+#ifndef KHAOTICA_GRAMMAR_H
+#define KHAOTICA_GRAMMAR_H
 
-#include <variant>
+#include <type_traits>
 #include <string>
 #include <vector>
-#include <memory>
-#include <optional>
-#include <list>
+#include <variant>
+#include <functional>
 #include <map>
+#include <list>
+#include <memory>
+#include <cstddef>
 
-namespace khaotica{
-    namespace mpeg2{
+namespace khaotica {
 
-        struct node_t;
-        struct scope_t;
+    struct fixed_length_t {
+        uint64_t value;
+    };
 
-        struct bslbf_t{};
-        struct uimsbf_t{};
-        struct simsbf_t{};
-        struct vlclbf_t{};
-        struct bitstring_t{};
-
-        struct integer_t{};
-        struct variable_t{};
+    struct variable_length_t {
+        uint64_t from;
+        uint64_t to;
+    };
 
 
-        struct array_t{
-            std::string name;
-            size_t size;
-        };
-        struct slot_t{
-            std::string name;
-            std::vector<std::shared_ptr<node_t>> indices;
-        };
+    struct integer_t {
+        int64_t value;
+    };
 
-        struct field_t{
-            std::string name;
-            std::variant<integer_t, variable_t> length;
-            std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t, bitstring_t> mnemonic;
-        };
+    struct identifier_t {
+        std::string name;
+    };
 
-        struct collection_t{
-            field_t entry;
-            size_t size;
-        };
+    struct bitstring_t {
+        std::optional<std::string> name;
+        std::string value;
+    };
 
-        struct slot_t{
-            field_t entry;
-            std::vector<size_t> indices;
-        };
+    struct bslbf_t {
+        std::string name;
+        fixed_length_t length;
+    };
 
-        struct identifier_t {
-            std::string name;
-        };
+    struct uimsbf_t {
+        std::string name;
+        std::variant<fixed_length_t, variable_length_t> length;
+    };
 
-        struct reference_t{
-            std::string name;
-            std::list<std::shared_ptr<node_t>> args;
-        };
+    struct simsbf_t {
+        std::string name;
+        std::variant<fixed_length_t, variable_length_t> length;
+    };
 
-        struct compound_t{
-            std::string name;
-            std::list<std::shared_ptr<node_t>> body;
-            std::list<std::string> args;
-            std::shared_ptr<scope_t> scope;
-        };
+    struct vlclbf_t {
+        std::string name;
+        std::variant<fixed_length_t, variable_length_t> length;
+    };
 
-        struct if_t {
-            std::shared_ptr<node_t> condition;
-            std::list<std::shared_ptr<node_t>> _then;
-            std::list<std::shared_ptr<node_t>> _else;
-            std::shared_ptr<scope_t> scope;
-        };
+    struct collection_t {
+        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        size_t size;
+    };
 
-        struct for_t {
-            std::optional<std::shared_ptr<node_t>> initializer;
-            std::optional<std::shared_ptr<node_t>> condition;
-            std::optional<std::shared_ptr<node_t>> modifier;
-            std::list<std::shared_ptr<node_t>> body;
-            std::shared_ptr<scope_t> scope;
-        };
+    struct slot_t {
+        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        std::vector<std::variant<identifier_t, integer_t>> indices;
+    };
 
-        struct do_t{
-            std::optional<std::shared_ptr<node_t>> condition;
-            std::list<std::shared_ptr<node_t>> body;
-            std::shared_ptr<scope_t> scope;
-        };
+    struct sparsed_t {
+        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        size_t front;
+        size_t back;
+    };
 
-        struct while_t{
-            std::optional<std::shared_ptr<node_t>> condition;
-            std::list<std::shared_ptr<node_t>> body;
-            std::shared_ptr<scope_t> scope;
-        };
+    struct node_t;
+    struct scope_t;
 
-        struct unary_expression_t {
-            std::shared_ptr<node_t> operand;
-            std::string operation;
-        };
+    struct reference_t {
+        std::string name;
+        std::list<std::shared_ptr<node_t>> args;
+    };
 
-        struct binary_expression_t {
-            std::shared_ptr<node_t> left_operand;
-            std::string operation;
-            std::shared_ptr<node_t> right_operand;
-        };
+    struct compound_t {
+        std::string name;
+        std::list<std::string> args;
+        std::list<std::shared_ptr<node_t>> body;
+        std::shared_ptr<scope_t> scope;
+    };
 
-        struct postincrement_t {
-            std::string operand;
-            std::string operation;
-        };
+    struct if_t {
+        std::shared_ptr<node_t> condition;
+        std::list<std::shared_ptr<node_t>> _then;
+        std::list<std::shared_ptr<node_t>> _else;
+        std::shared_ptr<scope_t> scope;
+    };
 
-        struct preincrement_t {
-            std::string operand;
-            std::string operation;
-        };
+    struct for_t {
+        std::optional<std::shared_ptr<node_t>> initializer;
+        std::optional<std::shared_ptr<node_t>> condition;
+        std::optional<std::shared_ptr<node_t>> modifier;
+        std::list<std::shared_ptr<node_t>> body;
+        std::shared_ptr<scope_t> scope;
+    };
 
-        struct assignment_t {
-            std::string symbol;
-            std::shared_ptr<node_t> expression;
-        };
+    struct do_t {
+        std::optional<std::shared_ptr<node_t>> condition;
+        std::list<std::shared_ptr<node_t>> body;
+        std::shared_ptr<scope_t> scope;
+    };
 
-        struct position_t{
-            std::optional<std::string> name;
-        };
+    struct while_t {
+        std::optional<std::shared_ptr<node_t>> condition;
+        std::list<std::shared_ptr<node_t>> body;
+        std::shared_ptr<scope_t> scope;
+    };
 
-        struct nextbits_t{
-            std::optional<uint64_t> length;
-        };
+    struct unary_expression_t {
+        std::shared_ptr<node_t> operand;
+        std::string operation;
+    };
 
-        typedef std::variant<
-            integer_t,
+    struct binary_expression_t {
+        std::shared_ptr<node_t> left_operand;
+        std::string operation;
+        std::shared_ptr<node_t> right_operand;
+    };
+
+    struct postincrement_t {
+        std::string operand;
+        std::string operation;
+    };
+
+    struct preincrement_t {
+        std::string operand;
+        std::string operation;
+    };
+
+    struct assignment_t {
+        std::string symbol;
+        std::shared_ptr<node_t> expression;
+    };
+
+    struct position_t {
+        std::optional<std::string> name;
+    };
+
+    struct nextbits_t {
+        std::optional<uint64_t> length;
+    };
+
+    struct node_t {
+        std::variant<
+            bslbf_t,
+            uimsbf_t,
+            simsbf_t,
+            vlclbf_t,
+
+            collection_t,
+            slot_t,
+            sparsed_t,
+
             bitstring_t,
+            integer_t,
             identifier_t,
+            reference_t,
+
+            compound_t,
+
+            if_t,
+            for_t,
+            do_t,
+            while_t,
+
             unary_expression_t,
             binary_expression_t,
             postincrement_t,
@@ -137,37 +178,120 @@ namespace khaotica{
             assignment_t,
             position_t,
             nextbits_t
-        > expression_t;
+        > payload;
+    };
 
-        struct node_t{
-            std::variant<
-                entry_t,
-                bitstring_t,
-                integer_t,
-                identifier_t,
-                reference_t,
-                compound_t,
-                if_t,
-                for_t,
-                do_t,
-                while_t,
-                unary_expression_t,
-                binary_expression_t,
-                postincrement_t,
-                preincrement_t,
-                assignment_t,
-                position_t,
-                nextbits_t
-            > payload;
-        };
+    typedef std::variant<
+        integer_t,
+        bitstring_t,
+        identifier_t,
+        unary_expression_t,
+        binary_expression_t,
+        postincrement_t,
+        preincrement_t,
+        assignment_t,
+        position_t,
+        nextbits_t
+    > expression_t;
 
-        typedef std::list<std::shared_ptr<node_t>> structure_t;
-        typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
+    typedef std::list<std::shared_ptr<node_t>> structure_t;
+    typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
-        struct scope_t{
-            std::weak_ptr<scope_t> parent;
-            std::list<std::shared_ptr<scope_t>> childs;
-            definitions_t definitions;
-        };
-    }
+    struct scope_t {
+        std::weak_ptr<scope_t> parent;
+        std::list<std::shared_ptr<scope_t>> childs;
+        definitions_t definitions;
+    };
+
+    struct document_t {
+        structure_t structure;
+        scope_t global;
+    };
+
+
+    struct value_t;
+
+    struct bitstring_v {
+        std::vector<bool> value;
+    };
+    struct uimsbf_v {
+        uint64_t value;
+    };
+    struct simsbf_v {
+        int64_t value;
+    };
+    struct vlclbf_v {
+        std::vector<bool> value;
+    };
+
+    struct collection_v {
+        std::variant<
+            std::vector<bitstring_v>,
+            std::vector<uimsbf_v>,
+            std::vector<simsbf_v>,
+            std::vector<vlclbf_v>
+        > value;
+    };
+
+    typedef std::variant<
+        bitstring_v,
+        uimsbf_v,
+        simsbf_v,
+        vlclbf_v
+    > slot_v;
+
+    struct matrix_t{
+        std::vector<size_t> dimensions;
+        std::vector<slot_v> value;
+    };
+
+    struct sparsed_v {
+        std::vector<bool> value;
+        std::vector<bool> mask;
+    };
+
+    typedef std::list<std::shared_ptr<value_t>> block_v;
+    struct if_v {
+        bool condition;
+        block_v value;
+    };
+
+    struct loop_v {
+        std::vector<block_v> value;
+    };
+
+    typedef std::variant<
+        bitstring_v,
+        uimsbf_v,
+        simsbf_v,
+        vlclbf_v,
+        sparsed_v,
+
+        bool
+    > expression_v;
+
+    struct value_t {
+        std::variant<
+            std::pair<bslbf_t, bitstring_v>,
+            std::pair<uimsbf_t, uimsbf_v>,
+            std::pair<simsbf_t, simsbf_v>,
+            std::pair<vlclbf_t, vlclbf_v>,
+            std::pair<collection_t, collection_v>,
+            std::pair<slot_t, std::pair<slot_v, matrix_t >>,
+            std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
+            std::pair<uimsbf_t, uimsbf_v>,
+            std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
+            std::pair<if_t, if_v>,
+            std::pair<for_t, loop_v>,
+            std::pair<do_t, loop_v>,
+            std::pair<while_t, loop_v>,
+            std::pair<expression_t, expression_v>
+        > payload;
+    };
+
+    typedef std::list<std::shared_ptr<value_t>> snapshot_t;
 }
+
+#endif //KHAOTICA_GRAMMAR_H
+
+

@@ -5,7 +5,7 @@
 #ifndef KHAOTICA_PRINTER_H
 #define KHAOTICA_PRINTER_H
 
-#include "grammar.h"
+#include "grammar_mpeg2.h"
 #include "bit.h"
 
 #include <iostream>

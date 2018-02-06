@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grammar.h"
+#include "grammar_mpeg2.h"
 #include "logging.h"
 #include "bit.h"
 #include "bitreader.h"

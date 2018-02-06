@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grammar.h"
+#include "grammar_mpeg2.h"
 
 namespace khaotica {
     class syntax_t{
