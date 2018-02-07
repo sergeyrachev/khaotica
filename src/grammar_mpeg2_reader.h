@@ -1,8 +1,8 @@
 #pragma once
 
-#include "grammar_mpeg2.h"
+#include "grammar_mpeg2_types.h"
 #include "logging.h"
-#include "bit.h"
+#include "type_conversion.h"
 #include "bitreader.h"
 
 #include <map>

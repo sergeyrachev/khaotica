@@ -9,36 +9,38 @@
 
 %define parser_class_name {parser_t}
 
-%define api.namespace {khaotica}
+%define api.namespace {khaotica::core::mpeg2}
 %define api.token.constructor
 %define api.value.type variant
 %define api.token.prefix {TOKEN_}
 
 %code requires{
     //Header file
-    #include "grammar.h"
+    #include "grammar_mpeg2_types.h"
 
-    #include <list>
+    //#include <list>
 
-    namespace khaotica{
+    namespace khaotica::core::mpeg2{
         class lexer_t;
     }
 }
 
 %code top {
     //Implementation file
+    #include "grammar_mpeg2_parser.hpp"
+    #include "grammar_mpeg2_lexer.h"
     #include "logging.h"
-    #include "parser.hpp"
-    #include "lexer.h"
 
     #include <sstream>
     #include <iostream>
 
-    khaotica::parser_t::symbol_type yylex(khaotica::lexer_t &lexer) {
+    using namespace khaotica;
+    using namespace khaotica::core::mpeg2;
+    parser_t::symbol_type yylex(lexer_t &lexer) {
         return lexer.next_token();
     }
 
-    void khaotica::parser_t::error( const location &loc, const std::string &err_message )
+    void parser_t::error( const location &loc, const std::string &err_message )
     {
         std::ostringstream ss;
         ss << loc;
@@ -49,8 +51,7 @@
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
-%parse-param {document_t& document}
-%parse-param {scope_t* scope}
+%parse-param {structure_t& structure} {std::shared_ptr<scope_t> scope} {std::shared_ptr<scope_t> global}
 
 %locations
 
@@ -73,10 +74,9 @@
 %token FUNCTION_POSITION "__position"
 
 //0b1000000 -> 0 0 0 0 0 0 0 1
-%token MNEMONIC_BSLBF "bslbf"
+%token BSLBF "bslbf"
 //0b1000000 -> 1 0 0 0 0 0 0 0
-%token MNEMONIC_UIMSBF "uimsbf"
-%token MNEMONIC_TCIMSBF "tcimsbf"
+%token UIMSBF "uimsbf"
 
 %token BRACKET_OPEN "["
 %token BRACKET_CLOSE "]"
@@ -104,10 +104,11 @@
 %token LESSTHAN_EQUAL "<="
 %token GREATERTHAN_EQUAL ">="
 
-
+%token <std::string> TEXT
 %token <std::string> IDENTIFIER
 %token <std::string> BITSTRING
 %token <int64_t> INTEGER
+%token <uint64_t> UINTEGER
 
 %type <std::list<std::shared_ptr<node_t>>> parameters
 %type <std::list<std::string>> arguments
@@ -130,6 +131,15 @@
 
 %type <std::shared_ptr<node_t>> internal_function
 
+%type <std::nullptr_t> bslbf_mnemonic
+%type <entry_length_t> entry_length
+
+%type <std::shared_ptr<node_t>> entry_bslbf
+%type <std::shared_ptr<node_t>> entry_uimsbf
+%type <std::shared_ptr<node_t>> entry_collection
+%type <std::shared_ptr<node_t>>entry_sparsed
+%type <std::shared_ptr<node_t>>entry_reference
+
 %%
 %start bitstream;
 
@@ -139,56 +149,115 @@ arguments
 }| IDENTIFIER {
     $$ = {};
 }| {
+
 }
 
-parameters
-: expression "," parameters {
-    $$.push_front($1);
-} | expression {
-    $$.push_back($1);
+parameters:
+"(" expression "," parameters ")" {
+    $$.push_front($expression);
+}|
+"(" expression ")" {
+    $$.push_back($expression);
+}|
+"(" ")"{
+    $$ = $$;
 }
 
+bslbf_mnemonic:
+"bslbf" {
 
-entry
-: IDENTIFIER INTEGER "bslbf"  {
-    auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+}|
+TEXT{
+
+}|
+%empty{
+
+}
+
+entry_length:
+UINTEGER[length] {
+    $$ = fixed_length_t{$length};
+}|
+UINTEGER[from] "-" UINTEGER[to]{
+    $$ = variable_length_t{$from, $to};
+}
+
+entry_bslbf:
+IDENTIFIER[name] UINTEGER[length] bslbf_mnemonic {
+    bslbf_t payload{$name, $length};
+
+    auto entry = std::make_shared<node_t>(payload);
+    scope->definitions[$name] = entry;
+
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER INTEGER {
-    auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+}
+
+entry_uimsbf:
+IDENTIFIER[name] entry_length[length] UIMSBF {
+    uimsbf_t payload{$name, $length};
+
+    auto entry = std::make_shared<node_t>(payload);
+    scope->definitions[$name] = entry;
+
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER INTEGER "bslbf"  {
-    auto entry = std::make_shared<node_t>(node_t{bslbf_t{$1, $2}});
+}
+
+entry_collection:
+IDENTIFIER[name] "[" UINTEGER[capacity] "]" UINTEGER[length] "*" UINTEGER[times] "uimsbf" {
+    uimsbf_t entry{$name, $length};
+    collection_t payload{entry, times};
+
+    auto entry = std::make_shared<node_t>(payload);
+    scope->definitions[$name] = entry;
+
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER INTEGER "uimsbf"  {
-    auto entry = std::make_shared<node_t>(node_t{uimsbf_t{$1, $2}});
+}|
+IDENTIFIER "[" UINTEGER[size] "]" UINTEGER "*" UINTEGER "bslbf" {
+    bslbf_t entry{$name, $length};
+    collection_t payload{entry, times};
+
+    auto entry = std::make_shared<node_t>(payload);
+    scope->definitions[$name] = entry;
+
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER "[" INTEGER[size] "]" INTEGER "*" INTEGER "uimsbf" {
-    auto entry = std::make_shared<node_t>(node_t{std::vector<uimsbf_t>($size)});
+}
+
+entry_sparsed:
+IDENTIFIER[name] "[" UINTEGER[from] ".." UINTEGER[to] "]" UINTEGER[length] "bslbf" {
+    bslbf_t entry{$name, $length};
+    sparsed_t payload{entry, $from, $to};
+
+    auto entry = std::make_shared<node_t>(payload);
+    scope->definitions[$name] = entry;
+
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER "[" INTEGER[from] ".." INTEGER[to] "]" INTEGER[length] "bslbf"  {
-    auto entry = std::make_shared<node_t>(node_t{bslbf_ranged_t{ {$IDENTIFIER, $length}, {$from, $to}}});
+}
+
+entry_reference:
+IDENTIFIER[name] parameters {
+    reference_t payload{$name, $parameters};
+
+    auto entry = std::make_shared<node_t>(payload);
     $$ = entry;
-    scope->definitions[$1] = entry;
-}| IDENTIFIER "(" ")" {
-    auto it = document.definitions.find($1);
-    if( it == document.definitions.end()){
-        document.definitions[$1] = nullptr;
+
+    auto it = global->definitions.find($name);
+    if( it == global->definitions.end()){
+        global->definitions[$name] = nullptr;
     }
-    auto entry = std::make_shared<node_t>(node_t{reference_t{$1, {}}});
-    $$ = entry;
-}| IDENTIFIER "(" parameters ")" {
-     auto it = document.definitions.find($1);
-     if( it == document.definitions.end()){
-         document.definitions[$1] = nullptr;
-     }
-     auto entry = std::make_shared<node_t>(node_t{reference_t{$1, $parameters}});
-     $$ = entry;
-}| if_block "(" expression ")" block[then] {
+}
+
+entry:
+entry_bslbf
+|
+entry_uimsbf
+|
+entry_collection
+|
+entry_sparsed
+|
+entry_reference
+|
+ if_block "(" expression ")" block[then] {
     auto condition = $expression;
     auto _then =  $then;
     $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}, scope}});

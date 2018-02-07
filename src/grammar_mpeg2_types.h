@@ -22,6 +22,7 @@ namespace khaotica {
         uint64_t to;
     };
 
+    typedef std::variant<fixed_length_t, variable_length_t> entry_length_t;
 
     struct integer_t {
         int64_t value;
@@ -43,17 +44,17 @@ namespace khaotica {
 
     struct uimsbf_t {
         std::string name;
-        std::variant<fixed_length_t, variable_length_t> length;
+        entry_length_t length;
     };
 
     struct simsbf_t {
         std::string name;
-        std::variant<fixed_length_t, variable_length_t> length;
+        entry_length_t length;
     };
 
     struct vlclbf_t {
         std::string name;
-        std::variant<fixed_length_t, variable_length_t> length;
+        entry_length_t length;
     };
 
     struct collection_t {
@@ -205,11 +206,11 @@ namespace khaotica {
 
     struct document_t {
         structure_t structure;
-        scope_t global;
+        std::shared_ptr<scope_t> global{std::make_shared<scope_t>()};
     };
 
-
     struct value_t;
+    typedef std::list<std::shared_ptr<value_t>> block_t;
 
     struct bitstring_v {
         std::vector<bool> value;
@@ -224,25 +225,22 @@ namespace khaotica {
         std::vector<bool> value;
     };
 
-    struct collection_v {
-        std::variant<
-            std::vector<bitstring_v>,
-            std::vector<uimsbf_v>,
-            std::vector<simsbf_v>,
-            std::vector<vlclbf_v>
-        > value;
-    };
-
     typedef std::variant<
         bitstring_v,
         uimsbf_v,
         simsbf_v,
         vlclbf_v
-    > slot_v;
+    > entry_t;
 
-    struct matrix_t{
-        std::vector<size_t> dimensions;
-        std::vector<slot_v> value;
+    struct collection_v {
+        std::vector<entry_t> value;
+    };
+
+    struct slot_v {
+        std::map<
+            std::vector<size_t>,
+            entry_t
+        > value;
     };
 
     struct sparsed_v {
@@ -250,14 +248,13 @@ namespace khaotica {
         std::vector<bool> mask;
     };
 
-    typedef std::list<std::shared_ptr<value_t>> block_v;
     struct if_v {
         bool condition;
-        block_v value;
+        block_t value;
     };
 
     struct loop_v {
-        std::vector<block_v> value;
+        std::vector<block_t> value;
     };
 
     typedef std::variant<
@@ -266,7 +263,6 @@ namespace khaotica {
         simsbf_v,
         vlclbf_v,
         sparsed_v,
-
         bool
     > expression_v;
 
@@ -277,10 +273,9 @@ namespace khaotica {
             std::pair<simsbf_t, simsbf_v>,
             std::pair<vlclbf_t, vlclbf_v>,
             std::pair<collection_t, collection_v>,
-            std::pair<slot_t, std::pair<slot_v, matrix_t >>,
+            std::pair<slot_t, std::pair<entry_t, slot_v>>,
             std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
-            std::pair<uimsbf_t, uimsbf_v>,
-            std::pair<compound_t, std::list<std::shared_ptr<value_t>>>,
+            std::pair<compound_t, block_t>,
             std::pair<if_t, if_v>,
             std::pair<for_t, loop_v>,
             std::pair<do_t, loop_v>,
@@ -288,10 +283,6 @@ namespace khaotica {
             std::pair<expression_t, expression_v>
         > payload;
     };
-
-    typedef std::list<std::shared_ptr<value_t>> snapshot_t;
 }
 
 #endif //KHAOTICA_GRAMMAR_H
-
-

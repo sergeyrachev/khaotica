@@ -4,7 +4,7 @@
 #include "interpreter.h"
 
 #include "parser.hpp"
-#include "lexer.h"
+#include "grammar_mpeg2_lexer.h"
 #include "logging.h"
 
 khaotica::document_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {

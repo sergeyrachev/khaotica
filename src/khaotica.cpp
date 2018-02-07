@@ -2,14 +2,14 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "khaotica.h"
-#include "bsparser.h"
+#include "grammar_mpeg2_reader.h"
 
 #include "logging.h"
 #include "options.h"
 
 #include "interpreter.h"
 #include "printer.h"
-#include "syntax.h"
+#include "grammar_mpeg2_syntax.h"
 
 int main( int argc, char* argv[] ) {
     std::string input_definition_filename;

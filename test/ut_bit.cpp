@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "bit.h"
+#include "type_conversion.h"
 
 using namespace khaotica::algorithm;
 TEST(Bit, UnpackLeastSignificantFirst){

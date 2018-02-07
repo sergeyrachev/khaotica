@@ -1,12 +1,11 @@
 %{
+#include "grammar_mpeg2_lexer.h"
 #include "logging.h"
-#include "parser.hpp"
-#include "lexer.h"
 
 #define YY_USER_ACTION { _location.step(); _location.columns(yyleng); }
-#define yyterminate() khaotica::parser_t::make_END(_location);
+#define yyterminate() parser_t::make_END(_location);
 
-using namespace khaotica;
+using namespace khaotica::core::mpeg2;
 
 %}
 
@@ -19,36 +18,16 @@ using namespace khaotica;
 %option yyclass="lexer_t"
 
 newline    \r?\n
-blank      [ \t]
-identifier [a-zA-Z_][a-zA-Z_0-9]*
-integer_dec    [0-9]+[0-9]*
-integer_hex    0x[0-9a-fA-F]+[0-9a-fA-F]*
-integer_oct    0[0-7]+[0-7]*
-integer_bin    0b[01]+[01]*
-bits       [01][01[ \t]*]*
-alphanum [a-zA-Z_ \t0-9.,]+
+identifier [[:alpha:]_][[:alnum:]_-]*
+uinteger_dec    [0-9]+[0-9]*
+uinteger_hex    0x[0-9a-fA-F]+[0-9a-fA-F]*
+uinteger_oct    0[0-7]+[0-7]*
+uinteger_bin    0b[01]+[01]*
+bits       [01][01[[:blank:]]*]*
+text [[:print:][:space:]]*
+line [[:print:][:blank:]]*
 
-%x quoted
-%x double_quoted
 %%
-
-"//".*{newline} { }
-
-"/*".*"*/" {}
-
-\" {
-    BEGIN(double_quoted);
-}
-
-<double_quoted>{alphanum} {
-    return parser_t::make_IDENTIFIER( {yytext}, _location);
-}
-
-<double_quoted>\" {
-    BEGIN(INITIAL);
-}
-
-{blank}+  /* skip whitespace */
 
 "[" return parser_t::make_BRACKET_OPEN(_location);
 "]" return parser_t::make_BRACKET_CLOSE(_location);
@@ -66,9 +45,9 @@ alphanum [a-zA-Z_ \t0-9.,]+
 "__position" return parser_t::make_FUNCTION_POSITION(_location);
 "==" return parser_t::make_EQUAL(_location);
 "!=" return parser_t::make_NOTEQUAL(_location);
-"bslbf" return parser_t::make_MNEMONIC_BSLBF(_location);
-"uimsbf" return parser_t::make_MNEMONIC_UIMSBF(_location);
-"tcimsbf" return parser_t::make_MNEMONIC_TCIMSBF(_location);
+"bslbf" return parser_t::make_BSLBF(_location);
+"uimsbf" return parser_t::make_UIMSBF(_location);
+"tcimsbf" return parser_t::make_TCIMSBF(_location);
 ".." return parser_t::make_RANGE(_location);
 "=" return parser_t::make_ASSIGN(_location);
 ";" return parser_t::make_SEMICOLON(_location);
@@ -89,35 +68,35 @@ alphanum [a-zA-Z_ \t0-9.,]+
 "<=" return parser_t::make_LESSTHAN_EQUAL(_location);
 ">=" return parser_t::make_GREATERTHAN_EQUAL(_location);
 
-\' {
-    BEGIN(quoted);
+"//"{line}{newline} { printf("Skip commented line '%s' at line %d\n", yytext, yylineno); }
+
+"/*"{text}"*/" {printf("Skip commented text '%s' at line %d\n", yytext, yylineno);}
+
+\"{text}*\" {
+    return parser_t::make_TEXT( {yytext}, _location);
 }
 
-<quoted>\' {
-    BEGIN(INITIAL);
-}
-
-<quoted>{bits} {
+\'{bits}\' {
     return parser_t::make_BITSTRING( {yytext}, _location);
 }
-
-<quoted>.|{newline} { printf("Bad quoted character '%s' at line %d\n", yytext, yylineno); return yyterminate();}
 
 {identifier} {
     return parser_t::make_IDENTIFIER( {yytext}, _location);
 }
 
-{integer_dec}|{integer_hex}|{integer_oct} {
-    auto number = std::stoll(yytext, 0, 0);
-    return khaotica::parser_t::make_INTEGER( {number}, _location);
+{uinteger_dec}|{uinteger_hex}|{uinteger_oct} {
+    auto number = std::stoull(yytext, 0, 0);
+    return khaotica::parser_t::make_UINTEGER( {number}, _location);
 }
 
-{integer_bin} {
-    auto number = std::stoll(yytext, 0, 2);
-    return khaotica::parser_t::make_INTEGER( {number}, _location);
+{uinteger_bin} {
+    auto number = std::stoull(yytext, 0, 2);
+    return khaotica::parser_t::make_UINTEGER( {number}, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);
+
+[[:blank:]]* {}
 
 {newline} { _location.initialize(YY_NULLPTR, yylineno, 1); }
 

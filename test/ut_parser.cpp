@@ -4,7 +4,7 @@
 
 #include "gtest/gtest.h"
 
-#include "lexer.h"
+#include "grammar_mpeg2_lexer.h"
 #include "parser.hpp"
 
 #include <sstream>
