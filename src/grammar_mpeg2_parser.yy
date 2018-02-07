@@ -18,8 +18,6 @@
     //Header file
     #include "grammar_mpeg2_types.h"
 
-    //#include <list>
-
     namespace khaotica::core::mpeg2{
         class lexer_t;
     }
@@ -137,8 +135,12 @@
 %type <std::shared_ptr<node_t>> entry_bslbf
 %type <std::shared_ptr<node_t>> entry_uimsbf
 %type <std::shared_ptr<node_t>> entry_collection
-%type <std::shared_ptr<node_t>>entry_sparsed
-%type <std::shared_ptr<node_t>>entry_reference
+%type <std::shared_ptr<node_t>> entry_sparsed
+%type <std::shared_ptr<node_t>> entry_reference
+%type <std::shared_ptr<node_t>> entry_if
+%type <std::shared_ptr<node_t>> entry_for
+%type <std::shared_ptr<node_t>> entry_do
+%type <std::shared_ptr<node_t>> entry_while
 
 %%
 %start bitstream;
@@ -257,18 +259,44 @@ entry_sparsed
 |
 entry_reference
 |
- if_block "(" expression ")" block[then] {
+entry_for
+|
+entry_do
+|
+entry_while
+|
+entry_if
+
+entry_if:
+opened_if
+|
+closed_if
+
+opened_if:
+if_block {scope = scope_t::open(scope);} "(" expression[condition] ")" entry[then] {
+    if_t payload{$condition, $then, std::nullopt, scope};
+    $$ = std::make_shared<node_t>(payload);
+    scope = scope->close();
+}|
+if_block {scope = scope_t::open(scope);} "(" expression[condition] ")" closed_if[then] {scope = scope->close();} "else" {scope = scope_t::open(scope);} opened_if[else]{
+    if_t payload{$condition, $then, $else, scope};
+    $$ = std::make_shared<node_t>(payload);
+    scope = scope->close();
+}
+
+closed_if:
+if_block {scope = scope_t::open(scope);} "(" expression[condition]  ")" closed_if "else" {scope = scope_t::open(scope->close());} closed_if {
+
+}|
+if_block {scope = scope_t::open(scope);} "(" expression[condition]  ")" block[then] {
     auto condition = $expression;
     auto _then =  $then;
     $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}, scope}});
     scope = scope->parent;
-}| if_block "(" expression ")" block[then] "else" block[else] {
-    auto condition = $expression;
-    auto _then =  $then;
-    auto _else =  $else;
-    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, _else, scope}});
-    scope = scope->parent;
-}| for_block "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
+}
+
+entry_for:
+for_block "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = $initializer;
     auto condition = $condition;
     auto modifier = $modifier;
@@ -296,12 +324,18 @@ entry_reference
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
     scope = scope->parent;
-}| do_block block[body] "while" "(" expression[condition] ")" {
+}
+
+entry_do:
+do_block block[body] "while" "(" expression[condition] ")" {
     auto condition = $condition;
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{do_t{condition, body, scope}});
     scope = scope->parent;
-}| while_block "(" expression[condition] ")" block[body] {
+}
+
+entry_while:
+while_block "(" expression[condition] ")" block[body] {
      auto condition = $condition;
      auto body = $body;
      $$ = std::make_shared<node_t>(node_t{while_t{condition, body, scope}});
@@ -314,7 +348,7 @@ do_block: "do" {
     scope = p.get();
 }
 
-if_block: "if" {
+if_block:  {
     auto p = std::make_shared<scope_t>(scope_t{scope});
     scope->childs.push_back(p);
     scope = p.get();
@@ -335,18 +369,15 @@ while_block: "while" {
 block
 : "{" entries "}" {
     $$ = $2;
-}| "{" "}" {
-    $$ = {};
-}| entry {
-   $$.push_back($1);
 }
 
 entries
-: entry entries{
-    $$ = $2;
-    $$.push_front($1);
-} | entry {
-    $$.push_back($1);
+: entries entry {
+    $$ = $1;
+    $$.push_back($entry);
+}|
+%empty {
+    $$ = {};
 }
 
 internal_function

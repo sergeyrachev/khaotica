@@ -90,9 +90,8 @@ namespace khaotica {
 
     struct if_t {
         std::shared_ptr<node_t> condition;
-        std::list<std::shared_ptr<node_t>> _then;
-        std::list<std::shared_ptr<node_t>> _else;
-        std::shared_ptr<scope_t> scope;
+        std::pair<std::list<std::shared_ptr<node_t>>, std::shared_ptr<scope_t> > _then;
+        std::pair<std::list<std::shared_ptr<node_t>>, std::shared_ptr<scope_t> > _else;
     };
 
     struct for_t {
@@ -202,6 +201,15 @@ namespace khaotica {
         std::weak_ptr<scope_t> parent;
         std::list<std::shared_ptr<scope_t>> childs;
         definitions_t definitions;
+
+        static std::shared_ptr<scope_t> open(const std::shared_ptr<scope_t>& parent) {
+            parent->childs.push_back( std::make_shared<scope_t>(parent));
+            return parent->childs.back();
+        }
+
+        std::shared_ptr<scope_t> close() {
+            return parent.lock();
+        }
     };
 
     struct document_t {
