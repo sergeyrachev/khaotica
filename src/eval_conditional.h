@@ -26,5 +26,3 @@ namespace khaotica{
         };
     }
 }
-
-#endif //KHAOTICA_EVAL_CONDITIONAL_H

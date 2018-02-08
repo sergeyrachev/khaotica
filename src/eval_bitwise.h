@@ -2,6 +2,8 @@
 
 #include "grammar_mpeg2_types.h"
 
+#include <cassert>
+
 namespace khaotica {
     namespace eval {
         struct bitwise_not_t {
@@ -14,6 +16,7 @@ namespace khaotica {
             }
 
             khaotica::expression_v operator()(const bool &operand) {
+                assert(false && "WAT????");
                 return static_cast<int64_t>(~operand);
             }
 

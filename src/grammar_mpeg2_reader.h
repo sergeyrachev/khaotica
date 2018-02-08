@@ -16,6 +16,6 @@
 namespace khaotica {
     class bsparser_t {
     public:
-        static khaotica::snapshot_t parse(bitreader_t& in, const khaotica::document_t& doc);
+        static void parse(khaotica::details::bitreader_t& in, const khaotica::sequence_t& doc);
     };
 }

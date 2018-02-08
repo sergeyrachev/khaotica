@@ -8,15 +8,11 @@ namespace khaotica{
     namespace eval {
         struct default_t {
             khaotica::expression_v operator()(const khaotica::bslbf_t &node) {
-                return std::vector<bool>();
+                return std::vector<bool>{};
             }
 
-            khaotica::expression_v operator()(const khaotica::bslbf_ranged_t &node) {
-                return std::vector<bool>();
-            }
-
-            khaotica::expression_v operator()(const std::vector<khaotica::uimsbf_t> &node) {
-                return std::vector<bool>(node.size());
+            khaotica::expression_v operator()(const khaotica::sparsed_t &node) {
+                return std::vector<bool>{};
             }
 
             khaotica::expression_v operator()(const khaotica::uimsbf_t &node) {
@@ -26,7 +22,7 @@ namespace khaotica{
 
             khaotica::expression_v operator()(const khaotica::bitstring_t &node) {
                 assert(false && "Must never be there");
-                return std::vector<bool>();
+                return std::vector<bool>{};
 
             }
 
@@ -107,5 +103,3 @@ namespace khaotica{
         };
     }
 }
-
-#endif //KHAOTICA_EVAL_DEFAULT_H

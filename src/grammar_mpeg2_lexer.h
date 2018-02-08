@@ -2,13 +2,14 @@
 
 #include <iostream>
 
-//#if !defined(yyFlexLexerOnce)
+#if !defined(yyFlexLexerOnce)
 #include "FlexLexer.h"
-//#endif
+#endif
 
 #include "grammar_mpeg2_parser.hpp"
 #include "location.hh"
 
+#undef YY_DECL
 #define YY_DECL parser_t::symbol_type lexer_t::next_token()
 
 namespace khaotica::core::mpeg2{

@@ -49,7 +49,7 @@
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
-%parse-param {structure_t& structure} {std::shared_ptr<scope_t> scope} {std::shared_ptr<scope_t> global}
+%parse-param {std::list<std::shared_ptr<node_t>>& structure} {std::shared_ptr<scope_t> scope} {std::shared_ptr<scope_t> global}
 
 %locations
 
@@ -75,6 +75,8 @@
 %token BSLBF "bslbf"
 //0b1000000 -> 1 0 0 0 0 0 0 0
 %token UIMSBF "uimsbf"
+
+%token TCIMSBF "tcimsbf"
 
 %token BRACKET_OPEN "["
 %token BRACKET_CLOSE "]"
@@ -108,10 +110,12 @@
 %token <int64_t> INTEGER
 %token <uint64_t> UINTEGER
 
+%type <sequence_t> bitstream
+
 %type <std::list<std::shared_ptr<node_t>>> parameters
 %type <std::list<std::string>> arguments
 
-%type <std::list<std::shared_ptr<node_t>>> block
+%type <sequence_t> block
 %type <std::list<std::shared_ptr<node_t>>> entries
 
 %type <std::shared_ptr<node_t>> entry
@@ -142,26 +146,26 @@
 %type <std::shared_ptr<node_t>> entry_do
 %type <std::shared_ptr<node_t>> entry_while
 
+%type <std::shared_ptr<node_t>> closed_if
+%type <std::shared_ptr<node_t>> opened_if
+%type <std::shared_ptr<node_t>> condition
+
 %%
 %start bitstream;
 
-arguments
-: IDENTIFIER "," arguments {
-    $$ = {};
-}| IDENTIFIER {
-    $$ = {};
-}| {
+arguments:
+arguments "," IDENTIFIER[name] {
+    $$.push_back($name);
+}|
+%empty{
 
 }
 
 parameters:
-"(" expression "," parameters ")" {
+parameters "," expression {
     $$.push_front($expression);
 }|
-"(" expression ")" {
-    $$.push_back($expression);
-}|
-"(" ")"{
+%empty{
     $$ = $$;
 }
 
@@ -188,17 +192,17 @@ entry_bslbf:
 IDENTIFIER[name] UINTEGER[length] bslbf_mnemonic {
     bslbf_t payload{$name, $length};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     scope->definitions[$name] = entry;
 
     $$ = entry;
 }
 
 entry_uimsbf:
-IDENTIFIER[name] entry_length[length] UIMSBF {
+IDENTIFIER[name] entry_length[length] "uimsbf" {
     uimsbf_t payload{$name, $length};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     scope->definitions[$name] = entry;
 
     $$ = entry;
@@ -206,19 +210,21 @@ IDENTIFIER[name] entry_length[length] UIMSBF {
 
 entry_collection:
 IDENTIFIER[name] "[" UINTEGER[capacity] "]" UINTEGER[length] "*" UINTEGER[times] "uimsbf" {
-    uimsbf_t entry{$name, $length};
-    collection_t payload{entry, times};
+    entry_length_t length{fixed_length_t{$length}};
+    uimsbf_t field{$name, length};
+    collection_t payload{field, $times};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     scope->definitions[$name] = entry;
 
     $$ = entry;
 }|
-IDENTIFIER "[" UINTEGER[size] "]" UINTEGER "*" UINTEGER "bslbf" {
-    bslbf_t entry{$name, $length};
-    collection_t payload{entry, times};
+IDENTIFIER[name] "[" UINTEGER[capacity] "]" UINTEGER[length] "*" UINTEGER[times] "bslbf" {
+    fixed_length_t length{$length};
+    bslbf_t field{$name, length};
+    collection_t payload{field, $times};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     scope->definitions[$name] = entry;
 
     $$ = entry;
@@ -226,20 +232,21 @@ IDENTIFIER "[" UINTEGER[size] "]" UINTEGER "*" UINTEGER "bslbf" {
 
 entry_sparsed:
 IDENTIFIER[name] "[" UINTEGER[from] ".." UINTEGER[to] "]" UINTEGER[length] "bslbf" {
-    bslbf_t entry{$name, $length};
-    sparsed_t payload{entry, $from, $to};
+    fixed_length_t length{$length};
+    bslbf_t field{$name, length};
+    sparsed_t payload{field, $from, $to};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     scope->definitions[$name] = entry;
 
     $$ = entry;
 }
 
 entry_reference:
-IDENTIFIER[name] parameters {
+IDENTIFIER[name] "(" parameters ")" {
     reference_t payload{$name, $parameters};
 
-    auto entry = std::make_shared<node_t>(payload);
+    auto entry = std::make_shared<node_t>(node_t{payload});
     $$ = entry;
 
     auto it = global->definitions.find($name);
@@ -273,102 +280,109 @@ opened_if
 closed_if
 
 opened_if:
-if_block {scope = scope_t::open(scope);} "(" expression[condition] ")" entry[then] {
-    if_t payload{$condition, $then, std::nullopt, scope};
-    $$ = std::make_shared<node_t>(payload);
+condition entry[then] {
+
+    sequence_t _then{{$then}, scope};
+    sequence_t _else{{}, scope};
+
+    if_t payload{$condition, _then, _else};
+    $$ = std::make_shared<node_t>(node_t{payload});
+
     scope = scope->close();
 }|
-if_block {scope = scope_t::open(scope);} "(" expression[condition] ")" closed_if[then] {scope = scope->close();} "else" {scope = scope_t::open(scope);} opened_if[else]{
-    if_t payload{$condition, $then, $else, scope};
-    $$ = std::make_shared<node_t>(payload);
+condition closed_if[then] "else" opened_if[else]{
+
+    sequence_t _then{{$then}, scope};
+    sequence_t _else{{$else}, scope};
+
+    if_t payload{$condition, _then, _else};
+    $$ = std::make_shared<node_t>(node_t{payload});
+
     scope = scope->close();
 }
 
 closed_if:
-if_block {scope = scope_t::open(scope);} "(" expression[condition]  ")" closed_if "else" {scope = scope_t::open(scope->close());} closed_if {
+condition closed_if[then] "else" closed_if [else]{
+    sequence_t _then{{$then}, scope};
+    sequence_t _else{{$else}, scope};
 
+    if_t payload{$condition, _then, _else};
+    $$ = std::make_shared<node_t>(node_t{payload});
+
+    scope = scope->close();
 }|
-if_block {scope = scope_t::open(scope);} "(" expression[condition]  ")" block[then] {
-    auto condition = $expression;
-    auto _then =  $then;
-    $$ = std::make_shared<node_t>(node_t{if_t{condition, _then, {}, scope}});
-    scope = scope->parent;
+condition block[then] {
+    sequence_t _then{$then};
+    sequence_t _else{{}, scope};
+
+    if_t payload{$condition, _then, _else};
+    $$ = std::make_shared<node_t>(node_t{payload});
+
+    scope = scope->close();
+}
+
+condition:
+"if" {scope = scope_t::open(scope);} "(" expression ")" {
+    $$ = $expression;
 }
 
 entry_for:
-for_block "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
+for_scope "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = $initializer;
     auto condition = $condition;
     auto modifier = $modifier;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
-    scope = scope->parent;
-}| for_block "(" ";" expression[condition] ";" expression[modifier] ")" block[body] {
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+    scope = scope->close();
+}|
+for_scope "(" ";" expression[condition] ";" expression[modifier] ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = $condition;
     auto modifier = $modifier;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
-    scope = scope->parent;
-}| for_block "(" ";" expression[condition] ";" ")" block[body] {
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+}|
+for_scope "(" ";" expression[condition] ";" ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = $condition;
     auto modifier = std::nullopt;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
-    scope = scope->parent;
-}| for_block "(" ";" ";" ")" block[body] {
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
+}|
+for_scope "(" ";" ";" ")" block[body] {
     auto initializer = std::nullopt;
     auto condition = std::nullopt;
     auto modifier = std::nullopt;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body, scope}});
-    scope = scope->parent;
+    $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
 }
 
+for_scope:
+"for" {
+    scope = scope_t::open(scope);
+}
+
+
 entry_do:
-do_block block[body] "while" "(" expression[condition] ")" {
+"do" block[body] "while" "(" expression[condition] ")" {
     auto condition = $condition;
     auto body = $body;
-    $$ = std::make_shared<node_t>(node_t{do_t{condition, body, scope}});
-    scope = scope->parent;
+    $$ = std::make_shared<node_t>(node_t{do_t{condition, body}});
+    scope = scope->close();
 }
 
 entry_while:
-while_block "(" expression[condition] ")" block[body] {
+"while" "(" expression[condition] ")" block[body] {
      auto condition = $condition;
      auto body = $body;
-     $$ = std::make_shared<node_t>(node_t{while_t{condition, body, scope}});
-     scope = scope->parent;
-}
-
-do_block: "do" {
-    auto p = std::make_shared<scope_t>(scope_t{scope});
-    scope->childs.push_back(p);
-    scope = p.get();
-}
-
-if_block:  {
-    auto p = std::make_shared<scope_t>(scope_t{scope});
-    scope->childs.push_back(p);
-    scope = p.get();
-}
-
-for_block: "for" {
-    auto p = std::make_shared<scope_t>(scope_t{scope});
-    scope->childs.push_back(p);
-    scope = p.get();
-}
-
-while_block: "while" {
-    auto p = std::make_shared<scope_t>(scope_t{scope});
-    scope->childs.push_back(p);
-    scope = p.get();
+     $$ = std::make_shared<node_t>(node_t{while_t{condition, body}});
+     scope = scope->close();
 }
 
 block
-: "{" entries "}" {
-    $$ = $2;
+: "{" {scope = scope_t::open(scope);} entries "}" {
+    $$ = {$entries, scope};
+    scope = scope->close();
 }
 
 entries
@@ -501,18 +515,26 @@ expression
     scope->definitions[$1] = entry;
 }
 
-bitstream
-: IDENTIFIER "(" arguments ")" { auto p = std::make_shared<scope_t>(scope_t{scope}); scope->childs.push_back(p); scope = p.get(); } block[body] { scope = scope->parent; } bitstream {
-    auto entry = std::make_shared<node_t>(node_t{compound_t{$IDENTIFIER, $body, {}, scope}});
-    auto it = document.definitions.find($IDENTIFIER);
-    if(it == document.definitions.end()){
-        document.structure.push_back(entry);
+bitstream:
+bitstream IDENTIFIER[name] "(" arguments ")" { scope = scope_t::open(scope); } block[body]  {
+    compound_t payload{$name, $arguments, $body};
+    auto entry = std::make_shared<node_t>(node_t{payload});
+
+    auto it = global->definitions.find($name);
+    if(it == global->definitions.end()){
+        structure.push_back(entry);
     }
-    document.definitions[$IDENTIFIER] = entry;
-}| IDENTIFIER "=" expression bitstream {
-    auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
-    scope->definitions[$1] = entry;
-}| END
-;
+    global->definitions[$name] = entry;
+}|
+bitstream IDENTIFIER[name] "=" expression {
+    assignment_t payload{$name, $expression};
+    auto entry = std::make_shared<node_t>(node_t{payload});
+
+    global->definitions[$name] = entry;
+}|
+%empty {
+    $$ = {};
+}
+
 
 %%

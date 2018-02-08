@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cassert>
 #include <vector>
+#include <functional>
 
 namespace khaotica {
     namespace eval{

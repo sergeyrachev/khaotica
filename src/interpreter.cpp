@@ -3,17 +3,17 @@
 
 #include "interpreter.h"
 
-#include "parser.hpp"
+#include "grammar_mpeg2_parser.hpp"
 #include "grammar_mpeg2_lexer.h"
 #include "logging.h"
 
-khaotica::document_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
+khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
-    khaotica::lexer_t _scanner(in, serr);
+    khaotica::core::mpeg2::lexer_t _scanner(in, serr);
 
-    khaotica::document_t document;
-    khaotica::parser_t _parser(_scanner, document, &document.global);
+    khaotica::sequence_t document;
+    khaotica::core::mpeg2::parser_t _parser(_scanner, document.body, document.scope, document.scope);
 
     _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);

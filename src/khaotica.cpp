@@ -38,15 +38,14 @@ int main( int argc, char* argv[] ) {
     std::ifstream flavor_script(input_definition_filename);
 
     auto doc = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
-    bool is_valid = khaotica::syntax_t::is_valid(doc, std::cout);
-    khaotica::printer_t::print(doc, std::cout);
+//    khaotica::printer_t::print(doc, std::cout);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-    khaotica::bitreader_t bitreader(bitstream);
+    khaotica::details::bitreader_t bitreader(bitstream);
 
     while(!bitstream.bad() && !bitstream.eof()){
-        auto snapshot = khaotica::bsparser_t::parse(bitreader, doc);
-        khaotica::printer_t::dump(doc, snapshot, std::cout);
+        khaotica::bsparser_t::parse(bitreader, doc);
+        //khaotica::printer_t::dump(doc, snapshot, std::cout);
     }
 
     return 0;

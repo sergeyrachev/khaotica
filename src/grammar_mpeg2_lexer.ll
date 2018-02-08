@@ -86,12 +86,12 @@ line [[:print:][:blank:]]*
 
 {uinteger_dec}|{uinteger_hex}|{uinteger_oct} {
     auto number = std::stoull(yytext, 0, 0);
-    return khaotica::parser_t::make_UINTEGER( {number}, _location);
+    return parser_t::make_UINTEGER( {number}, _location);
 }
 
 {uinteger_bin} {
     auto number = std::stoull(yytext, 0, 2);
-    return khaotica::parser_t::make_UINTEGER( {number}, _location);
+    return parser_t::make_UINTEGER( {number}, _location);
 }
 
 .	printf("Unknown character '%s' at line %d\n", yytext, yylineno);

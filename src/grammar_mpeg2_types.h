@@ -81,37 +81,38 @@ namespace khaotica {
         std::list<std::shared_ptr<node_t>> args;
     };
 
-    struct compound_t {
-        std::string name;
-        std::list<std::string> args;
+    struct sequence_t{
         std::list<std::shared_ptr<node_t>> body;
         std::shared_ptr<scope_t> scope;
     };
 
+    struct compound_t {
+        std::string name;
+        std::list<std::string> args;
+        sequence_t body;
+    };
+
     struct if_t {
         std::shared_ptr<node_t> condition;
-        std::pair<std::list<std::shared_ptr<node_t>>, std::shared_ptr<scope_t> > _then;
-        std::pair<std::list<std::shared_ptr<node_t>>, std::shared_ptr<scope_t> > _else;
+        sequence_t _then;
+        sequence_t _else;
     };
 
     struct for_t {
         std::optional<std::shared_ptr<node_t>> initializer;
         std::optional<std::shared_ptr<node_t>> condition;
         std::optional<std::shared_ptr<node_t>> modifier;
-        std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope;
+        sequence_t body;
     };
 
     struct do_t {
         std::optional<std::shared_ptr<node_t>> condition;
-        std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope;
+        sequence_t body;
     };
 
     struct while_t {
         std::optional<std::shared_ptr<node_t>> condition;
-        std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope;
+        sequence_t body;
     };
 
     struct unary_expression_t {
@@ -194,7 +195,6 @@ namespace khaotica {
         nextbits_t
     > expression_t;
 
-    typedef std::list<std::shared_ptr<node_t>> structure_t;
     typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
     struct scope_t {
@@ -203,7 +203,7 @@ namespace khaotica {
         definitions_t definitions;
 
         static std::shared_ptr<scope_t> open(const std::shared_ptr<scope_t>& parent) {
-            parent->childs.push_back( std::make_shared<scope_t>(parent));
+            parent->childs.push_back( std::make_shared<scope_t>(scope_t{parent, {}, {}}));
             return parent->childs.back();
         }
 
@@ -212,13 +212,8 @@ namespace khaotica {
         }
     };
 
-    struct document_t {
-        structure_t structure;
-        std::shared_ptr<scope_t> global{std::make_shared<scope_t>()};
-    };
-
     struct value_t;
-    typedef std::list<std::shared_ptr<value_t>> block_t;
+    typedef std::list<std::shared_ptr<value_t>> block_v;
 
     struct bitstring_v {
         std::vector<bool> value;
@@ -258,19 +253,18 @@ namespace khaotica {
 
     struct if_v {
         bool condition;
-        block_t value;
+        block_v value;
     };
 
     struct loop_v {
-        std::vector<block_t> value;
+        std::vector<block_v> value;
     };
 
     typedef std::variant<
-        bitstring_v,
-        uimsbf_v,
-        simsbf_v,
-        vlclbf_v,
-        sparsed_v,
+        std::vector<bool>,
+        uint64_t,
+        int64_t,
+        //sparsed_v,
         bool
     > expression_v;
 
@@ -283,7 +277,7 @@ namespace khaotica {
             std::pair<collection_t, collection_v>,
             std::pair<slot_t, std::pair<entry_t, slot_v>>,
             std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
-            std::pair<compound_t, block_t>,
+            std::pair<compound_t, block_v>,
             std::pair<if_t, if_v>,
             std::pair<for_t, loop_v>,
             std::pair<do_t, loop_v>,

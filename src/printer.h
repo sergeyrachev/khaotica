@@ -13,8 +13,8 @@
 namespace khaotica{
     class printer_t{
     public:
-        static void print(const khaotica::document_t& doc, std::ostream& out);
-        static void dump(const khaotica::document_t& doc, const khaotica::snapshot_t& snapshot, std::ostream& out);
+//        static void print(const khaotica::document_t& doc, std::ostream& out);
+//        static void dump(const khaotica::document_t& doc, const khaotica::snapshot_t& snapshot, std::ostream& out);
     };
 }
 #endif //KHAOTICA_PRINTER_H
