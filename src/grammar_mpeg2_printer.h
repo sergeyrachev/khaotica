@@ -8,10 +8,18 @@
 
 namespace khaotica {
 
-    class print_t {
+    class printer_t{
     public:
-        explicit print_t(const sequence_t &doc) : indentation(0), doc(doc) {
+        explicit printer_t(const sequence_t &doc) : indentation(0), doc(doc) {
 
+        }
+
+        std::string operator()(const sequence_t& node){
+            std::ostringstream out;
+            for(const auto& entry : node.body){
+                out << std::visit(*this, entry->payload);
+            }
+            return out.str();
         }
 
         std::string on(std::shared_ptr<node_t> node) {
@@ -29,6 +37,24 @@ namespace khaotica {
             out << length.from << "-" << length.to;
             return out.str();
         }
+
+        std::string operator()(const integer_t &node) {
+            std::ostringstream out;
+            out << node.value;
+            return out.str();
+        };
+
+        std::string operator()(const identifier_t &node) {
+            std::ostringstream out;
+            out << node.name;
+            return out.str();
+        };
+
+        std::string operator()(const bitstring_t &node) {
+            std::ostringstream out;
+            out << "'" << node.value << "'";
+            return out.str();
+        };
 
         std::string operator()(const bslbf_t &node) {
             std::ostringstream out;
@@ -54,50 +80,74 @@ namespace khaotica {
             return out.str();
         };
 
-        std::string operator()(const sparsed_t &node) {
+        std::string operator()(const simsbf_t &node) {
             std::ostringstream out;
             out << std::string(indentation, ' ')
-                << node.bits.name
-                << "["
-                << node.range.first
-                << ".."
-                << node.range.second
-                << "]"
+                << node.name
                 << " "
-                << node.bits.length
+                << std::visit(*this, node.length)
                 << " "
-                << "bslbf"
+                << "simsbf"
                 << std::endl;
             return out.str();
         };
 
-        std::string operator()(const bitstring_t &node) {
+        std::string operator()(const vlclbf_t &node) {
             std::ostringstream out;
-            out << "'" << node.value << "'";
+            out << std::string(indentation, ' ')
+                << node.name
+                << " "
+                << std::visit(*this, node.length)
+                << " "
+                << "vlclbf"
+                << std::endl;
             return out.str();
         };
 
-        std::string operator()(const integer_t &node) {
+        std::string operator()(const collection_t &node) {
             std::ostringstream out;
-            out << node.value;
+            out << std::string(indentation, ' ')
+                << std::visit(*this, node.entry)
+                << " * " << node.size
+                << std::endl;
             return out.str();
         };
 
-        std::string operator()(const identifier_t &node) {
+        std::string operator()(const slot_t &node) {
             std::ostringstream out;
-            out << node.name;
+            out << std::string(indentation, ' ')
+                << std::visit(*this, node.entry);
+
+            for(const auto& i : node.indices) {
+                out << "[" << std::visit(*this, i) << "]";
+            }
+            out << std::endl;
+            return out.str();
+        };
+
+        std::string operator()(const sparsed_t &node) {
+            std::ostringstream out;
+            out << std::string(indentation, ' ')
+                << std::visit(*this, node.entry)
+                << "[" << node.front << ".." << node.back <<"]"
+                << std::endl;
             return out.str();
         };
 
         std::string operator()(const reference_t &node) {
             std::ostringstream out;
 
-            out << std::string(indentation, ' ') << node.name << "() -> { " << std::endl;
+            out << std::string(indentation, ' ')
+                << node.name << "(";
+            for(const auto& arg : node.args){
+                out << ", " << std::visit(*this, arg->payload) << std::endl;
+            }
+            out << ") -> {" << std::endl;
             indentation++;
 
-            auto &compound = std::get<compound_t>(doc.definitions.at(node.name)->payload);
+            auto& compound = std::get<compound_t>(doc.scope->definitions.at(node.name)->payload);
 
-            for (auto &&item : compound.body) {
+            for (auto &&item : compound.body.body) {
                 out << on(item);
             }
 
@@ -116,13 +166,13 @@ namespace khaotica {
             out << " ) {" << std::endl;
 
             indentation++;
-            for (auto &&item : node._then) {
+            for (auto &&item : node._then.body) {
                 out << on(item);
             }
 
-            out << (node._else.empty() ? "" : "}else{");
+            out << (node._else.body.empty() ? "" : "}else{");
 
-            for (auto &&item : node._else) {
+            for (auto &&item : node._else.body) {
                 out << on(item);
             }
 
@@ -154,7 +204,7 @@ namespace khaotica {
             out << ") {" << std::endl;
             indentation++;
 
-            for (auto &&item : node.body) {
+            for (auto &&item : node.body.body) {
                 out << on(item);
             }
             indentation--;
@@ -174,7 +224,7 @@ namespace khaotica {
             std::ostringstream out;
             out << std::string(indentation, ' ') << node.name << "() {" << std::endl;
             indentation++;
-            for (auto &&item :node.body) {
+            for (auto &&item :node.body.body) {
                 out << on(item);
             }
             indentation--;

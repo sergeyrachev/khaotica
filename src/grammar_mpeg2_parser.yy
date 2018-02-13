@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-//%no-lines
+%no-lines
 
 %verbose
 %define parse.trace
@@ -107,7 +107,6 @@
 %token <std::string> TEXT
 %token <std::string> IDENTIFIER
 %token <std::string> BITSTRING
-%token <int64_t> INTEGER
 %token <uint64_t> UINTEGER
 
 %type <sequence_t> bitstream
@@ -147,7 +146,6 @@
 %type <std::shared_ptr<node_t>> entry_while
 
 %type <std::shared_ptr<node_t>> closed_if
-%type <std::shared_ptr<node_t>> opened_if
 %type <std::shared_ptr<node_t>> condition
 
 %%
@@ -157,12 +155,17 @@ arguments:
 arguments "," IDENTIFIER[name] {
     $$.push_back($name);
 }|
-%empty{
+IDENTIFIER[name]{
+    $$.push_back($name);
+}|%empty{
 
 }
 
 parameters:
 parameters "," expression {
+    $$.push_front($expression);
+}|
+expression {
     $$.push_front($expression);
 }|
 %empty{
@@ -274,52 +277,50 @@ entry_while
 |
 entry_if
 
+
 entry_if:
-opened_if
-|
-closed_if
-
-opened_if:
-condition entry[then] {
-
-    sequence_t _then{{$then}, scope};
-    sequence_t _else{{}, scope};
-
-    if_t payload{$condition, _then, _else};
-    $$ = std::make_shared<node_t>(node_t{payload});
-
-    scope = scope->close();
+matched {
 }|
-condition closed_if[then] "else" opened_if[else]{
-
-    sequence_t _then{{$then}, scope};
-    sequence_t _else{{$else}, scope};
-
-    if_t payload{$condition, _then, _else};
-    $$ = std::make_shared<node_t>(node_t{payload});
-
-    scope = scope->close();
+unmatched{
 }
 
-closed_if:
-condition closed_if[then] "else" closed_if [else]{
-    sequence_t _then{{$then}, scope};
-    sequence_t _else{{$else}, scope};
+matched:
+condition matched[then] "else" matched[else] {
 
-    if_t payload{$condition, _then, _else};
-    $$ = std::make_shared<node_t>(node_t{payload});
-
-    scope = scope->close();
-}|
-condition block[then] {
-    sequence_t _then{$then};
-    sequence_t _else{{}, scope};
-
-    if_t payload{$condition, _then, _else};
-    $$ = std::make_shared<node_t>(node_t{payload});
-
-    scope = scope->close();
 }
+
+unmatched:
+condition entry {
+}|
+condition matched "else" unmatched {
+}
+
+//entry_if:
+//condition closed_if[then] "else" entry_if[else]{
+//
+//    sequence_t _then{{$then}, scope};
+//    sequence_t _else{{$else}, scope};
+//
+//    if_t payload{$condition, _then, _else};
+//    $$ = std::make_shared<node_t>(node_t{payload});
+//
+//    scope = scope->close();
+//}| condition
+//
+//closed_if:
+//condition closed_if[then] "else" closed_if[else]{
+//    sequence_t _then{$then};
+//    sequence_t _else{{$else}, scope};
+//
+//    if_t payload{$condition, _then, _else};
+//    $$ = std::make_shared<node_t>(node_t{payload});
+//
+//    scope = scope->close();
+//}| condition entry[then] "else" entry[else] {
+//
+//}entry{
+//
+//}
 
 condition:
 "if" {scope = scope_t::open(scope);} "(" expression ")" {
@@ -406,8 +407,8 @@ internal_function
 primary_expression
 : IDENTIFIER {
     $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
-}| INTEGER {
-    $$ = std::make_shared<node_t>(node_t{integer_t{$1}});
+}| UINTEGER {
+     $$ = std::make_shared<node_t>(node_t{integer_t{$1}});
 }| BITSTRING {
     $$ = std::make_shared<node_t>(node_t{bitstring_t{$1}});
 }| "(" expression ")" {

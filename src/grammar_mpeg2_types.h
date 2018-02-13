@@ -24,6 +24,7 @@ namespace khaotica {
 
     typedef std::variant<fixed_length_t, variable_length_t> entry_length_t;
 
+
     struct integer_t {
         int64_t value;
     };
@@ -57,18 +58,20 @@ namespace khaotica {
         entry_length_t length;
     };
 
+    typedef std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry_t;
+
     struct collection_t {
-        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        entry_t entry;
         size_t size;
     };
 
     struct slot_t {
-        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        entry_t entry;
         std::vector<std::variant<identifier_t, integer_t>> indices;
     };
 
     struct sparsed_t {
-        std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry;
+        entry_t entry;
         size_t front;
         size_t back;
     };
@@ -83,7 +86,7 @@ namespace khaotica {
 
     struct sequence_t{
         std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope;
+        std::shared_ptr<scope_t> scope{std::make_shared<scope_t>()};
     };
 
     struct compound_t {
@@ -233,16 +236,16 @@ namespace khaotica {
         uimsbf_v,
         simsbf_v,
         vlclbf_v
-    > entry_t;
+    > entry_v;
 
     struct collection_v {
-        std::vector<entry_t> value;
+        std::vector<entry_v> value;
     };
 
     struct slot_v {
         std::map<
             std::vector<size_t>,
-            entry_t
+            entry_v
         > value;
     };
 
@@ -275,7 +278,7 @@ namespace khaotica {
             std::pair<simsbf_t, simsbf_v>,
             std::pair<vlclbf_t, vlclbf_v>,
             std::pair<collection_t, collection_v>,
-            std::pair<slot_t, std::pair<entry_t, slot_v>>,
+            std::pair<slot_t, std::pair<entry_v, slot_v>>,
             std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
             std::pair<compound_t, block_v>,
             std::pair<if_t, if_v>,
