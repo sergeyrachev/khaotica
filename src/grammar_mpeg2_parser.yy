@@ -114,9 +114,6 @@
 %type <std::list<std::shared_ptr<node_t>>> parameters
 %type <std::list<std::string>> arguments
 
-%type <sequence_t> block
-%type <std::list<std::shared_ptr<node_t>>> entries
-
 %type <std::shared_ptr<node_t>> entry
 %type <std::shared_ptr<node_t>> expression
 %type <std::shared_ptr<node_t>> primary_expression
@@ -129,7 +126,6 @@
 %type <std::shared_ptr<node_t>> prefix_expression
 %type <std::shared_ptr<node_t>> relational_expression
 %type <std::shared_ptr<node_t>> comparison_expression
-
 %type <std::shared_ptr<node_t>> internal_function
 
 %type <std::nullptr_t> bslbf_mnemonic
@@ -145,8 +141,13 @@
 %type <std::shared_ptr<node_t>> entry_do
 %type <std::shared_ptr<node_t>> entry_while
 
+%type <std::shared_ptr<node_t>> definitely_inner_if
+%type <std::shared_ptr<node_t>> inner_if
 %type <std::shared_ptr<node_t>> closed_if
-%type <std::shared_ptr<node_t>> condition
+
+%type <std::list<std::shared_ptr<node_t>>> entries
+%type <std::list<std::shared_ptr<node_t>>> block
+
 
 %%
 %start bitstream;
@@ -170,6 +171,23 @@ expression {
 }|
 %empty{
     $$ = $$;
+}
+
+block:
+"{" entries "}" {
+
+}|
+entry{
+
+}
+
+entries
+: entries entry {
+    $$ = $1;
+    $$.push_back($entry);
+}|
+%empty {
+    $$ = {};
 }
 
 bslbf_mnemonic:
@@ -278,53 +296,18 @@ entry_while
 entry_if
 
 
-entry_if:
-matched {
+entry_if: opened_if | closed_if
+
+opened_if:
+"if" "(" expression ")" entry {
 }|
-unmatched{
-}
-
-matched:
-condition matched[then] "else" matched[else] {
+"if" "(" expression ")" closed_if "else" entry {
 
 }
 
-unmatched:
-condition entry {
-}|
-condition matched "else" unmatched {
-}
+closed_if:
+"if" "(" expression ")" closed_if "else" closed_if {
 
-//entry_if:
-//condition closed_if[then] "else" entry_if[else]{
-//
-//    sequence_t _then{{$then}, scope};
-//    sequence_t _else{{$else}, scope};
-//
-//    if_t payload{$condition, _then, _else};
-//    $$ = std::make_shared<node_t>(node_t{payload});
-//
-//    scope = scope->close();
-//}| condition
-//
-//closed_if:
-//condition closed_if[then] "else" closed_if[else]{
-//    sequence_t _then{$then};
-//    sequence_t _else{{$else}, scope};
-//
-//    if_t payload{$condition, _then, _else};
-//    $$ = std::make_shared<node_t>(node_t{payload});
-//
-//    scope = scope->close();
-//}| condition entry[then] "else" entry[else] {
-//
-//}entry{
-//
-//}
-
-condition:
-"if" {scope = scope_t::open(scope);} "(" expression ")" {
-    $$ = $expression;
 }
 
 entry_for:
@@ -350,7 +333,7 @@ for_scope "(" ";" expression[condition] ";" ")" block[body] {
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{for_t{initializer, condition, modifier, body}});
 }|
-for_scope "(" ";" ";" ")" block[body] {
+for_scope "(" ";" ";" ")" "{" block[body] "}" {
     auto initializer = std::nullopt;
     auto condition = std::nullopt;
     auto modifier = std::nullopt;
@@ -365,7 +348,7 @@ for_scope:
 
 
 entry_do:
-"do" block[body] "while" "(" expression[condition] ")" {
+"do" "{"  block[body] "while" "(" expression[condition] ")" {
     auto condition = $condition;
     auto body = $body;
     $$ = std::make_shared<node_t>(node_t{do_t{condition, body}});
@@ -373,26 +356,11 @@ entry_do:
 }
 
 entry_while:
-"while" "(" expression[condition] ")" block[body] {
+"while" "(" expression[condition] ")" "{"  block[body] {
      auto condition = $condition;
      auto body = $body;
      $$ = std::make_shared<node_t>(node_t{while_t{condition, body}});
      scope = scope->close();
-}
-
-block
-: "{" {scope = scope_t::open(scope);} entries "}" {
-    $$ = {$entries, scope};
-    scope = scope->close();
-}
-
-entries
-: entries entry {
-    $$ = $1;
-    $$.push_back($entry);
-}|
-%empty {
-    $$ = {};
 }
 
 internal_function

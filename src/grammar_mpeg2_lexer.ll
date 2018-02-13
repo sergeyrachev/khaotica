@@ -17,6 +17,7 @@ using namespace khaotica::core::mpeg2;
 %option nounistd
 %option yyclass="lexer_t"
 
+blank [[:blank:]]
 newline    \r?\n
 identifier [[:alpha:]_][[:alnum:]_-]*
 uinteger_dec    [0-9]+[0-9]*
@@ -94,11 +95,11 @@ line [[:print:][:blank:]]*
     return parser_t::make_UINTEGER( {number}, _location);
 }
 
-.	printf("Unknown character '%s' at line %d\n", yytext, yylineno);
-
-[[:blank:]]* {}
+{blank}* {}
 
 {newline} { _location.initialize(YY_NULLPTR, yylineno, 1); }
+
+.	printf("Unknown character '%s' ('%d') at line %d\n", yytext, *yytext, yylineno);
 
 <<EOF>>     { return yyterminate(); }
 
