@@ -276,6 +276,7 @@ IDENTIFIER[name] "(" parameters ")" {
     }
 }
 
+
 entry:
 entry_bslbf
 |
@@ -292,21 +293,20 @@ entry_for
 entry_do
 |
 entry_while
-|
-entry_if
 
-
-entry_if: opened_if | closed_if
-
-opened_if:
-"if" "(" expression ")" entry {
-}|
-"if" "(" expression ")" closed_if "else" entry {
-
-}
+entry_if: closed_if | opened_if
 
 closed_if:
 "if" "(" expression ")" closed_if "else" closed_if {
+
+}|entry{
+
+}
+
+opened_if:
+"if" "(" expression ")" entry_if {
+}|
+"if" "(" expression ")" closed_if "else" opened_if {
 
 }
 
