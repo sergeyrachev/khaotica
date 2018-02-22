@@ -173,14 +173,6 @@ expression {
     $$ = $$;
 }
 
-block:
-"{" entries "}" {
-
-}|
-entry{
-
-}
-
 entries
 : entries entry {
     $$ = $1;
@@ -188,6 +180,14 @@ entries
 }|
 %empty {
     $$ = {};
+}
+
+block:
+"{" entries "}" {
+
+}|
+entry{
+
 }
 
 bslbf_mnemonic:
@@ -276,6 +276,16 @@ IDENTIFIER[name] "(" parameters ")" {
     }
 }
 
+statement:
+entry:
+|
+entry_for
+|
+entry_while
+|
+entry_if
+|
+closed_if
 
 entry:
 entry_bslbf
@@ -288,25 +298,31 @@ entry_sparsed
 |
 entry_reference
 |
-entry_for
-|
 entry_do
 |
-entry_while
+block
 
-entry_if: closed_if | opened_if
+StatementNoShortIf:
+inner_if {
 
-closed_if:
-"if" "(" expression ")" closed_if "else" closed_if {
+}|
+entry_while {
+}|
+entry_for {
+}
 
-}|entry{
+entry_if:
+"if" "(" expression ")" statement {
 
 }
 
-opened_if:
-"if" "(" expression ")" entry_if {
-}|
-"if" "(" expression ")" closed_if "else" opened_if {
+closed_if:
+"if" "(" expression ")"  StatementNoShortIf "else" statement {
+
+}
+
+inner_if:
+"if" "(" expression ")"  StatementNoShortIf "else"  StatementNoShortIf {
 
 }
 
@@ -478,32 +494,36 @@ logical_or
 expression
 : logical_or {
     $$ = $1;
-}| IDENTIFIER "=" expression {
+}| assignment {
     auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
     $$ = entry;
     scope->definitions[$1] = entry;
 }
 
-bitstream:
-bitstream IDENTIFIER[name] "(" arguments ")" { scope = scope_t::open(scope); } block[body]  {
-    compound_t payload{$name, $arguments, $body};
-    auto entry = std::make_shared<node_t>(node_t{payload});
+compound:
+IDENTIFIER[name] "(" arguments ")" block[body] {
+    $$ = compound_t{$name, $arguments, $body};
+}
 
+assignment:
+IDENTIFIER[name] "=" expression {
+    $$ = assignment_t{$name, $expression}
+}
+
+document:
+document compound{
+    auto entry = std::make_shared<node_t>(node_t{payload});
     auto it = global->definitions.find($name);
     if(it == global->definitions.end()){
         structure.push_back(entry);
     }
     global->definitions[$name] = entry;
 }|
-bitstream IDENTIFIER[name] "=" expression {
-    assignment_t payload{$name, $expression};
-    auto entry = std::make_shared<node_t>(node_t{payload});
+document assignment {
+    assignment_t& assignment = $assignment;
+    global->definitions[assignment.name] = std::make_shared<node_t>(node_t{assignment});
+}| %empty {
 
-    global->definitions[$name] = entry;
-}|
-%empty {
-    $$ = {};
 }
-
 
 %%
