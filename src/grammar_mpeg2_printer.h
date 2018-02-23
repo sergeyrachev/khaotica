@@ -26,6 +26,18 @@ namespace khaotica {
             return std::visit(*this, node->payload);
         }
 
+        std::string operator()(const auto& node) {
+            std::ostringstream out;
+
+            return out.str();
+        }
+
+        std::string operator()(const std::list<std::shared_ptr<node_t>>& sequence) {
+            std::ostringstream out;
+
+            return out.str();
+        }
+
         std::string operator()(const fixed_length_t &length) {
             std::ostringstream out;
             out << length.value;
@@ -129,7 +141,7 @@ namespace khaotica {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << std::visit(*this, node.entry)
-                << "[" << node.front << ".." << node.back <<"]"
+                << "[" << node.range.front << ".." << node.range.back <<"]"
                 << std::endl;
             return out.str();
         };
@@ -166,14 +178,11 @@ namespace khaotica {
             out << " ) {" << std::endl;
 
             indentation++;
-            for (auto &&item : node._then.body) {
-                out << on(item);
-            }
+            on(node._then);
 
-            out << (node._else.body.empty() ? "" : "}else{");
-
-            for (auto &&item : node._else.body) {
-                out << on(item);
+            if(node._else ){
+                out << "} else {";
+                on(*node._else);
             }
 
             indentation--;
@@ -186,27 +195,27 @@ namespace khaotica {
             out << std::string(indentation, ' ') << "for" << "(";
 
             if (node.initializer) {
-                out << on(*node.initializer);
+                //out << on(*node.initializer);
             }
 
             out << ";";
 
             if (node.condition) {
-                out << on(*node.condition);
+                //out << on(*node.condition);
             }
 
             out << ";";
 
             if (node.modifier) {
-                out << on(*node.modifier);
+               // out << on(*node.modifier);
             }
 
             out << ") {" << std::endl;
             indentation++;
 
-            for (auto &&item : node.body.body) {
-                out << on(item);
-            }
+//            for (auto &&item : node.body.body) {
+//                out << on(item);
+//            }
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();

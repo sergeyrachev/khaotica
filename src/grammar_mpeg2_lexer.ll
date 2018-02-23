@@ -25,11 +25,13 @@ uinteger_hex    0x[0-9a-fA-F]+[0-9a-fA-F]*
 uinteger_oct    0[0-7]+[0-7]*
 uinteger_bin    0b[01]+[01]*
 bits       [01][01[[:blank:]]*]*
-text [[:print:][:space:]]*
-line [[:print:][:blank:]]*
+text [[:print:][:space:]]
+line [[:print:][:blank:]]
+
+%x COMMENT
 
 %%
-
+"," return parser_t::make_COMMA(_location);
 "[" return parser_t::make_BRACKET_OPEN(_location);
 "]" return parser_t::make_BRACKET_CLOSE(_location);
 "{" return parser_t::make_BRACE_OPEN(_location);
@@ -44,11 +46,14 @@ line [[:print:][:blank:]]*
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
 "lengthof" return parser_t::make_FUNCTION_LENGTHOF(_location);
 "__position" return parser_t::make_FUNCTION_POSITION(_location);
+"bytealigned" return parser_t::make_FUNCTION_BYTEALIGNED(_location);
 "==" return parser_t::make_EQUAL(_location);
 "!=" return parser_t::make_NOTEQUAL(_location);
 "bslbf" return parser_t::make_BSLBF(_location);
 "uimsbf" return parser_t::make_UIMSBF(_location);
 "tcimsbf" return parser_t::make_TCIMSBF(_location);
+"simsbf" return parser_t::make_SIMSBF(_location);
+"vlclbf" return parser_t::make_VLCLBF(_location);
 ".." return parser_t::make_RANGE(_location);
 "=" return parser_t::make_ASSIGN(_location);
 ";" return parser_t::make_SEMICOLON(_location);
@@ -69,11 +74,18 @@ line [[:print:][:blank:]]*
 "<=" return parser_t::make_LESSTHAN_EQUAL(_location);
 ">=" return parser_t::make_GREATERTHAN_EQUAL(_location);
 
-"//"{line}{newline} { printf("Skip commented line '%s' at line %d\n", yytext, yylineno); }
+"//"{line}*{newline} { printf("Skip commented line '%s' at line %d\n", yytext, yylineno); }
 
-"/*"{text}"*/" {printf("Skip commented text '%s' at line %d\n", yytext, yylineno);}
+"/*" { BEGIN(COMMENT); }
 
-\"{text}*\" {
+<COMMENT>"*/" {
+    BEGIN(INITIAL);
+}
+<COMMENT>{text} {
+
+}
+
+\"[^"]*\" {
     return parser_t::make_TEXT( {yytext}, _location);
 }
 

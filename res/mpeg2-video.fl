@@ -1,6 +1,6 @@
  video_sequence() {
- next_start_code()
-     sequence_header()
+    next_start_code()
+    sequence_header()
     if(1) if (1) {} else if (1) f()  else {} else {}
     if ( nextbits() == extension_start_code ) {
         sequence_extension()
@@ -23,6 +23,9 @@
         } while ( nextbits() != sequence_end_code )
     } else {
     /* ISO/IEC 11172-2 */
+    /* te
+    st
+    */
     }
     sequence_end_code 32 bslbf
 }
@@ -261,7 +264,7 @@ slice() {
     slice_start_code 32 bslbf
     if (vertical_size > 2800)
     slice_vertical_position_extension 3 uimsbf
-    if ( <sequence_scalable_extension() is present in the bitstream> )
+    if ( "<sequence_scalable_extension() is present in the bitstream>" )
         if (scalable_mode == "data partitioning" )
             priority_breakpoint 7 uimsbf
     quantiser_scale_code 5 uimsbf
@@ -348,9 +351,9 @@ motion_vector ( r, s ) {
 
 coded_block_pattern () {
     coded_block_pattern_420 3-9 vlclbf
-    if ( chroma_format == 4:2:2 )
+    if ( chroma_format == "4:2:2" )
         coded_block_pattern_1 2 uimsbf
-    if ( chroma_format == 4:4:4 )
+    if ( chroma_format == "4:4:4" )
         coded_block_pattern_2 6 uimsbf
 }
 
@@ -367,11 +370,11 @@ block( i ) {
                     dct_dc_differential 1-11 uimsbf
             }
         } else {
-            First DCT coefficient
+            First_DCT_coefficient 2-14 vlclbf
         }
-        while ( nextbits() != End of block )
-            Subsequent DCT coefficients
-        End of block
+        while ( nextbits() != "End of block" )
+            Subsequent_DCT_coefficients 3-14 vlclbf
+        End_of_block 2-4 vlclbf
     }
 }
 

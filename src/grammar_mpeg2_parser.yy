@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-%no-lines
+//%no-lines
 
 %verbose
 %define parse.trace
@@ -21,6 +21,9 @@
     namespace khaotica::core::mpeg2{
         class lexer_t;
     }
+    namespace khaotica::core::mpeg2{
+        class impl_t;
+    }
 }
 
 %code top {
@@ -28,6 +31,7 @@
     #include "grammar_mpeg2_parser.hpp"
     #include "grammar_mpeg2_lexer.h"
     #include "logging.h"
+    #include "grammar_mpeg2_parser_impl.h"
 
     #include <sstream>
     #include <iostream>
@@ -49,7 +53,7 @@
 %lex-param {lexer_t& lexer}
 
 %parse-param {lexer_t& lexer}
-%parse-param {std::list<std::shared_ptr<node_t>>& structure} {std::shared_ptr<scope_t> scope} {std::shared_ptr<scope_t> global}
+%parse-param {std::shared_ptr<impl_t> impl}
 
 %locations
 
@@ -58,6 +62,7 @@
 } <>
 
 %token END 0
+%token COMMA ","
 %token BRACE_OPEN "{"
 %token BRACE_CLOSE "}"
 %token PARENTHESIS_OPEN "("
@@ -70,11 +75,14 @@
 %token FUNCTION_NEXTBITS "nextbits"
 %token FUNCTION_LENGTHOF "lengthof"
 %token FUNCTION_POSITION "__position"
+%token FUNCTION_BYTEALIGNED "bytealigned"
 
 //0b1000000 -> 0 0 0 0 0 0 0 1
 %token BSLBF "bslbf"
 //0b1000000 -> 1 0 0 0 0 0 0 0
 %token UIMSBF "uimsbf"
+%token SIMSBF "simsbf"
+%token VLCLBF "vlclbf"
 
 %token TCIMSBF "tcimsbf"
 
@@ -116,7 +124,6 @@
 %type <std::list<std::string>> arguments
 
 %type <std::shared_ptr<node_t>> expression
-%type <std::shared_ptr<node_t>> assignment_expression
 %type <std::shared_ptr<node_t>> primary_expression
 %type <std::shared_ptr<node_t>> unary_expression
 %type <std::shared_ptr<node_t>> multiplicative_expr
@@ -129,41 +136,47 @@
 %type <std::shared_ptr<node_t>> comparison_expression
 %type <std::shared_ptr<node_t>> internal_function
 
+%type <assignment_t> assignment_expression
+
 %type <std::nullptr_t> bslbf_mnemonic
 %type <entry_length_t> entry_length
 
-%type <std::shared_ptr<node_t>> bslbf_field
-%type <std::shared_ptr<node_t>> uimsbf_field
-%type <std::shared_ptr<node_t>> collection_field
-%type <std::shared_ptr<node_t>> sparsed_field
-%type <std::shared_ptr<node_t>> reference_field
-%type <std::shared_ptr<node_t>> if_statement
-%type <std::shared_ptr<node_t>> if_else_statement
-%type <std::shared_ptr<node_t>> for_statement
-%type <std::shared_ptr<node_t>> for_statement_inner
-%type <std::shared_ptr<node_t>> do_statement
-%type <std::shared_ptr<node_t>> while_statement
-%type <std::shared_ptr<node_t>> while_statement_inner
+%type <bslbf_t> bslbf_field
+%type <uimsbf_t> uimsbf_field
+%type <simsbf_t> simsbf_field
+%type <vlclbf_t> vlclbf_field
+%type <collection_t> collection_field
+%type <sparsed_t> sparsed_field
+%type <slot_t> slot_field
+%type <reference_t> reference_field
+%type <if_t> if_statement
+%type <if_t> if_else_statement
+%type <if_t> if_else_statement_inner
+%type <for_t> for_statement
+%type <for_t> for_statement_inner
+%type <do_t> do_statement
+%type <while_t> while_statement
+%type <while_t> while_statement_inner
+%type <std::shared_ptr<node_t>> inner_statement
 
 %type <std::shared_ptr<node_t>> statement
 %type <std::list<std::shared_ptr<node_t>>> statements
-%type <std::list<std::shared_ptr<node_t>>> block
+%type <sequence_t> block
+%type <dimension_t> dimension
+%type <std::vector<dimension_t>> dimensions
+%type <identifier_t> dimension_referenced
+%type <integer_t> dimension_integer
+%type <range_t> ranged
 
 %%
 %start document;
 
 document:
-document compound{
-    //auto entry = std::make_shared<node_t>(node_t{payload});
-    //auto it = global->definitions.find($name);
-    //if(it == global->definitions.end()){
-    //    structure.push_back(entry);
-    //}
-    //global->definitions[$name] = entry;
+document[script] compound{
+    impl->add($script, $compound);
 }|
-document assignment_expression {
-    assignment_t& assignment = $assignment_expression;
-    global->definitions[assignment.name] = std::make_shared<node_t>(node_t{assignment});
+document[script] assignment_expression {
+    impl->add($script, $assignment_expression);
 }| %empty {
 
 }
@@ -172,7 +185,6 @@ compound:
 IDENTIFIER[name] "(" arguments ")" block[body] {
     $$ = compound_t{$name, $arguments, $body};
 }
-
 
 arguments:
 arguments "," IDENTIFIER[name] {
@@ -192,13 +204,12 @@ expression {
     $$.push_front($expression);
 }|
 %empty{
-    $$ = $$;
+
 }
 
 statements
 : statements statement {
-    $$ = $1;
-    $$.push_back(statement);
+    $$.push_back($statement);
 }|
 %empty{
 
@@ -206,7 +217,7 @@ statements
 
 block:
 "{" statements "}" {
-
+    $$ = sequence_t{$statements, {}};
 }
 
 statement
@@ -226,7 +237,13 @@ bslbf_field
 |
 uimsbf_field
 |
+simsbf_field
+|
+vlclbf_field
+|
 collection_field
+|
+slot_field
 |
 sparsed_field
 |
@@ -234,133 +251,146 @@ reference_field
 |
 do_statement
 |
-block{
-}
+block
 
 bslbf_field:
 IDENTIFIER[name] UINTEGER[length] bslbf_mnemonic {
-    bslbf_t payload{$name, $length};
-
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    scope->definitions[$name] = entry;
-
-    $$ = entry;
+    $$ = bslbf_t{$name, $length};
 }
 
 uimsbf_field:
 IDENTIFIER[name] entry_length[length] "uimsbf" {
-    uimsbf_t payload{$name, $length};
+    $$ = uimsbf_t{$name, $length};
+}
 
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    scope->definitions[$name] = entry;
+simsbf_field:
+IDENTIFIER[name] entry_length[length] "simsbf" {
+    $$ = simsbf_t{$name, $length};
+}
 
-    $$ = entry;
+vlclbf_field:
+IDENTIFIER[name] entry_length[length] "vlclbf" {
+    $$ = vlclbf_t{$name, $length};
 }
 
 collection_field:
-IDENTIFIER[name] "[" UINTEGER[capacity] "]" UINTEGER[length] "*" UINTEGER[times] "uimsbf" {
+IDENTIFIER[name] dimensions UINTEGER[length] "*" UINTEGER[times] "uimsbf" {
     entry_length_t length{fixed_length_t{$length}};
     uimsbf_t field{$name, length};
-    collection_t payload{field, $times};
-
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    scope->definitions[$name] = entry;
-
-    $$ = entry;
+    $$ = collection_t{field, $times};
 }|
-IDENTIFIER[name] "[" UINTEGER[capacity] "]" UINTEGER[length] "*" UINTEGER[times] "bslbf" {
+IDENTIFIER[name] dimensions UINTEGER[length] "*" UINTEGER[times] "bslbf" {
     fixed_length_t length{$length};
     bslbf_t field{$name, length};
-    collection_t payload{field, $times};
+    $$ = collection_t{field, $times};
+}
 
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    scope->definitions[$name] = entry;
+slot_field:
+IDENTIFIER[name] dimensions entry_length "uimsbf" {
+    $$ = slot_t{};
+}|
+IDENTIFIER[name] dimensions entry_length "vlclbf" {
+    $$ = slot_t{};
+}
 
-    $$ = entry;
+dimensions:
+dimensions dimension{
+    $$.push_back($dimension);
+}|
+dimension{
+
+}
+
+dimension:
+dimension_referenced[value]{
+    $$ = dimension_t{$value};
+}|
+dimension_integer[value] {
+    $$ = dimension_t{$value};
+}
+
+dimension_referenced:
+"[" IDENTIFIER[name] "]" {
+    $$ = identifier_t{$name};
+}
+
+dimension_integer:
+"[" UINTEGER[value] "]" {
+    $$ = integer_t{$value};
 }
 
 sparsed_field:
-IDENTIFIER[name] "[" UINTEGER[from] ".." UINTEGER[to] "]" UINTEGER[length] "bslbf" {
+IDENTIFIER[name] ranged UINTEGER[length] "bslbf" {
     fixed_length_t length{$length};
     bslbf_t field{$name, length};
-    sparsed_t payload{field, $from, $to};
+    $$ = sparsed_t{field, $ranged};
+}
 
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    scope->definitions[$name] = entry;
-
-    $$ = entry;
+ranged:
+"[" UINTEGER[from] ".." UINTEGER[to] "]" {
+    $$ = range_t{$from, $to};
 }
 
 reference_field:
 IDENTIFIER[name] "(" parameters ")" {
-    reference_t payload{$name, $parameters};
-
-    auto entry = std::make_shared<node_t>(node_t{payload});
-    $$ = entry;
-
-    auto it = global->definitions.find($name);
-    if( it == global->definitions.end()){
-        global->definitions[$name] = nullptr;
-    }
+    $$ = reference_t{$name, $parameters};
 }
-
 
 inner_statement:
-if_else_statement_inner {
-
-}|
-while_statement_inner {
-}|
-for_statement_inner {
-}|
-field{
-
-}
+if_else_statement_inner
+|
+while_statement_inner
+|
+for_statement_inner
+|
+field
 
 if_statement:
-"if" "(" expression ")" statement {
-
+"if" "(" expression[condition] ")" statement[then] {
+    $$ = if_t{$condition, $then, {}};
 }
 
 if_else_statement:
-"if" "(" expression ")"  inner_statement "else" statement {
-
+"if" "(" expression[condition] ")"  inner_statement[then] "else" statement[else] {
+    $$ = if_t{$condition, $then, $else};
 }
 
 if_else_statement_inner:
-"if" "(" expression ")"  inner_statement "else" inner_statement {
-
+"if" "(" expression[condition] ")"  inner_statement[then] "else" inner_statement[else] {
+    $$ = if_t{$condition, $then, $else};
 }
 
 for_statement:
-"for" "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" statement[body] {
+"for" "(" parameters[initializer] ";" parameters[condition] ";" parameters[modifier] ")" statement[body] {
+    auto initializer = std::make_shared<node_t>(node_t{$initializer});
+    auto condition = std::make_shared<node_t>(node_t{$condition});
+    auto modifier = std::make_shared<node_t>(node_t{$modifier});
 
+    $$ = for_t{initializer, condition, modifier, $body};
 }
 
 for_statement_inner:
-"for" "(" expression[initializer] ";" expression[condition] ";" expression[modifier] ")" inner_statement[body] {
+"for" "("  parameters[initializer] ";" parameters[condition] ";" parameters[modifier] ")" inner_statement[body] {
+    auto initializer = std::make_shared<node_t>(node_t{$initializer});
+    auto condition = std::make_shared<node_t>(node_t{$condition});
+    auto modifier = std::make_shared<node_t>(node_t{$modifier});
 
+    $$ = for_t{initializer, condition, modifier, $body};
 }
 
 do_statement:
 "do" statement "while" "(" expression[condition] ")" {
-    //auto condition = $condition;
-    //auto body = $body;
-    //$$ = std::make_shared<node_t>(node_t{do_t{condition, body}});
-    //scope = scope->close();
+    $$ = do_t{};
 }
 
 while_statement:
-"while" "(" expression[condition] ")" "{"  statement[body] {
-     auto condition = $condition;
-     auto body = $body;
-     $$ = std::make_shared<node_t>(node_t{while_t{condition, body}});
-     scope = scope->close();
+"while" "(" expression[condition] ")" statement[body] {
+     $$ = while_t{};
 }
 
 while_statement_inner:
-"while" "(" expression[condition] ")" "{"  inner_statement[body] {
-
+"while" "(" expression[condition] ")" inner_statement[body] {
+    $$ = while_t{};
 }
 
 internal_function
@@ -370,11 +400,15 @@ internal_function
     $$ = std::make_shared<node_t>(node_t{position_t{}});
 }| FUNCTION_NEXTBITS "(" ")" {
     $$ = std::make_shared<node_t>(node_t{nextbits_t{}});
+}| FUNCTION_BYTEALIGNED "(" ")" {
+    $$ = std::make_shared<node_t>(node_t{bytealigned_t{}});
 }
 
 primary_expression
 : IDENTIFIER {
     $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
+}| IDENTIFIER dimensions {
+     $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
 }| UINTEGER {
      $$ = std::make_shared<node_t>(node_t{integer_t{$1}});
 }| BITSTRING {
@@ -387,6 +421,8 @@ primary_expression
     $$ = $1;
 }| internal_function {
     $$ = $1;
+}| TEXT {
+    $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
 }
 
 postfix_expression
@@ -477,16 +513,14 @@ logical_or
 
 assignment_expression:
 IDENTIFIER[name] "=" expression {
-    $$ = assignment_t{$name, $expression}
+    $$ = assignment_t{$name, $expression};
 }
 
 expression
 : logical_or {
     $$ = $1;
 }| assignment_expression {
-    //auto entry = std::make_shared<node_t>(node_t{assignment_t{$1, $3}});
-    //$$ = entry;
-    //scope->definitions[$1] = entry;
+    $$ = std::make_shared<node_t>(node_t{$assignment_expression});
 }
 
 bslbf_mnemonic:

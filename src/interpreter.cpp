@@ -5,6 +5,7 @@
 
 #include "grammar_mpeg2_parser.hpp"
 #include "grammar_mpeg2_lexer.h"
+#include "grammar_mpeg2_parser_impl.h"
 #include "logging.h"
 
 khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
@@ -13,7 +14,8 @@ khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enabl
     khaotica::core::mpeg2::lexer_t _scanner(in, serr);
 
     khaotica::sequence_t document;
-    khaotica::core::mpeg2::parser_t _parser(_scanner, document.body, document.scope, document.scope);
+    auto impl = std::make_shared<khaotica::core::mpeg2::impl_t>();
+    khaotica::core::mpeg2::parser_t _parser(_scanner, impl);
 
     _scanner.set_debug(enable_verbosity);
     _parser.set_debug_level(enable_verbosity);

@@ -65,15 +65,20 @@ namespace khaotica {
         size_t size;
     };
 
+    typedef std::variant<identifier_t, integer_t> dimension_t;
     struct slot_t {
         entry_t entry;
-        std::vector<std::variant<identifier_t, integer_t>> indices;
+        std::vector<dimension_t> indices;
+    };
+
+    struct range_t {
+        size_t front;
+        size_t back;
     };
 
     struct sparsed_t {
         entry_t entry;
-        size_t front;
-        size_t back;
+        range_t range;
     };
 
     struct node_t;
@@ -86,7 +91,7 @@ namespace khaotica {
 
     struct sequence_t{
         std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope{std::make_shared<scope_t>()};
+        std::shared_ptr<scope_t> scope; //deprecated
     };
 
     struct compound_t {
@@ -97,25 +102,25 @@ namespace khaotica {
 
     struct if_t {
         std::shared_ptr<node_t> condition;
-        sequence_t _then;
-        sequence_t _else;
+        std::shared_ptr<node_t> _then;
+        std::optional<std::shared_ptr<node_t>> _else;
     };
 
     struct for_t {
-        std::optional<std::shared_ptr<node_t>> initializer;
-        std::optional<std::shared_ptr<node_t>> condition;
-        std::optional<std::shared_ptr<node_t>> modifier;
-        sequence_t body;
+        std::shared_ptr<node_t> initializer;
+        std::shared_ptr<node_t> condition;
+        std::shared_ptr<node_t> modifier;
+        std::shared_ptr<node_t> body;
     };
 
     struct do_t {
         std::optional<std::shared_ptr<node_t>> condition;
-        sequence_t body;
+        std::shared_ptr<node_t> body;
     };
 
     struct while_t {
         std::optional<std::shared_ptr<node_t>> condition;
-        sequence_t body;
+        std::shared_ptr<node_t> body;
     };
 
     struct unary_expression_t {
@@ -152,6 +157,10 @@ namespace khaotica {
         std::optional<uint64_t> length;
     };
 
+    struct bytealigned_t{
+
+    };
+
     struct node_t {
         std::variant<
             bslbf_t,
@@ -174,6 +183,8 @@ namespace khaotica {
             for_t,
             do_t,
             while_t,
+            sequence_t,
+            std::list<std::shared_ptr<node_t>>,
 
             unary_expression_t,
             binary_expression_t,
@@ -181,7 +192,8 @@ namespace khaotica {
             preincrement_t,
             assignment_t,
             position_t,
-            nextbits_t
+            nextbits_t,
+            bytealigned_t
         > payload;
     };
 
