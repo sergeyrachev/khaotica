@@ -74,7 +74,7 @@ line [[:print:][:blank:]]
 "<=" return parser_t::make_LESSTHAN_EQUAL(_location);
 ">=" return parser_t::make_GREATERTHAN_EQUAL(_location);
 
-"//"{line}*{newline} { printf("Skip commented line '%s' at line %d\n", yytext, yylineno); }
+"//"{line}* { ECHO; }
 
 "/*" { BEGIN(COMMENT); }
 
@@ -82,7 +82,7 @@ line [[:print:][:blank:]]
     BEGIN(INITIAL);
 }
 <COMMENT>{text} {
-
+    ECHO; yymore();
 }
 
 \"[^"]*\" {
@@ -111,8 +111,6 @@ line [[:print:][:blank:]]
 
 {newline} { _location.initialize(YY_NULLPTR, yylineno, 1); }
 
-.	printf("Unknown character '%s' ('%d') at line %d\n", yytext, *yytext, yylineno);
-
-<<EOF>>     { return yyterminate(); }
+<<EOF>> { return yyterminate(); }
 
 %%

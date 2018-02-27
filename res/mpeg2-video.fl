@@ -1,7 +1,6 @@
- video_sequence() {
-    next_start_code()
+video_sequence() {
+     next_start_code()
     sequence_header()
-    if(1) if (1) {} else if (1) f()  else {} else {}
     if ( nextbits() == extension_start_code ) {
         sequence_extension()
         do {
@@ -23,9 +22,6 @@
         } while ( nextbits() != sequence_end_code )
     } else {
     /* ISO/IEC 11172-2 */
-    /* te
-    st
-    */
     }
     sequence_end_code 32 bslbf
 }
@@ -63,21 +59,24 @@ extension_data( i ) {
     while ( nextbits()== extension_start_code ) {
         extension_start_code 32 bslbf
         if (i == 0) { /* follows sequence_extension() */
-            if ( nextbits()== "Sequence Display Extension ID" )
+            if ( nextbits()== '0010' )
                 sequence_display_extension()
-            if ( nextbits()== "Sequence Scalable Extension ID" )
+            else
                 sequence_scalable_extension()
         }
-        /* Note: extension never follows a group_of_pictures_header() */
+        /* NOTE - i never takes the value 1 because extension_data()
+            never follows a group_of_pictures_header() */
         if (i == 2) { /* follows picture_coding_extension() */
-            if ( nextbits()== "Quant Matrix Extension ID" )
+            if ( nextbits() == '0011' )
                 quant_matrix_extension()
-        if ( nextbits()== "Picture Pan Scan Extension ID" )
-            picture_display_extension()
-        if ( nextbits()== "Picture Spatial Scalable Extension ID" )
-            picture_spatial_scalable_extension()
-        if ( nextbits()== "Picture Temporal Scalable Ext. ID" )
-            picture_temporal_scalable_extension()
+            else if ( nextbits() == '0100' )
+                copyright_extension()
+            else if ( nextbits() == '0111' )
+                picture_display_extension()
+            else if ( nextbits() == '1001' )
+                picture_spatial_scalable_extension()
+            else
+                picture_temporal_scalable_extension()
         }
     }
 }
@@ -85,7 +84,7 @@ extension_data( i ) {
 user_data() {
     user_data_start_code 32 bslbf
     while( nextbits() != '0000 0000 0000 0000 0000 0001' ) {
-        user_data 8
+        user_data 8 uimsbf
     }
     next_start_code()
 }
@@ -126,7 +125,7 @@ sequence_scalable_extension() {
     extension_start_code_identifier 4 uimsbf
     scalable_mode 2 uimsbf
     layer_id 4 uimsbf
-    if (scalable_mode == "spatial scalability") {
+    if (scalable_mode == '01') {
         lower_layer_prediction_horizontal_size 14 uimsbf
         marker_bit 1 bslbf
         lower_layer_prediction_vertical_size 14 uimsbf
@@ -135,7 +134,7 @@ sequence_scalable_extension() {
         vertical_subsampling_factor_m 5 uimsbf
         vertical_subsampling_factor_n 5 uimsbf
     }
-    if ( scalable_mode == "temporal scalability" ) {
+    if ( scalable_mode == '11' ) {
         picture_mux_enable 1 uimsbf
         if ( picture_mux_enable )
             mux_to_progressive_sequence 1 uimsbf
@@ -264,8 +263,8 @@ slice() {
     slice_start_code 32 bslbf
     if (vertical_size > 2800)
     slice_vertical_position_extension 3 uimsbf
-    if ( "<sequence_scalable_extension() is present in the bitstream>" )
-        if (scalable_mode == "data partitioning" )
+    if ( __position(sequence_scalable_extension) )
+        if (scalable_mode == '00' )
             priority_breakpoint 7 uimsbf
     quantiser_scale_code 5 uimsbf
     if ( nextbits() == '1' ) {
@@ -307,11 +306,11 @@ macroblock() {
 
 macroblock_modes() {
     macroblock_type 1-9 vlclbf
-    if ( ( spatial_temporal_weight_code_flag == 1 ) && ( spatial_temporal_weight_code_table_index != ‘00’) ) {
+    if ( ( spatial_temporal_weight_code_flag == 1 ) && ( spatial_temporal_weight_code_table_index != '00') ) {
         spatial_temporal_weight_code 2 uimsbf
     }
     if ( macroblock_motion_forward || macroblock_motion_backward ) {
-        if ( picture_structure == ‘frame’ ) {
+        if ( picture_structure == '11' ) {
             if ( frame_pred_frame_dct == 0 )
                 frame_motion_type 2 uimsbf
         } else {
@@ -351,9 +350,9 @@ motion_vector ( r, s ) {
 
 coded_block_pattern () {
     coded_block_pattern_420 3-9 vlclbf
-    if ( chroma_format == "4:2:2" )
+    if ( chroma_format == '10' )
         coded_block_pattern_1 2 uimsbf
-    if ( chroma_format == "4:4:4" )
+    if ( chroma_format == '11' )
         coded_block_pattern_2 6 uimsbf
 }
 
@@ -372,7 +371,7 @@ block( i ) {
         } else {
             First_DCT_coefficient 2-14 vlclbf
         }
-        while ( nextbits() != "End of block" )
+        while ( nextbits() != '10' )
             Subsequent_DCT_coefficients 3-14 vlclbf
         End_of_block 2-4 vlclbf
     }

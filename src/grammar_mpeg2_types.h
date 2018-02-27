@@ -299,6 +299,8 @@ namespace khaotica {
             std::pair<while_t, loop_v>,
             std::pair<expression_t, expression_v>
         > payload;
+        uint64_t offset;
+        uint64_t length;
     };
 }
 

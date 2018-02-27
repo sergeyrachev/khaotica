@@ -421,8 +421,6 @@ primary_expression
     $$ = $1;
 }| internal_function {
     $$ = $1;
-}| TEXT {
-    $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
 }
 
 postfix_expression
