@@ -98,13 +98,13 @@ line [[:print:][:blank:]]
 }
 
 {uinteger_dec}|{uinteger_hex}|{uinteger_oct} {
-    auto number = std::stoull(yytext, 0, 0);
-    return parser_t::make_UINTEGER( {number}, _location);
+    auto number = std::stoll(yytext, 0, 0);
+    return parser_t::make_INTEGER( {number}, _location);
 }
 
 {uinteger_bin} {
-    auto number = std::stoull(yytext, 0, 2);
-    return parser_t::make_UINTEGER( {number}, _location);
+    auto number = std::stoll(yytext, 0, 2);
+    return parser_t::make_INTEGER( {number}, _location);
 }
 
 {blank}* {}

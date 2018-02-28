@@ -10,20 +10,16 @@ namespace khaotica {
 
     class printer_t{
     public:
-        explicit printer_t(const sequence_t &doc) : indentation(0), doc(doc) {
+        explicit printer_t() : indentation(0){
 
         }
 
         std::string operator()(const sequence_t& node){
             std::ostringstream out;
-            for(const auto& entry : node.body){
+            for(const auto& entry : node){
                 out << std::visit(*this, entry->payload);
             }
             return out.str();
-        }
-
-        std::string on(std::shared_ptr<node_t> node) {
-            return std::visit(*this, node->payload);
         }
 
         std::string operator()(const auto& node) {
@@ -32,19 +28,7 @@ namespace khaotica {
             return out.str();
         }
 
-        std::string operator()(const std::list<std::shared_ptr<node_t>>& sequence) {
-            std::ostringstream out;
-
-            return out.str();
-        }
-
-        std::string operator()(const fixed_length_t &length) {
-            std::ostringstream out;
-            out << length.value;
-            return out.str();
-        }
-
-        std::string operator()(const variable_length_t &length) {
+        std::string operator()(const length_t &length) {
             std::ostringstream out;
             out << length.from << "-" << length.to;
             return out.str();
@@ -85,7 +69,7 @@ namespace khaotica {
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
-                << std::visit(*this, node.length)
+                << (*this)(node.length)
                 << " "
                 << "uimsbf"
                 << std::endl;
@@ -97,7 +81,7 @@ namespace khaotica {
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
-                << std::visit(*this, node.length)
+                << (*this)(node.length)
                 << " "
                 << "simsbf"
                 << std::endl;
@@ -109,7 +93,7 @@ namespace khaotica {
             out << std::string(indentation, ' ')
                 << node.name
                 << " "
-                << std::visit(*this, node.length)
+                << (*this)(node.length)
                 << " "
                 << "vlclbf"
                 << std::endl;
@@ -157,11 +141,11 @@ namespace khaotica {
             out << ") -> {" << std::endl;
             indentation++;
 
-            auto& compound = std::get<compound_t>(doc.scope->definitions.at(node.name)->payload);
+            //auto& compound = std::get<compound_t>(doc.scope->definitions.at(node.name)->payload);
 
-            for (auto &&item : compound.body.body) {
-                out << on(item);
-            }
+            //for (auto &&item : compound.body.body) {
+            //    out << on(item);
+            //}
 
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
@@ -173,16 +157,16 @@ namespace khaotica {
 
             out << std::string(indentation, ' ') << "if" << "( ";
 
-            out << on(node.condition);
+            out << std::visit(*this, node.condition->payload );
 
             out << " ) {" << std::endl;
 
             indentation++;
-            on(node._then);
+            std::visit(*this, node._then->payload );
 
             if(node._else ){
                 out << "} else {";
-                on(*node._else);
+                std::visit(*this, (*node._else)->payload );
             }
 
             indentation--;
@@ -233,9 +217,9 @@ namespace khaotica {
             std::ostringstream out;
             out << std::string(indentation, ' ') << node.name << "() {" << std::endl;
             indentation++;
-            for (auto &&item :node.body.body) {
-                out << on(item);
-            }
+
+            out << (*this)(node.body);
+
             indentation--;
             out << std::string(indentation, ' ') << "}" << std::endl;
             return out.str();
@@ -245,7 +229,7 @@ namespace khaotica {
         std::string operator()(const assignment_t &node) {
             std::ostringstream out;
             out << node.symbol << "=";
-            out << on(node.expression);
+            out << std::visit(*this, node.expression->payload);
             return out.str();
         };
 
@@ -264,7 +248,7 @@ namespace khaotica {
         std::string operator()(const unary_expression_t &node) {
             std::ostringstream out;
             out << "( " << node.operation;
-            out << on(node.operand);
+            out << std::visit(*this, node.operand->payload);
             out << " )";
             return out.str();
         };
@@ -272,9 +256,9 @@ namespace khaotica {
         std::string operator()(const binary_expression_t &node) {
             std::ostringstream out;
             out << "( ";
-            out << on(node.left_operand);
+            out << std::visit(*this, node.left_operand->payload);
             out << node.operation;
-            out << on(node.right_operand);
+            out << std::visit(*this, node.right_operand->payload);
             out << " )";
             return out.str();
         };
@@ -296,6 +280,5 @@ namespace khaotica {
 
     private:
         size_t indentation;
-        const sequence_t &doc;
     };
 }

@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-//%no-lines
+%no-lines
 
 %verbose
 %define parse.trace
@@ -115,12 +115,12 @@
 %token <std::string> TEXT
 %token <std::string> IDENTIFIER
 %token <std::string> BITSTRING
-%token <uint64_t> UINTEGER
+%token <int64_t> INTEGER
 
 %type <sequence_t> document
 %type <compound_t> compound
 
-%type <std::list<std::shared_ptr<node_t>>> parameters
+%type <sequence_t> parameters
 %type <std::list<std::string>> arguments
 
 %type <std::shared_ptr<node_t>> expression
@@ -139,7 +139,7 @@
 %type <assignment_t> assignment_expression
 
 %type <std::nullptr_t> bslbf_mnemonic
-%type <entry_length_t> entry_length
+%type <length_t> entry_length
 
 %type <bslbf_t> bslbf_field
 %type <uimsbf_t> uimsbf_field
@@ -157,13 +157,16 @@
 %type <do_t> do_statement
 %type <while_t> while_statement
 %type <while_t> while_statement_inner
+
+%type <std::shared_ptr<node_t>> field
+%type <std::shared_ptr<node_t>> statement
 %type <std::shared_ptr<node_t>> inner_statement
 
-%type <std::shared_ptr<node_t>> statement
-%type <std::list<std::shared_ptr<node_t>>> statements
 %type <sequence_t> block
-%type <dimension_t> dimension
+%type <sequence_t> statements
+
 %type <std::vector<dimension_t>> dimensions
+%type <dimension_t> dimension
 %type <identifier_t> dimension_referenced
 %type <integer_t> dimension_integer
 %type <range_t> ranged
@@ -173,10 +176,10 @@
 
 document:
 document[script] compound{
-    impl->add($script, $compound);
+    impl->add($compound);
 }|
 document[script] assignment_expression {
-    impl->add($script, $assignment_expression);
+    impl->add($assignment_expression);
 }| %empty {
 
 }
@@ -216,45 +219,61 @@ statements
 }
 
 block:
-"{" statements "}" {
-    $$ = sequence_t{$statements, {}};
+"{" { impl->open(); } statements { impl->close(); } "}" {
+    $$ = $statements;
 }
 
 statement
-:field
-|
-for_statement
-|
-while_statement
-|
-if_statement
-|
-if_else_statement{
+:field {
+    $$ = $field;
+}|
+for_statement[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+while_statement[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+if_statement[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+if_else_statement[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
 }
 
 field:
-bslbf_field
-|
-uimsbf_field
-|
-simsbf_field
-|
-vlclbf_field
-|
-collection_field
-|
-slot_field
-|
-sparsed_field
-|
-reference_field
-|
-do_statement
-|
-block
+bslbf_field[payload] {
+    $$ = impl->add($payload);
+}|
+uimsbf_field[payload] {
+    $$ = impl->add($payload);
+}|
+simsbf_field[payload] {
+    $$ = impl->add($payload);
+}|
+vlclbf_field[payload] {
+    $$ = impl->add($payload);
+}|
+collection_field[payload] {
+    $$ = impl->add($payload);
+}|
+slot_field[payload] {
+    $$ = impl->add($payload);
+}|
+sparsed_field[payload] {
+    $$ = impl->add($payload);
+}|
+reference_field[payload] {
+    $$ = impl->add($payload);
+}|
+do_statement[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+block[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}
 
 bslbf_field:
-IDENTIFIER[name] UINTEGER[length] bslbf_mnemonic {
+IDENTIFIER[name] entry_length[length] bslbf_mnemonic {
     $$ = bslbf_t{$name, $length};
 }
 
@@ -274,15 +293,13 @@ IDENTIFIER[name] entry_length[length] "vlclbf" {
 }
 
 collection_field:
-IDENTIFIER[name] dimensions UINTEGER[length] "*" UINTEGER[times] "uimsbf" {
-    entry_length_t length{fixed_length_t{$length}};
-    uimsbf_t field{$name, length};
-    $$ = collection_t{field, $times};
+IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] "uimsbf" {
+    uimsbf_t field{$name, $length};
+    $$ = collection_t{field, static_cast<uint64_t>($times)};
 }|
-IDENTIFIER[name] dimensions UINTEGER[length] "*" UINTEGER[times] "bslbf" {
-    fixed_length_t length{$length};
-    bslbf_t field{$name, length};
-    $$ = collection_t{field, $times};
+IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] "bslbf" {
+    bslbf_t field{$name, $length};
+    $$ = collection_t{field, static_cast<uint64_t>($times)};
 }
 
 slot_field:
@@ -298,7 +315,7 @@ dimensions dimension{
     $$.push_back($dimension);
 }|
 dimension{
-
+    $$.push_back($dimension);
 }
 
 dimension:
@@ -315,20 +332,19 @@ dimension_referenced:
 }
 
 dimension_integer:
-"[" UINTEGER[value] "]" {
+"[" INTEGER[value] "]" {
     $$ = integer_t{$value};
 }
 
 sparsed_field:
-IDENTIFIER[name] ranged UINTEGER[length] "bslbf" {
-    fixed_length_t length{$length};
-    bslbf_t field{$name, length};
+IDENTIFIER[name] ranged entry_length[length] "bslbf" {
+    bslbf_t field{$name, $length};
     $$ = sparsed_t{field, $ranged};
 }
 
 ranged:
-"[" UINTEGER[from] ".." UINTEGER[to] "]" {
-    $$ = range_t{$from, $to};
+"[" INTEGER[from] ".." INTEGER[to] "]" {
+    $$ = range_t{static_cast<uint64_t>($from), static_cast<uint64_t>($to)};
 }
 
 reference_field:
@@ -337,17 +353,22 @@ IDENTIFIER[name] "(" parameters ")" {
 }
 
 inner_statement:
-if_else_statement_inner
-|
-while_statement_inner
-|
-for_statement_inner
-|
-field
+if_else_statement_inner[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+while_statement_inner[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+for_statement_inner[payload] {
+    $$ = std::make_shared<node_t>(node_t{$payload});
+}|
+field{
+    $$ = $field;
+}
 
 if_statement:
 "if" "(" expression[condition] ")" statement[then] {
-    $$ = if_t{$condition, $then, {}};
+    $$ = if_t{$condition, $then, std::nullopt};
 }
 
 if_else_statement:
@@ -409,7 +430,7 @@ primary_expression
     $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
 }| IDENTIFIER dimensions {
      $$ = std::make_shared<node_t>(node_t{identifier_t{$1}});
-}| UINTEGER {
+}| INTEGER {
      $$ = std::make_shared<node_t>(node_t{integer_t{$1}});
 }| BITSTRING {
     $$ = std::make_shared<node_t>(node_t{bitstring_t{$1}});
@@ -533,11 +554,11 @@ TEXT{
 }
 
 entry_length:
-UINTEGER[length] {
-    $$ = fixed_length_t{$length};
+INTEGER[length] {
+    $$ = length_t{static_cast<uint64_t>($length), static_cast<uint64_t>($length)};
 }|
-UINTEGER[from] "-" UINTEGER[to]{
-    $$ = variable_length_t{$from, $to};
+INTEGER[from] "-" INTEGER[to]{
+    $$ = length_t{static_cast<uint64_t>($from), static_cast<uint64_t>($to)};
 }
 
 %%

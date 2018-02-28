@@ -13,11 +13,10 @@ khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enabl
     std::ostringstream serr;
     khaotica::core::mpeg2::lexer_t _scanner(in, serr);
 
-    khaotica::sequence_t document;
     auto impl = std::make_shared<khaotica::core::mpeg2::impl_t>();
     khaotica::core::mpeg2::parser_t _parser(_scanner, impl);
 
-    _scanner.set_debug(enable_verbosity);
+    _scanner.set_debug(0);
     _parser.set_debug_level(enable_verbosity);
 
     std::ostringstream perr;
@@ -27,5 +26,6 @@ khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enabl
     logging::debug() << "Parsing has ended with code " << ret << ": ";
     logging::debug() << perr.str();
 
+    khaotica::sequence_t document;
     return document;
 }

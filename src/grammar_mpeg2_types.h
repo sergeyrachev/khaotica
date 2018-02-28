@@ -13,17 +13,10 @@
 
 namespace khaotica {
 
-    struct fixed_length_t {
-        uint64_t value;
-    };
-
-    struct variable_length_t {
+    struct length_t {
         uint64_t from;
         uint64_t to;
     };
-
-    typedef std::variant<fixed_length_t, variable_length_t> entry_length_t;
-
 
     struct integer_t {
         int64_t value;
@@ -40,22 +33,22 @@ namespace khaotica {
 
     struct bslbf_t {
         std::string name;
-        fixed_length_t length;
+        length_t length;
     };
 
     struct uimsbf_t {
         std::string name;
-        entry_length_t length;
+        length_t length;
     };
 
     struct simsbf_t {
         std::string name;
-        entry_length_t length;
+        length_t length;
     };
 
     struct vlclbf_t {
         std::string name;
-        entry_length_t length;
+        length_t length;
     };
 
     typedef std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry_t;
@@ -84,14 +77,12 @@ namespace khaotica {
     struct node_t;
     struct scope_t;
 
+    typedef std::list<std::shared_ptr<node_t>> sequence_t;
+    typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
+
     struct reference_t {
         std::string name;
         std::list<std::shared_ptr<node_t>> args;
-    };
-
-    struct sequence_t{
-        std::list<std::shared_ptr<node_t>> body;
-        std::shared_ptr<scope_t> scope; //deprecated
     };
 
     struct compound_t {
@@ -184,7 +175,6 @@ namespace khaotica {
             do_t,
             while_t,
             sequence_t,
-            std::list<std::shared_ptr<node_t>>,
 
             unary_expression_t,
             binary_expression_t,
@@ -210,16 +200,14 @@ namespace khaotica {
         nextbits_t
     > expression_t;
 
-    typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
-
     struct scope_t {
         std::weak_ptr<scope_t> parent;
-        std::list<std::shared_ptr<scope_t>> childs;
+        std::list<std::shared_ptr<scope_t>> children;
         definitions_t definitions;
 
         static std::shared_ptr<scope_t> open(const std::shared_ptr<scope_t>& parent) {
-            parent->childs.push_back( std::make_shared<scope_t>(scope_t{parent, {}, {}}));
-            return parent->childs.back();
+            parent->children.push_back( std::make_shared<scope_t>(scope_t{parent, {}, {}}));
+            return parent->children.back();
         }
 
         std::shared_ptr<scope_t> close() {

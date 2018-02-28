@@ -1,12 +1,12 @@
 video_sequence() {
-     next_start_code()
+    next_start_code()
     sequence_header()
-    if ( nextbits() == extension_start_code ) {
+    if ( nextbits() == 0xB5 ) {
         sequence_extension()
         do {
             extension_and_user_data( 0 )
             do {
-                if (nextbits() == group_start_code) {
+                if (nextbits() == 0xB8) {
                     group_of_pictures_header()
                     extension_and_user_data( 1 )
                 }
@@ -369,11 +369,11 @@ block( i ) {
                     dct_dc_differential 1-11 uimsbf
             }
         } else {
-            First_DCT_coefficient 2-14 vlclbf
+            First_DCT_coefficient 2-24
         }
         while ( nextbits() != '10' )
-            Subsequent_DCT_coefficients 3-14 vlclbf
-        End_of_block 2-4 vlclbf
+            Subsequent_DCT_coefficients 3-24
+        End_of_block 2-4  vlclbf
     }
 }
 
