@@ -12,7 +12,7 @@ video_sequence() {
                 }
                 picture_header()
                 picture_coding_extension()
-                extensions_and_user_data( 2 )
+                extension_and_user_data( 2 )
                 picture_data()
             } while ( (nextbits() == picture_start_code) || (nextbits() == group_start_code) )
             if ( nextbits() != sequence_end_code ) {
@@ -249,6 +249,21 @@ picture_spatial_scalable_extension() {
     spatial_temporal_weight_code_table_index 2 uimsbf
     lower_layer_progressive_frame 1 uimsbf
     lower_layer_deinterlaced_field_select 1 uimsbf
+    next_start_code()
+}
+
+copyright_extension() {
+    extension_start_code_identifier 4 uimsbf
+    copyright_flag 1 bslbf
+    copyright_identifier 8 uimsbf
+    original_or_copy 1 bslbf
+    reserved 7 uimsbf
+    marker_bit 1 bslbf
+    copyright_number_1 20 uimsbf
+    marker_bit 1 bslbf
+    copyright_number_2 22 uimsbf
+    marker_bit 1 bslbf
+    copyright_number_3 22 uimsbf
     next_start_code()
 }
 

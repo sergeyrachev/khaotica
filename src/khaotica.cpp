@@ -38,9 +38,9 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto doc = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
-    khaotica::printer_t printer;
-    std::cout << printer(doc);
+    auto document = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
+    khaotica::printer_t printer(document.global);
+    std::cout << printer(document.sequence);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::details::bitreader_t bitreader(bitstream);

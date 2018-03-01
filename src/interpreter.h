@@ -11,7 +11,7 @@
 namespace khaotica{
     class interpreter_t {
     public:
-        static khaotica::sequence_t parse(std::istream &in, bool enable_verbosity = true);
+        static khaotica::document_t parse(std::istream &in, bool enable_verbosity = true);
     };
 }
 

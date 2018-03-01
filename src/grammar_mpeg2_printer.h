@@ -5,12 +5,13 @@
 #include <variant>
 #include <iostream>
 #include <sstream>
+#include <cassert>
 
 namespace khaotica {
 
     class printer_t{
     public:
-        explicit printer_t() : indentation(0){
+        explicit printer_t(std::shared_ptr<scope_t> global) : indentation(0), global(global) {
 
         }
 
@@ -18,6 +19,7 @@ namespace khaotica {
             std::ostringstream out;
             for(const auto& entry : node){
                 out << std::visit(*this, entry->payload);
+                out << std::endl;
             }
             return out.str();
         }
@@ -30,7 +32,12 @@ namespace khaotica {
 
         std::string operator()(const length_t &length) {
             std::ostringstream out;
-            out << length.from << "-" << length.to;
+
+            if(length.from == length.to){
+                out << length.from;
+            }else {
+                out << length.from << "-" << length.to;
+            }
             return out.str();
         }
 
@@ -59,8 +66,7 @@ namespace khaotica {
                 << " "
                 << (*this)(node.length)
                 << " "
-                << "bslbf"
-                << std::endl;
+                << "bslbf";
             return out.str();
         };
 
@@ -71,8 +77,7 @@ namespace khaotica {
                 << " "
                 << (*this)(node.length)
                 << " "
-                << "uimsbf"
-                << std::endl;
+                << "uimsbf";
             return out.str();
         };
 
@@ -83,8 +88,7 @@ namespace khaotica {
                 << " "
                 << (*this)(node.length)
                 << " "
-                << "simsbf"
-                << std::endl;
+                << "simsbf";
             return out.str();
         };
 
@@ -95,8 +99,7 @@ namespace khaotica {
                 << " "
                 << (*this)(node.length)
                 << " "
-                << "vlclbf"
-                << std::endl;
+                << "vlclbf";
             return out.str();
         };
 
@@ -104,20 +107,17 @@ namespace khaotica {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << std::visit(*this, node.entry)
-                << " * " << node.size
-                << std::endl;
+                << " * " << node.size;
             return out.str();
         };
 
         std::string operator()(const slot_t &node) {
             std::ostringstream out;
-            out << std::string(indentation, ' ')
-                << std::visit(*this, node.entry);
+            out << std::visit(*this, node.entry);
 
             for(const auto& i : node.indices) {
                 out << "[" << std::visit(*this, i) << "]";
             }
-            out << std::endl;
             return out.str();
         };
 
@@ -125,30 +125,31 @@ namespace khaotica {
             std::ostringstream out;
             out << std::string(indentation, ' ')
                 << std::visit(*this, node.entry)
-                << "[" << node.range.front << ".." << node.range.back <<"]"
-                << std::endl;
+                << "[" << node.range.front << ".." << node.range.back <<"]";
             return out.str();
         };
 
         std::string operator()(const reference_t &node) {
             std::ostringstream out;
 
+            auto& compound = std::get<compound_t>(global->definitions.at(node.name)->payload);
+
             out << std::string(indentation, ' ')
                 << node.name << "(";
-            for(const auto& arg : node.args){
-                out << ", " << std::visit(*this, arg->payload) << std::endl;
+
+            assert( node.args.size() == compound.args.size() );
+
+            for (auto [arg, param] = std::pair{node.args.begin(), compound.args.begin()}; arg != node.args.end() || param != compound.args.end(); ++arg, ++param) {
+                out << *param << " = " << std::visit(*this, (*arg)->payload) << ", ";
             }
-            out << ") -> {" << std::endl;
+            out << "){" << std::endl;
+
             indentation++;
 
-            //auto& compound = std::get<compound_t>(doc.scope->definitions.at(node.name)->payload);
-
-            //for (auto &&item : compound.body.body) {
-            //    out << on(item);
-            //}
+            out << std::visit(*this, compound.body->payload);
 
             indentation--;
-            out << std::string(indentation, ' ') << "}" << std::endl;
+            out << std::string(indentation, ' ') << "}";
             return out.str();
         };
 
@@ -162,15 +163,17 @@ namespace khaotica {
             out << " ) {" << std::endl;
 
             indentation++;
-            std::visit(*this, node._then->payload );
-
+            out << std::visit(*this, node._then->payload );
             if(node._else ){
-                out << "} else {";
-                std::visit(*this, (*node._else)->payload );
+
+                indentation--;
+                out << std::string(indentation, ' ') << "} else {" << std::endl;
+                indentation++;
+                out << std::visit(*this, (*node._else)->payload );
             }
 
             indentation--;
-            out << std::string(indentation, ' ') << "}" << std::endl;
+            out << std::string(indentation, ' ') << "}";
             return out.str();
         };
 
@@ -201,16 +204,35 @@ namespace khaotica {
 //                out << on(item);
 //            }
             indentation--;
-            out << std::string(indentation, ' ') << "}" << std::endl;
+
+            out << std::string(indentation, ' ') << "}";
             return out.str();
         };
 
         std::string operator()(const do_t &node) {
-            return "do{}while()";
+            std::ostringstream out;
+            out << std::string(indentation, ' ') << "do {" << std::endl;
+
+            indentation++;
+
+            out << std::visit(*this, node.body->payload);
+
+            indentation--;
+            out << std::string(indentation, ' ') << "} while()";
+            return  out.str();
         }
 
         std::string operator()(const while_t &node) {
-            return "while(){}";
+            std::ostringstream out;
+            out << std::string(indentation, ' ')
+                << "while(){" << std::endl;
+            indentation++;
+
+            out << std::visit(*this, node.body->payload);
+
+            indentation--;
+            out << std::string(indentation, ' ') << "}";
+            return  out.str();
         }
 
         std::string operator()(const compound_t &node) {
@@ -218,10 +240,10 @@ namespace khaotica {
             out << std::string(indentation, ' ') << node.name << "() {" << std::endl;
             indentation++;
 
-            out << (*this)(node.body);
+            out << std::visit(*this, node.body->payload);
 
             indentation--;
-            out << std::string(indentation, ' ') << "}" << std::endl;
+            out << std::string(indentation, ' ') << "}";
             return out.str();
         };
 
@@ -280,5 +302,6 @@ namespace khaotica {
 
     private:
         size_t indentation;
+        std::shared_ptr<scope_t> global;
     };
 }

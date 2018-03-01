@@ -1,7 +1,7 @@
 %skeleton "lalr1.cc"
 %require "3.0"
 
-%no-lines
+//%no-lines
 
 %verbose
 %define parse.trace
@@ -162,7 +162,7 @@
 %type <std::shared_ptr<node_t>> statement
 %type <std::shared_ptr<node_t>> inner_statement
 
-%type <sequence_t> block
+%type <std::shared_ptr<node_t>> block
 %type <sequence_t> statements
 
 %type <std::vector<dimension_t>> dimensions
@@ -190,7 +190,8 @@ IDENTIFIER[name] "(" arguments ")" block[body] {
 }
 
 arguments:
-arguments "," IDENTIFIER[name] {
+arguments[list] "," IDENTIFIER[name] {
+    $$ = $list;
     $$.push_back($name);
 }|
 IDENTIFIER[name]{
@@ -200,7 +201,8 @@ IDENTIFIER[name]{
 }
 
 parameters:
-parameters "," expression {
+parameters[list] "," expression {
+    $$ = $list;
     $$.push_front($expression);
 }|
 expression {
@@ -211,7 +213,8 @@ expression {
 }
 
 statements
-: statements statement {
+: statements[list] statement {
+    $$ = $list;
     $$.push_back($statement);
 }|
 %empty{
@@ -220,7 +223,7 @@ statements
 
 block:
 "{" { impl->open(); } statements { impl->close(); } "}" {
-    $$ = $statements;
+    $$ = std::make_shared<node_t>(node_t{$statements});
 }
 
 statement
@@ -269,7 +272,7 @@ do_statement[payload] {
     $$ = std::make_shared<node_t>(node_t{$payload});
 }|
 block[payload] {
-    $$ = std::make_shared<node_t>(node_t{$payload});
+    $$ = $payload;
 }
 
 bslbf_field:
@@ -303,15 +306,18 @@ IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] "bslbf" {
 }
 
 slot_field:
-IDENTIFIER[name] dimensions entry_length "uimsbf" {
-    $$ = slot_t{};
+IDENTIFIER[name] dimensions entry_length[length] "uimsbf" {
+    uimsbf_t field{$name, $length};
+    $$ = slot_t{field, $dimensions};
 }|
-IDENTIFIER[name] dimensions entry_length "vlclbf" {
-    $$ = slot_t{};
+IDENTIFIER[name] dimensions entry_length[length] "vlclbf" {
+   vlclbf_t field{$name, $length};
+   $$ = slot_t{field, $dimensions};
 }
 
 dimensions:
-dimensions dimension{
+dimensions[list] dimension{
+    $$ = $list;
     $$.push_back($dimension);
 }|
 dimension{
@@ -400,18 +406,18 @@ for_statement_inner:
 }
 
 do_statement:
-"do" statement "while" "(" expression[condition] ")" {
-    $$ = do_t{};
+"do" statement[body] "while" "(" expression[condition] ")" {
+    $$ = do_t{$condition, $body};
 }
 
 while_statement:
 "while" "(" expression[condition] ")" statement[body] {
-     $$ = while_t{};
+     $$ = while_t{$condition, $body};
 }
 
 while_statement_inner:
 "while" "(" expression[condition] ")" inner_statement[body] {
-    $$ = while_t{};
+    $$ = while_t{$condition, $body};
 }
 
 internal_function

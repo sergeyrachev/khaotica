@@ -10,16 +10,16 @@ namespace khaotica{
             public:
                 void add( const compound_t& compound ) {
                     auto node = std::make_shared<node_t>(node_t{compound});
-                    auto [slot, is_inserted] = scope->definitions.emplace( compound.name, node );
+                    auto [slot, is_inserted] = document.global->definitions.emplace( compound.name, node );
                     if(is_inserted){
-                        document.push_back( node );
+                        document.sequence.push_back( node );
                     } else {
                         slot->second = node;
                     }
                 }
 
                 std::shared_ptr<node_t> add(const reference_t& node) {
-                    return std::make_shared<node_t>(node_t{node});
+                    return document.global->definitions[node.name] = add_symbol(node.name, node);
                 }
 
                 std::shared_ptr<node_t> add(const assignment_t& node) {
@@ -62,9 +62,7 @@ namespace khaotica{
                     scope = scope->close();
                 }
 
-                sequence_t document;
-                std::shared_ptr<scope_t> global{std::make_shared<scope_t>()};
-
+                document_t document{{}, std::make_shared<scope_t>()};
             private:
                 template<class T>
                 std::shared_ptr<node_t> add_symbol(const std::string& name, const T& node){
@@ -72,7 +70,7 @@ namespace khaotica{
                 }
 
             private:
-                std::shared_ptr<scope_t> scope{global};
+                std::shared_ptr<scope_t> scope{document.global};
             };
         }
     }

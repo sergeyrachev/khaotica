@@ -27,7 +27,6 @@ namespace khaotica {
     };
 
     struct bitstring_t {
-        std::optional<std::string> name;
         std::string value;
     };
 
@@ -88,7 +87,7 @@ namespace khaotica {
     struct compound_t {
         std::string name;
         std::list<std::string> args;
-        sequence_t body;
+        std::shared_ptr<node_t> body;
     };
 
     struct if_t {
@@ -105,12 +104,12 @@ namespace khaotica {
     };
 
     struct do_t {
-        std::optional<std::shared_ptr<node_t>> condition;
+        std::shared_ptr<node_t> condition;
         std::shared_ptr<node_t> body;
     };
 
     struct while_t {
-        std::optional<std::shared_ptr<node_t>> condition;
+        std::shared_ptr<node_t> condition;
         std::shared_ptr<node_t> body;
     };
 
@@ -213,6 +212,11 @@ namespace khaotica {
         std::shared_ptr<scope_t> close() {
             return parent.lock();
         }
+    };
+
+    struct document_t{
+        sequence_t sequence;
+        std::shared_ptr<scope_t> global;
     };
 
     struct value_t;

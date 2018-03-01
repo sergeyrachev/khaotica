@@ -8,7 +8,7 @@
 #include "grammar_mpeg2_parser_impl.h"
 #include "logging.h"
 
-khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
+khaotica::document_t khaotica::interpreter_t::parse(std::istream &in, bool enable_verbosity) {
 
     std::ostringstream serr;
     khaotica::core::mpeg2::lexer_t _scanner(in, serr);
@@ -26,6 +26,6 @@ khaotica::sequence_t khaotica::interpreter_t::parse(std::istream &in, bool enabl
     logging::debug() << "Parsing has ended with code " << ret << ": ";
     logging::debug() << perr.str();
 
-    khaotica::sequence_t document;
-    return document;
+
+    return impl->document;
 }
