@@ -3,13 +3,12 @@ cmake_minimum_required(VERSION 3.9)
 
 find_package(gtest CONFIG PATHS deps)
 find_package(boost CONFIG PATHS deps)
-find_package(BISON)
-find_package(FLEX)
+find_package(BISON 3.0 REQUIRED)
+find_package(FLEX REQUIRED)
 
 set(GRAMMAR_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
 file(MAKE_DIRECTORY ${GRAMMAR_DIR})
 
-find_package(BISON 3.0 REQUIRED)
 set(BisonOutput grammar_mpeg2_parser.cpp)
 set(BisonOutputH grammar_mpeg2_parser.hpp)
 set(BisonInput src/grammar_mpeg2_parser.yy)
@@ -25,7 +24,7 @@ add_custom_command(
     ${CMAKE_CURRENT_LIST_DIR}/${BisonInput}
 )
 
-find_package(FLEX REQUIRED)
+
 set(FlexOutput grammar_mpeg2_lexer.cpp)
 set(FlexInput src/grammar_mpeg2_lexer.ll)
 add_custom_command(

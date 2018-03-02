@@ -29,6 +29,7 @@ text [[:print:][:space:]]
 line [[:print:][:blank:]]
 
 %x COMMENT
+%x QUOTED
 
 %%
 "," return parser_t::make_COMMA(_location);
@@ -89,9 +90,15 @@ line [[:print:][:blank:]]
     return parser_t::make_TEXT( {yytext}, _location);
 }
 
-\'{bits}\' {
+\' {
+    BEGIN(QUOTED);
+}
+
+<QUOTED>{bits} {
     return parser_t::make_BITSTRING( {yytext}, _location);
 }
+
+<QUOTED>\' { BEGIN(INITIAL); }
 
 {identifier} {
     return parser_t::make_IDENTIFIER( {yytext}, _location);
