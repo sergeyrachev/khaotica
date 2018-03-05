@@ -17,7 +17,17 @@ namespace khaotica{
 
             khaotica::expression_v operator()(const khaotica::uimsbf_t &node) {
                 return uint64_t{0};
+            }
+            khaotica::expression_v operator()(const khaotica::simsbf_t &node) {
+                return int64_t{0};
+            }
+            khaotica::expression_v operator()(const khaotica::tcimsbf_t &node) {
+                return int64_t{0};
+            }
 
+            khaotica::expression_v operator()(const auto &node) {
+                assert(false && "Must never be there");
+                return uint64_t{0};
             }
 
             khaotica::expression_v operator()(const khaotica::bitstring_t &node) {

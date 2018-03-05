@@ -5,6 +5,7 @@
 #include "grammar_mpeg2_types.h"
 
 #include "eval_logical.h"
+#include "eval_conditional.h"
 #include "eval_arithmetic.h"
 #include "eval_bitwise.h"
 #include "eval_comparison.h"
@@ -16,6 +17,7 @@
 
 using namespace khaotica;
 using namespace khaotica::details;
+using namespace khaotica::eval;
 
 namespace {
 
@@ -26,20 +28,20 @@ namespace {
             {"&&", [](const expression_v &left, const expression_v &right) { return std::visit(logical_and_t(), left, right); }},
             {"==", [](const expression_v &left, const expression_v &right) { return std::visit(equal_t(), left, right); }},
             {"!=", [](const expression_v &left, const expression_v &right) { return std::visit(not_equal_t(), left, right); }},
-            {"<", [](const expression_v &left, const expression_v &right) { return std::visit(less_t(), left, right); }},
-            {">", [](const expression_v &left, const expression_v &right) { return std::visit(greater_t(), left, right); }},
+            {"<",  [](const expression_v &left, const expression_v &right) { return std::visit(less_t(), left, right); }},
+            {">",  [](const expression_v &left, const expression_v &right) { return std::visit(greater_t(), left, right); }},
             {"<=", [](const expression_v &left, const expression_v &right) { return std::visit(less_equal_t(), left, right); }},
             {">=", [](const expression_v &left, const expression_v &right) { return std::visit(greater_equal_t(), left, right); }},
-            {"-", [](const expression_v &left, const expression_v &right) { return std::visit(minus_t(), left, right); }},
-            {"+", [](const expression_v &left, const expression_v &right) { return std::visit(plus_t(), left, right); }},
-            {"*", [](const expression_v &left, const expression_v &right) { return std::visit(multiplies_t(), left, right); }},
-            {"/", [](const expression_v &left, const expression_v &right) { return std::visit(divides_t(), left, right); }},
-            {"%", [](const expression_v &left, const expression_v &right) { return std::visit(modulus_t(), left, right); }},
+            {"-",  [](const expression_v &left, const expression_v &right) { return std::visit(minus_t(), left, right); }},
+            {"+",  [](const expression_v &left, const expression_v &right) { return std::visit(plus_t(), left, right); }},
+            {"*",  [](const expression_v &left, const expression_v &right) { return std::visit(multiplies_t(), left, right); }},
+            {"/",  [](const expression_v &left, const expression_v &right) { return std::visit(divides_t(), left, right); }},
+            {"%",  [](const expression_v &left, const expression_v &right) { return std::visit(modulus_t(), left, right); }},
         };
         return functors.at(op);
     }
 
-    auto find_unary_functor(const std::string &op){
+    auto find_unary_functor(const std::string &op) {
         using namespace eval;
         static const std::map<std::string, std::function<expression_v(const expression_v &)>> functors{
             {"!", [](const expression_v &operand) { return std::visit(logical_not_t(), operand); }},
@@ -49,17 +51,268 @@ namespace {
         return functors.at(op);
     }
 
-    //class parse_t {
-//    public:
-//        explicit parse_t(bitreader_t &bitreader, const sequence_t &doc)
-//            : bitreader(bitreader), doc(doc) {
-//        }
-//
-//
-//        std::shared_ptr<value_t> on(std::shared_ptr<node_t> node) {
-//            return std::visit(*this, node->payload);
-//        }
-//
+    class parse_t {
+    public:
+        explicit parse_t(bitreader_t &bitreader, const document_t &doc, std::shared_ptr<khaotica::mpeg2::sax_t> handler)
+            : bitreader(bitreader), doc(doc), handler(handler) {
+        }
+
+        void parse() {
+            (*this)(doc.sequence);
+        }
+
+        std::vector<bool> read(const length_t &length) {
+            if (length.from == length.to) {
+                return bitreader.read(length.from);
+            } else {
+                assert(false && "Not implemented");
+            }
+            return {};
+        }
+
+        std::shared_ptr<value_t> operator()(const auto &node) {
+            return {};
+        }
+
+        std::shared_ptr<value_t> operator()(const sequence_t &node) {
+            std::shared_ptr<value_t> value;
+            for (auto &&item : node) {
+                value = std::visit(*this, item->payload);
+            }
+            return value;
+        }
+
+        std::shared_ptr<value_t> operator()(const integer_t &node) {
+            auto value = node.value;
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
+        };
+
+        std::shared_ptr<value_t> operator()(const identifier_t &node) {
+            auto symbol = symbols.find(node.name);
+            if (symbol != symbols.end()) {
+                expression_v value = extract(*symbol->second);
+                auto v = std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
+                return v;
+            }
+
+            auto definition = lookup(node.name, scope);
+            if (definition) {
+                auto value = std::visit(*this, definition->payload);
+                return value;
+            }
+
+            // FIXME: Fix this shit with a correct scope handling. Note! WHAT is a scope in bitstream is not clear yet.
+            definition = deep_lookup(node.name, scope);
+            if (definition) {
+                auto value = std::visit(default_t(), definition->payload);
+                return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
+            }
+
+            assert(false && "It is REALLY bad to be there and try to use unresolved symbol");
+            return nullptr;
+        };
+
+        std::shared_ptr<value_t> operator()(const bitstring_t &node) {
+            auto value = algorithm::unpack(node.value);
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
+        };
+
+        std::shared_ptr<value_t> operator()(const tcimsbf_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const bslbf_t &node) {
+            auto position = bitreader.position();
+            bitstring_v field{read(node.length)};
+
+            std::pair value{node, field};
+
+            auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
+            symbols[node.name] = node_value;
+
+            handler->on(value);
+            return node_value;
+        };
+
+        std::shared_ptr<value_t> operator()(const uimsbf_t &node) {
+            auto position = bitreader.position();
+            uimsbf_v field{algorithm::to_ull_msbf(read(node.length))};
+            std::pair value{node, field};
+
+            auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
+            symbols[node.name] = node_value;
+            handler->on(value);
+
+            return node_value;
+        };
+
+        std::shared_ptr<value_t> operator()(const simsbf_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const vlclbf_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const collection_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const slot_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const sparsed_t &node) {
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const reference_t &node) {
+            auto it = doc.global->definitions.find(node.name);
+            assert(it != doc.global->definitions.end());
+            return std::visit(*this, it->second->payload);
+        };
+
+        std::shared_ptr<value_t> operator()(const if_t &node) {
+            handler->open(node);
+
+            auto conditional_expression = std::visit(*this, node.condition->payload);
+            auto conditional_expression_payload = std::get<std::pair<expression_t, expression_v>>(conditional_expression->payload);
+            auto conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
+
+            if (conditional_expression_value) {
+                std::visit(*this, node._then->payload);
+            } else if(node._else){
+                std::visit(*this, (*node._else)->payload);
+            }
+
+            return std::make_shared<value_t>(value_t{std::make_pair(node, if_v{ conditional_expression_value, {}} )});
+        };
+
+        std::shared_ptr<value_t> operator()(const for_t &node) {
+            handler->open(node);
+
+            auto initializer = std::visit(*this, node.initializer->payload);
+
+            auto conditional_expression = std::visit(*this, node.condition->payload);
+            auto conditional_expression_payload = std::get<std::pair<expression_t, expression_v>>(conditional_expression->payload);
+            bool conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
+
+            while (conditional_expression_value) {
+                std::visit(*this, node.body->payload);
+                auto modifier = std::visit(*this, node.modifier->payload);
+
+                auto conditional_expression = std::visit(*this, node.condition->payload);
+                auto conditional_expression_payload = std::get<std::pair<expression_t, expression_v>>(conditional_expression->payload);
+                conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
+            }
+
+            handler->close(node);
+
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const do_t &node) {
+            handler->open(node);
+
+            bool conditional_expression_value(true);
+            do {
+                std::visit(*this, node.body->payload);
+
+                auto conditional_expression = std::visit(*this, node.condition->payload);
+                auto conditional_expression_payload = std::get<std::pair<expression_t, expression_v>>(conditional_expression->payload);
+                conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
+            } while (conditional_expression_value);
+
+            handler->close(node);
+            return {};
+        }
+
+        std::shared_ptr<value_t> operator()(const while_t &node) {
+            handler->open(node);
+
+            handler->close(node);
+            return {};
+        }
+
+        std::shared_ptr<value_t> operator()(const compound_t &node) {
+            handler->open(node);
+
+            std::visit(*this, node.body->payload);
+
+            handler->close(node);
+            return {};
+        };
+
+        std::shared_ptr<value_t> operator()(const assignment_t &node) {
+            auto initializer = std::visit(*this, node.expression->payload);
+            symbols[node.symbol] = initializer;
+
+            auto initializer_payload = std::get<std::pair<expression_t, expression_v>>(initializer->payload);
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, expression_v{initializer_payload.second})});
+
+        };
+
+        std::shared_ptr<value_t> operator()(const preincrement_t &node) {
+            auto previous_value = symbols.find(node.operand)->second;
+            auto &previous_payload = std::get<std::pair<expression_t, expression_v>>(previous_value->payload);
+            auto value = std::visit(find_binary_functor(node.operation), previous_payload.second, expression_v{int64_t{1}});
+
+            previous_payload.second = value;
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
+        };
+
+        std::shared_ptr<value_t> operator()(const postincrement_t &node) {
+            auto previous_value = symbols.find(node.operand)->second;
+            auto &previous_payload = std::get<std::pair<expression_t, expression_v>>(previous_value->payload);
+            auto value = std::visit(find_binary_functor(node.operation), previous_payload.second, expression_v{int64_t{1}});
+
+            previous_payload.second = value;
+            return previous_value;
+        };
+
+        std::shared_ptr<value_t> operator()(const unary_expression_t &node) {
+            auto operand = std::visit(*this, node.operand->payload);
+            auto operand_payload = std::get<std::pair<expression_t, expression_v>>(operand->payload);
+
+            auto value = std::visit(find_unary_functor(node.operation), operand_payload.second);
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, expression_v{value})});
+        };
+
+        std::shared_ptr<value_t> operator()(const binary_expression_t &node) {
+            auto left = std::visit(*this, node.left_operand->payload);
+            auto right = std::visit(*this, node.right_operand->payload);
+
+            auto left_payload = std::get<std::pair<expression_t, expression_v>>(left->payload);
+            auto right_payload = std::get<std::pair<expression_t, expression_v>>(right->payload);
+
+            auto value = std::visit(find_binary_functor(node.operation), left_payload.second, right_payload.second);
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, expression_v{value})});
+        };
+
+        std::shared_ptr<value_t> operator()(const position_t &node) {
+            uint64_t value(0);
+            if (node.name) {
+                auto symbol = symbols.find(*node.name);
+                if (symbol != symbols.end()) {
+                    value = symbol->second->offset;
+                }
+            } else {
+                value = bitreader.position();
+            }
+
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, expression_v{value})});
+        };
+
+        std::shared_ptr<value_t> operator()(const nextbits_t &node) {
+            auto value = bitreader.peek();
+            return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, expression_v{value})});
+        };
+
+        std::shared_ptr<value_t> operator()(const bytealigned_t &node) {
+            return nullptr;
+        };
+
+
 //        std::shared_ptr<value_t> operator()(const bslbf_t &node) {
 //            auto position = bitreader.position();
 //            auto value = bitreader.read(node.length);
@@ -289,63 +542,53 @@ namespace {
 //        std::shared_ptr<value_t> operator()(const nextbits_t &node) {
 //            return nullptr;
 //        }
-//    private:
-//        expression_v extract(const value_t &value) {
-//            if( const auto&& val = std::get_if<std::pair<bslbf_t, bslbf_v>>(&value.payload)){
-//                return val->second.value;
-//            } else if(const auto&& val = std::get_if<std::pair<uimsbf_t, uimsbf_v>>(&value.payload)) {
-//                return val->second.value;
-//            } else if(const auto&& val = std::get_if<std::pair<expression_t, expression_v>>(&value.payload)){
-//                return val->second;
-//            }
-//            assert(false && "No way to be there");
-//            return false;
-//        }
-//
-//        uint64_t extract_location(const value_t &value) {
-//            if( const auto&& val = std::get_if<std::pair<bslbf_t, bslbf_v>>(&value.payload)){
-//                return val->second.location;
-//            } else if(const auto&& val = std::get_if<std::pair<uimsbf_t, uimsbf_v>>(&value.payload)) {
-//                return val->second.location;
-//            }
-//            assert(false && "No way to be there");
-//            return false;
-//        }
-//
-//        std::shared_ptr<node_t> lookup(const std::string& name, scope_t* scope) {
-//
-//            auto it = scope->definitions.find(name);
-//            if(it != scope->definitions.end()){
-//                return it->second;
-//            }
-//
-//            if( scope->parent){
-//                return lookup(name, scope->parent);
-//            }
-//
-//            return nullptr;
-//        }
-//
-//        std::shared_ptr<node_t> deep_lookup(const std::string& name, scope_t* scope) {
-//
-//            auto it = scope->definitions.find(name);
-//            if(it != scope->definitions.end()){
-//                return it->second;
-//            }
-//
-//            if( scope->parent){
-//                for (auto &&sibling : scope->parent->childs) {
-//                    it = sibling->definitions.find(name);
-//                    if(it != sibling->definitions.end()){
-//                        return it->second;
-//                    }
-//                }
-//
-//                return deep_lookup(name, scope->parent);
-//            }
-//
-//            return nullptr;
-//        }
+    private:
+        expression_v extract(const value_t &value) {
+            if( const auto&& val = std::get_if<std::pair<bslbf_t, bitstring_v>>(&value.payload)){
+                return val->second.value;
+            } else if(const auto&& val = std::get_if<std::pair<uimsbf_t, uimsbf_v>>(&value.payload)) {
+                return val->second.value;
+            } else if(const auto&& val = std::get_if<std::pair<expression_t, expression_v>>(&value.payload)){
+                return val->second;
+            }
+            assert(false && "No way to be there");
+            return false;
+        }
+
+        std::shared_ptr<node_t> lookup(const std::string& name, std::shared_ptr<scope_t> scope) {
+
+            auto it = scope->definitions.find(name);
+            if(it != scope->definitions.end()){
+                return it->second;
+            }
+
+            if(auto parent = scope->parent.lock()){
+                return lookup(name, parent);
+            }
+
+            return nullptr;
+        }
+
+        std::shared_ptr<node_t> deep_lookup(const std::string& name, std::shared_ptr<scope_t> scope) {
+
+            auto it = scope->definitions.find(name);
+            if(it != scope->definitions.end()){
+                return it->second;
+            }
+
+            if( auto parent = scope->parent.lock() ){
+                for (auto &&sibling : parent->children) {
+                    it = sibling->definitions.find(name);
+                    if(it != sibling->definitions.end()){
+                        return it->second;
+                    }
+                }
+
+                return deep_lookup(name, parent);
+            }
+
+            return nullptr;
+        }
 //
 //        std::tuple<std::vector<bool>, std::vector<bool>>
 //        update(const std::vector<bool> &initial_value, const std::vector<bool> &initial_mask, const std::vector<bool> &slice_value,
@@ -369,17 +612,16 @@ namespace {
 //            return {value, mask};
 //        }
 //
-//    private:
-//        bitreader_t &bitreader;
-//        const sequence_t &doc;
-//        std::map<std::string, std::shared_ptr<value_t>> symbols;
-//        scope_t* scope{nullptr};
-//    };
+    private:
+        bitreader_t &bitreader;
+        const document_t &doc;
+        std::shared_ptr<khaotica::mpeg2::sax_t> handler;
+        std::map<std::string, std::shared_ptr<value_t>> symbols;
+        std::shared_ptr<scope_t> scope{doc.global};
+    };
 }
 
-void bsparser_t::parse(bitreader_t &in, const sequence_t &doc) {
-//    parse_t parse(in, doc);
-//    for (auto &&entry : doc.body) {
-//        parse.on(entry);
-//    }
+void bsparser_t::parse(bitreader_t &in, const document_t &doc, std::shared_ptr<khaotica::mpeg2::sax_t> handler) {
+    parse_t parse(in, doc, handler);
+    parse.parse();
 }

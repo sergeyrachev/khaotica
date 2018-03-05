@@ -1,5 +1,7 @@
 #pragma once
 
+#include "type_conversion.h"
+
 #include <cstdint>
 #include <cassert>
 #include <vector>
@@ -66,8 +68,7 @@ namespace khaotica {
             }
 
             bool operator()(const std::vector<bool> &left, const int64_t &right) {
-                assert(false && "WAT?!");
-                return {false};
+                return F()(left, khaotica::algorithm::unpack(right));
             }
 
             bool operator()(const std::vector<bool> &left, const bool &right) {
@@ -76,8 +77,7 @@ namespace khaotica {
             }
 
             bool operator()(const std::vector<bool> &left, const uint64_t &right) {
-                assert(false && "WAT?!");
-                return {false};
+                return F()(left, khaotica::algorithm::unpack(right));
             }
         };
 

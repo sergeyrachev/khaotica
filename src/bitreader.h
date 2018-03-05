@@ -21,6 +21,11 @@ namespace khaotica{
 
             }
 
+            std::vector<bool> peek(){
+                using khaotica::algorithm::unpack;
+                return unpack( in.peek() );
+            }
+
             std::vector<bool> read(uint64_t n) {
                 std::vector<bool> ret;
                 for (auto i = 0; i < n; i++) {

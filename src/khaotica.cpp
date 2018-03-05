@@ -4,6 +4,7 @@
 #include "khaotica.h"
 #include "grammar_mpeg2_reader.h"
 #include "grammar_mpeg2_printer.h"
+#include "grammar_mpeg2_dump.h"
 
 #include "logging.h"
 #include "options.h"
@@ -46,10 +47,8 @@ int main( int argc, char* argv[] ) {
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::details::bitreader_t bitreader(bitstream);
 
-    //while(!bitstream.bad() && !bitstream.eof()){
-    //    khaotica::bsparser_t::parse(bitreader, doc);
-        //khaotica::printer_t::dump(doc, snapshot, std::cout);
-    //}
+    khaotica::bsparser_t bsparser;
+    bsparser.parse(bitreader, document, std::static_pointer_cast<khaotica::mpeg2::sax_t>(std::make_shared<khaotica::mpeg2::sax_t>()));
 
     return 0;
 }
