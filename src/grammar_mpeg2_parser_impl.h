@@ -42,6 +42,10 @@ namespace khaotica{
                     return add_symbol(node.name, node);
                 }
 
+                std::shared_ptr<node_t> add(const tcimsbf_t& node) {
+                    return add_symbol(node.name, node);
+                }
+
                 std::shared_ptr<node_t> add(const collection_t& node) {
                     return std::visit([this, node](const auto& entry){return this->add_symbol(entry.name, node);}, node.entry);
                 }

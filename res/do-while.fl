@@ -1,5 +1,0 @@
-MPEG_transport_stream() {
-    do {
-        data_byte                                       8 bslbf
-    } while (nextbits(8))
-}

@@ -1,9 +1,0 @@
- TSPacket() {
-
-    DTS_next_AU[32..24]   8       bslbf
-
-
-
-    DTS_next_AU[14..0]   15       bslbf
-
- }

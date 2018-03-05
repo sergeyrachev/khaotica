@@ -39,6 +39,7 @@ int main( int argc, char* argv[] ) {
     std::ifstream flavor_script(input_definition_filename);
 
     auto document = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
+
     khaotica::printer_t printer(document.global);
     std::cout << printer(document.sequence);
 

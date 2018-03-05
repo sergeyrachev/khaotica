@@ -49,6 +49,10 @@ namespace khaotica {
         std::string name;
         length_t length;
     };
+    struct tcimsbf_t {
+        std::string name;
+        length_t length;
+    };
 
     typedef std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry_t;
 
@@ -157,6 +161,7 @@ namespace khaotica {
             uimsbf_t,
             simsbf_t,
             vlclbf_t,
+            tcimsbf_t,
 
             collection_t,
             slot_t,

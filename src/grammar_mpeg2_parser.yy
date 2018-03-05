@@ -145,6 +145,7 @@
 %type <uimsbf_t> uimsbf_field
 %type <simsbf_t> simsbf_field
 %type <vlclbf_t> vlclbf_field
+%type <tcimsbf_t> tcimsbf_field
 %type <collection_t> collection_field
 %type <sparsed_t> sparsed_field
 %type <slot_t> slot_field
@@ -256,6 +257,9 @@ simsbf_field[payload] {
 vlclbf_field[payload] {
     $$ = impl->add($payload);
 }|
+tcimsbf_field[payload]{
+    $$ = impl->add($payload);
+}|
 collection_field[payload] {
     $$ = impl->add($payload);
 }|
@@ -293,6 +297,11 @@ IDENTIFIER[name] entry_length[length] "simsbf" {
 vlclbf_field:
 IDENTIFIER[name] entry_length[length] "vlclbf" {
     $$ = vlclbf_t{$name, $length};
+}
+
+tcimsbf_field:
+IDENTIFIER[name] entry_length[length] "tcimsbf" {
+    $$ = tcimsbf_t{$name, $length};
 }
 
 collection_field:

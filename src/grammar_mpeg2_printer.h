@@ -58,6 +58,19 @@ namespace khaotica {
             return out.str();
         };
 
+        std::string operator()(const tcimsbf_t &node) {
+            std::ostringstream out;
+            out << std::string(indentation, ' ')
+                << node.name
+                << " "
+                << (*this)(node.length)
+                << " "
+                << "tcimsbf";
+
+            out << std::endl;
+            return out.str();
+        };
+
         std::string operator()(const bslbf_t &node) {
             std::ostringstream out;
             out << std::string(indentation, ' ')
