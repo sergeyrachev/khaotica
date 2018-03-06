@@ -1,6 +1,6 @@
 #pragma once
 
-#include "grammar_mpeg2_types.h"
+#include "khaotica/mpeg2_types.h"
 
 namespace khaotica {
     class syntax_t{

@@ -9,19 +9,19 @@
 
 %define parser_class_name {parser_t}
 
-%define api.namespace {khaotica::core::mpeg2}
+%define api.namespace {khaotica::syntax::mpeg2}
 %define api.token.constructor
 %define api.value.type variant
 %define api.token.prefix {TOKEN_}
 
 %code requires{
     //Header file
-    #include "grammar_mpeg2_types.h"
+    #include "mpeg2_types.h"
 
-    namespace khaotica::core::mpeg2{
+    namespace khaotica::syntax::mpeg2{
         class lexer_t;
     }
-    namespace khaotica::core::mpeg2{
+    namespace khaotica::syntax::mpeg2{
         class impl_t;
     }
 }
@@ -36,8 +36,7 @@
     #include <sstream>
     #include <iostream>
 
-    using namespace khaotica;
-    using namespace khaotica::core::mpeg2;
+    using namespace khaotica::syntax::mpeg2;
     parser_t::symbol_type yylex(lexer_t &lexer) {
         return lexer.next_token();
     }
@@ -46,7 +45,7 @@
     {
         std::ostringstream ss;
         ss << loc;
-        logging::debug() << "Parsing error: '" << err_message << "' " << ss.str();
+        logging::debug() << "Parsing error: '" << err_message << "' at " << ss.str();
     }
 }
 

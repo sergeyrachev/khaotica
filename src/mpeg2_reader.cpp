@@ -1,8 +1,8 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-#include "grammar_mpeg2_reader.h"
-#include "grammar_mpeg2_types.h"
+#include "mpeg2_reader.h"
+#include "mpeg2_types.h"
 
 #include "eval_logical.h"
 #include "eval_conditional.h"
@@ -15,14 +15,13 @@
 #include <variant>
 #include <stack>
 
-using namespace khaotica;
-using namespace khaotica::details;
-using namespace khaotica::eval;
+using namespace khaotica::bitstream::mpeg2;
+using namespace khaotica::syntax::mpeg2;
 
 namespace {
+    using namespace khaotica::eval;
 
     auto find_binary_functor(const std::string &op) {
-        using namespace eval;
         static const std::map<std::string, std::function<expression_v(const expression_v &, const expression_v &)>> functors{
             {"||", [](const expression_v &left, const expression_v &right) { return std::visit(logical_or_t(), left, right); }},
             {"&&", [](const expression_v &left, const expression_v &right) { return std::visit(logical_and_t(), left, right); }},
@@ -42,7 +41,6 @@ namespace {
     }
 
     auto find_unary_functor(const std::string &op) {
-        using namespace eval;
         static const std::map<std::string, std::function<expression_v(const expression_v &)>> functors{
             {"!", [](const expression_v &operand) { return std::visit(logical_not_t(), operand); }},
             {"~", [](const expression_v &operand) { return std::visit(bitwise_not_t(), operand); }},
@@ -53,7 +51,7 @@ namespace {
 
     class parse_t {
     public:
-        explicit parse_t(bitreader_t &bitreader, const document_t &doc, std::shared_ptr<khaotica::mpeg2::sax_t> handler)
+        explicit parse_t(bitreader_t &bitreader, const document_t &doc, sax_t& handler)
             : bitreader(bitreader), doc(doc), handler(handler) {
         }
 
@@ -95,14 +93,14 @@ namespace {
                 return v;
             }
 
-            auto definition = lookup(node.name, scope);
+            auto definition = lookup(node.name, doc.global);
             if (definition) {
                 auto value = std::visit(*this, definition->payload);
                 return value;
             }
 
             // FIXME: Fix this shit with a correct scope handling. Note! WHAT is a scope in bitstream is not clear yet.
-            definition = deep_lookup(node.name, scope);
+            definition = deep_lookup(node.name, doc.global);
             if (definition) {
                 auto value = std::visit(default_t(), definition->payload);
                 return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
@@ -113,7 +111,7 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const bitstring_t &node) {
-            auto value = algorithm::unpack(node.value);
+            auto value = khaotica::algorithm::unpack(node.value);
             return std::make_shared<value_t>(value_t{std::make_pair(expression_t{node}, value)});
         };
 
@@ -130,18 +128,18 @@ namespace {
             auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
             symbols[node.name] = node_value;
 
-            handler->on(value);
+            handler.on(value);
             return node_value;
         };
 
         std::shared_ptr<value_t> operator()(const uimsbf_t &node) {
             auto position = bitreader.position();
-            uimsbf_v field{algorithm::to_ull_msbf(read(node.length))};
+            uimsbf_v field{khaotica::algorithm::to_ull_msbf(read(node.length))};
             std::pair value{node, field};
 
             auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
             symbols[node.name] = node_value;
-            handler->on(value);
+            handler.on(value);
 
             return node_value;
         };
@@ -173,7 +171,7 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const if_t &node) {
-            handler->open(node);
+            handler.open(node);
 
             auto conditional_expression = std::visit(*this, node.condition->payload);
             auto conditional_expression_payload = std::get<std::pair<expression_t, expression_v>>(conditional_expression->payload);
@@ -185,11 +183,12 @@ namespace {
                 std::visit(*this, (*node._else)->payload);
             }
 
-            return std::make_shared<value_t>(value_t{std::make_pair(node, if_v{ conditional_expression_value, {}} )});
+            handler.close(node);
+            return {};
         };
 
         std::shared_ptr<value_t> operator()(const for_t &node) {
-            handler->open(node);
+            handler.open(node);
 
             auto initializer = std::visit(*this, node.initializer->payload);
 
@@ -206,13 +205,13 @@ namespace {
                 conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
             }
 
-            handler->close(node);
+            handler.close(node);
 
             return {};
         };
 
         std::shared_ptr<value_t> operator()(const do_t &node) {
-            handler->open(node);
+            handler.open(node);
 
             bool conditional_expression_value(true);
             do {
@@ -223,23 +222,23 @@ namespace {
                 conditional_expression_value = std::visit(conditional_t(), conditional_expression_payload.second);
             } while (conditional_expression_value);
 
-            handler->close(node);
+            handler.close(node);
             return {};
         }
 
         std::shared_ptr<value_t> operator()(const while_t &node) {
-            handler->open(node);
+            handler.open(node);
 
-            handler->close(node);
+            handler.close(node);
             return {};
         }
 
         std::shared_ptr<value_t> operator()(const compound_t &node) {
-            handler->open(node);
+            handler.open(node);
 
             std::visit(*this, node.body->payload);
 
-            handler->close(node);
+            handler.close(node);
             return {};
         };
 
@@ -294,7 +293,7 @@ namespace {
             if (node.name) {
                 auto symbol = symbols.find(*node.name);
                 if (symbol != symbols.end()) {
-                    value = symbol->second->offset;
+                    value = symbol->second->position;
                 }
             } else {
                 value = bitreader.position();
@@ -615,13 +614,13 @@ namespace {
     private:
         bitreader_t &bitreader;
         const document_t &doc;
-        std::shared_ptr<khaotica::mpeg2::sax_t> handler;
+        sax_t& handler;
+
         std::map<std::string, std::shared_ptr<value_t>> symbols;
-        std::shared_ptr<scope_t> scope{doc.global};
     };
 }
 
-void bsparser_t::parse(bitreader_t &in, const document_t &doc, std::shared_ptr<khaotica::mpeg2::sax_t> handler) {
+void reader_t::parse(bitreader_t& in, const document_t& doc, sax_t& handler) {
     parse_t parse(in, doc, handler);
     parse.parse();
 }

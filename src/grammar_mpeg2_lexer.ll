@@ -5,7 +5,7 @@
 #define YY_USER_ACTION { _location.step(); _location.columns(yyleng); }
 #define yyterminate() parser_t::make_END(_location);
 
-using namespace khaotica::core::mpeg2;
+using namespace khaotica::syntax::mpeg2;
 
 %}
 

@@ -12,7 +12,7 @@
 #undef YY_DECL
 #define YY_DECL parser_t::symbol_type lexer_t::next_token()
 
-namespace khaotica::core::mpeg2{
+namespace khaotica::syntax::mpeg2{
     class lexer_t : public yyFlexLexer {
     public:
         explicit lexer_t(std::istream& in, std::ostream& out):yyFlexLexer(in, out){};

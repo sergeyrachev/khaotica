@@ -1,6 +1,8 @@
 #ifndef KHAOTICA_GRAMMAR_H
 #define KHAOTICA_GRAMMAR_H
 
+#include "scope.h"
+
 #include <type_traits>
 #include <string>
 #include <vector>
@@ -11,7 +13,7 @@
 #include <memory>
 #include <cstddef>
 
-namespace khaotica {
+namespace khaotica::syntax::mpeg2 {
 
     struct length_t {
         uint64_t from;
@@ -35,9 +37,17 @@ namespace khaotica {
         length_t length;
     };
 
+    struct bitstring_v {
+        std::vector<bool> value;
+    };
+
     struct uimsbf_t {
         std::string name;
         length_t length;
+    };
+
+    struct uimsbf_v {
+        uint64_t value;
     };
 
     struct simsbf_t {
@@ -45,26 +55,62 @@ namespace khaotica {
         length_t length;
     };
 
+    struct simsbf_v {
+        int64_t value;
+    };
+
     struct vlclbf_t {
         std::string name;
         length_t length;
     };
+
+    struct vlclbf_v {
+        std::vector<bool> value;
+    };
+
     struct tcimsbf_t {
         std::string name;
         length_t length;
     };
 
-    typedef std::variant<bslbf_t, uimsbf_t, simsbf_t, vlclbf_t> entry_t;
+    typedef std::variant<
+        bslbf_t,
+        uimsbf_t,
+        simsbf_t,
+        vlclbf_t
+    > entry_t;
+
+    typedef std::variant<
+        bitstring_v,
+        uimsbf_v,
+        simsbf_v,
+        vlclbf_v
+    > entry_v;
 
     struct collection_t {
         entry_t entry;
         size_t size;
     };
 
-    typedef std::variant<identifier_t, integer_t> dimension_t;
+    struct collection_v {
+        std::vector<entry_v> value;
+    };
+
+    typedef std::variant<
+        identifier_t,
+        integer_t
+    > dimension_t;
+
     struct slot_t {
         entry_t entry;
         std::vector<dimension_t> indices;
+    };
+
+    struct slot_v {
+        std::map<
+            std::vector<size_t>,
+            entry_v
+        > value;
     };
 
     struct range_t {
@@ -77,8 +123,13 @@ namespace khaotica {
         range_t range;
     };
 
+    struct sparsed_v {
+        std::vector<bool> value;
+        std::vector<bool> mask;
+    };
+
     struct node_t;
-    struct scope_t;
+    struct value_t;
 
     typedef std::list<std::shared_ptr<node_t>> sequence_t;
     typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
@@ -151,8 +202,36 @@ namespace khaotica {
         std::optional<uint64_t> length;
     };
 
-    struct bytealigned_t{
+    struct bytealigned_t {
 
+    };
+
+    typedef std::variant<
+        integer_t,
+        bitstring_t,
+        identifier_t,
+        unary_expression_t,
+        binary_expression_t,
+        postincrement_t,
+        preincrement_t,
+        assignment_t,
+        position_t,
+        nextbits_t
+    > expression_t;
+
+    typedef std::variant<
+        std::vector<bool>,
+        uint64_t,
+        int64_t,
+        //sparsed_v,
+        bool
+    > expression_v;
+
+    typedef scope_t<definitions_t> scope_t;
+
+    struct document_t {
+        sequence_t sequence;
+        std::shared_ptr<scope_t> global;
     };
 
     struct node_t {
@@ -191,95 +270,6 @@ namespace khaotica {
         > payload;
     };
 
-    typedef std::variant<
-        integer_t,
-        bitstring_t,
-        identifier_t,
-        unary_expression_t,
-        binary_expression_t,
-        postincrement_t,
-        preincrement_t,
-        assignment_t,
-        position_t,
-        nextbits_t
-    > expression_t;
-
-    struct scope_t {
-        std::weak_ptr<scope_t> parent;
-        std::list<std::shared_ptr<scope_t>> children;
-        definitions_t definitions;
-
-        static std::shared_ptr<scope_t> open(const std::shared_ptr<scope_t>& parent) {
-            parent->children.push_back( std::make_shared<scope_t>(scope_t{parent, {}, {}}));
-            return parent->children.back();
-        }
-
-        std::shared_ptr<scope_t> close() {
-            return parent.lock();
-        }
-    };
-
-    struct document_t{
-        sequence_t sequence;
-        std::shared_ptr<scope_t> global;
-    };
-
-    struct value_t;
-    typedef std::list<std::shared_ptr<value_t>> block_v;
-
-    struct bitstring_v {
-        std::vector<bool> value;
-    };
-    struct uimsbf_v {
-        uint64_t value;
-    };
-    struct simsbf_v {
-        int64_t value;
-    };
-    struct vlclbf_v {
-        std::vector<bool> value;
-    };
-
-    typedef std::variant<
-        bitstring_v,
-        uimsbf_v,
-        simsbf_v,
-        vlclbf_v
-    > entry_v;
-
-    struct collection_v {
-        std::vector<entry_v> value;
-    };
-
-    struct slot_v {
-        std::map<
-            std::vector<size_t>,
-            entry_v
-        > value;
-    };
-
-    struct sparsed_v {
-        std::vector<bool> value;
-        std::vector<bool> mask;
-    };
-
-    struct if_v {
-        bool condition;
-        block_v value;
-    };
-
-    struct loop_v {
-        std::vector<block_v> value;
-    };
-
-    typedef std::variant<
-        std::vector<bool>,
-        uint64_t,
-        int64_t,
-        //sparsed_v,
-        bool
-    > expression_v;
-
     struct value_t {
         std::variant<
             std::pair<bslbf_t, bitstring_v>,
@@ -289,14 +279,9 @@ namespace khaotica {
             std::pair<collection_t, collection_v>,
             std::pair<slot_t, std::pair<entry_v, slot_v>>,
             std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
-            std::pair<compound_t, block_v>,
-            std::pair<if_t, if_v>,
-            std::pair<for_t, loop_v>,
-            std::pair<do_t, loop_v>,
-            std::pair<while_t, loop_v>,
             std::pair<expression_t, expression_v>
         > payload;
-        uint64_t offset;
+        uint64_t position;
         uint64_t length;
     };
 }

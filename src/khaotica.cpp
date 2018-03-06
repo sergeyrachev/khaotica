@@ -2,15 +2,13 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include "khaotica.h"
-#include "grammar_mpeg2_reader.h"
-#include "grammar_mpeg2_printer.h"
-#include "grammar_mpeg2_dump.h"
+#include "khaotica/mpeg2_interpreter.h"
+#include "khaotica/mpeg2_reader.h"
 
+#include "grammar_mpeg2_printer.h"
 #include "logging.h"
 #include "options.h"
 
-#include "interpreter.h"
-#include "printer.h"
 #include "grammar_mpeg2_syntax.h"
 
 int main( int argc, char* argv[] ) {
@@ -23,7 +21,6 @@ int main( int argc, char* argv[] ) {
         ( "help,h", "Produce this message" )
         ( "input-definition,i", po::value(&input_definition_filename)->required(), "Flavor definition for input bitstream" )
         ( "input-bitstream,I", po::value(&input_bitstream_filename)->required(), "input bitstream")
-        ( "verbose,v", po::value(&enable_verbose)->implicit_value(true), "Enable verbosity")
         ;
 
     po::positional_options_description pos_opt_desc;
@@ -39,16 +36,15 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream flavor_script(input_definition_filename);
 
-    auto document = khaotica::interpreter_t::parse(flavor_script, enable_verbose);
+    auto document = khaotica::syntax::mpeg2::interpreter_t::parse(flavor_script);
 
     khaotica::printer_t printer(document.global);
     std::cout << printer(document.sequence);
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
-    khaotica::details::bitreader_t bitreader(bitstream);
+    khaotica::bitstream::mpeg2::bitreader_t bitreader(bitstream);
 
-    khaotica::bsparser_t bsparser;
-    bsparser.parse(bitreader, document, std::static_pointer_cast<khaotica::mpeg2::sax_t>(std::make_shared<khaotica::mpeg2::sax_t>()));
+    //khaotica::bitstream::mpeg2::reader_t::parse(bitreader, document, std::static_pointer_cast<khaotica::mpeg2::sax_t>(std::make_shared<khaotica::mpeg2::sax_t>()));
 
     return 0;
 }

@@ -6,7 +6,7 @@
 
 #include "bitreader.h"
 
-using namespace khaotica;
+using namespace khaotica::bitstream::mpeg2;
 
 TEST(Bitreader, FirstBit){
     std::stringstream ss;

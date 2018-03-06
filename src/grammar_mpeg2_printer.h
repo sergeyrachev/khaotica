@@ -1,7 +1,7 @@
 #pragma once
 
-#include "grammar_mpeg2_types.h"
-#include "grammar_mpeg2_sax.h"
+#include "khaotica/mpeg2_types.h"
+#include "khaotica/mpeg2_sax.h"
 
 #include <variant>
 #include <iostream>
@@ -10,6 +10,7 @@
 #include <algorithm>
 
 namespace khaotica {
+    using namespace khaotica::syntax::mpeg2;
 
     class printer_t{
     public:
