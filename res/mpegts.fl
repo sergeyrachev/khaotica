@@ -13,10 +13,10 @@ transport_packet(){
      transport_scrambling_control                            2 bslbf
      adaptation_field_control                                2 bslbf
      continuity_counter                                      4 uimsbf
-    if(adaptation_field_control=='10'          || adaptation_field_control=='11' ){
+    if(adaptation_field_control=='10' || adaptation_field_control=='11' ){
         adaptation_field()
     }
-    if(adaptation_field_control=='01'        || adaptation_field_control=='11') {
+    if(adaptation_field_control=='01' || adaptation_field_control=='11') {
         for (i=0;i<N;i++){
              data_byte                                       8 bslbf
         }           
@@ -24,7 +24,7 @@ transport_packet(){
 }           
 
 adaptation_field() {
-     adaptation_field_length                                 8 uimsbf
+    adaptation_field_length                                 8 uimsbf
     if(adaptation_field_length >0) {
          discontinuity_indicator                             1 bslbf
          random_access_indicator                             1 bslbf
@@ -76,19 +76,17 @@ adaptation_field() {
                  DTS_next_AU[14..0]                         15 bslbf
                  marker_bit                                  1 bslbf
             }                                               
-            for ( i=0;i<N;i++) {                                               
+            for ( i = __position(); i < __position(adaptation_field_length) + adaptation_field_length; i++) {
                  reserved                                    8 bslbf
             }                                               
         }                                               
-        for (i=0;i<N;i++){                                               
+        for (i = __position(); i < __position(adaptation_field_length) + adaptation_field_length; i++){
              stuffing_byte                                   8 bslbf
         }                                               
     }                                               
 }
 
 sync_byte = 0x47
-A=0
-B=lengthof(var)
-N=184-lengthof(adaptation_field)
+N = 184 - adaptation_field_length - (adaptation_field_length > 0)
 
 

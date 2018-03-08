@@ -31,7 +31,7 @@
     #include "grammar_mpeg2_parser.hpp"
     #include "grammar_mpeg2_lexer.h"
     #include "logging.h"
-    #include "grammar_mpeg2_parser_impl.h"
+    #include "grammar_mpeg2_impl.h"
 
     #include <sstream>
     #include <iostream>
@@ -72,7 +72,6 @@
 %token IF "if"
 %token ELSE "else"
 %token FUNCTION_NEXTBITS "nextbits"
-%token FUNCTION_LENGTHOF "lengthof"
 %token FUNCTION_POSITION "__position"
 %token FUNCTION_BYTEALIGNED "bytealigned"
 

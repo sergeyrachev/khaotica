@@ -6,7 +6,7 @@
 
 #include "grammar_mpeg2_parser.hpp"
 #include "grammar_mpeg2_lexer.h"
-#include "grammar_mpeg2_parser_impl.h"
+#include "grammar_mpeg2_impl.h"
 
 #include "logging.h"
 

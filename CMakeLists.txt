@@ -61,9 +61,9 @@ add_library(core
     api/khaotica/mpeg2_interpreter.h
 
     src/mpeg2_types.cpp api/khaotica/mpeg2_types.h
-    src/grammar_mpeg2_syntax.cpp src/grammar_mpeg2_syntax.h
-    src/grammar_mpeg2_printer.cpp src/grammar_mpeg2_printer.h
-    src/grammar_mpeg2_parser_impl.cpp src/grammar_mpeg2_parser_impl.h
+    src/mpeg2_syntax.cpp api/khaotica/mpeg2_syntax.h
+    src/printer.cpp src/printer.h
+    src/grammar_mpeg2_impl.cpp src/grammar_mpeg2_impl.h
     src/mpeg2_reader.cpp api/khaotica/mpeg2_reader.h
     src/mpeg2_sax.cpp api/khaotica/mpeg2_sax.h
 
@@ -71,7 +71,7 @@ add_library(core
     src/type_conversion.h
     src/logging.cpp src/logging.h
     api/khaotica/scope.h
-    src/mpeg2_interpreter_impl.cpp src/mpeg2_interpreter_impl.h)
+    src/mpeg2_interpreter_impl.cpp src/mpeg2_interpreter_impl.h src/type_conversion.cpp)
 target_compile_features(core PUBLIC cxx_std_17)
 target_include_directories(core
     PUBLIC api/
@@ -82,7 +82,7 @@ target_include_directories(core
 
 add_executable(khaotica
     src/khaotica.cpp
-    src/options.cpp src/options.h)
+    src/options.cpp src/options.h src/scanner.cpp src/scanner.h)
 
 target_compile_features(khaotica PUBLIC cxx_std_17)
 target_link_libraries(khaotica core ${boost_LIBRARIES})
@@ -91,7 +91,7 @@ target_include_directories(khaotica
     PRIVATE ${boost_INCLUDE_DIRECTORIES})
 target_compile_definitions(khaotica PRIVATE ${boost_COMPILE_DEFINITIONS})
 
-install(TARGETS khaotica core
+install(TARGETS khaotica
     RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib/static/khaotica

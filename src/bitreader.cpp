@@ -25,7 +25,7 @@ std::vector<bool> bitreader_t::read(uint64_t n) {
 
 uint64_t bitreader_t::position() {
     uint64_t pos = in.tellg();
-    return pos;
+    return pos * 8 - _cache.size();
 }
 
 std::vector<bool> bitreader_t::cache(std::istream &in) {

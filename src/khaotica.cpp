@@ -5,11 +5,12 @@
 #include "khaotica/mpeg2_interpreter.h"
 #include "khaotica/mpeg2_reader.h"
 
-#include "grammar_mpeg2_printer.h"
+#include "printer.h"
 #include "logging.h"
 #include "options.h"
 
-#include "grammar_mpeg2_syntax.h"
+#include "khaotica/mpeg2_syntax.h"
+#include "scanner.h"
 
 int main( int argc, char* argv[] ) {
     std::string input_definition_filename;
@@ -43,8 +44,7 @@ int main( int argc, char* argv[] ) {
 
     std::ifstream bitstream(input_bitstream_filename, std::ios_base::binary);
     khaotica::bitstream::mpeg2::bitreader_t bitreader(bitstream);
-
-    //khaotica::bitstream::mpeg2::reader_t::parse(bitreader, document, std::static_pointer_cast<khaotica::mpeg2::sax_t>(std::make_shared<khaotica::mpeg2::sax_t>()));
+    khaotica::bitstream::mpeg2::reader_t::parse(bitreader, document, *std::make_shared<khaotica::scanner_t>());
 
     return 0;
 }

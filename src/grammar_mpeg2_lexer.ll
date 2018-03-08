@@ -45,7 +45,6 @@ line [[:print:][:blank:]]
 "if" return parser_t::make_IF(_location);
 "else" return parser_t::make_ELSE(_location);
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
-"lengthof" return parser_t::make_FUNCTION_LENGTHOF(_location);
 "__position" return parser_t::make_FUNCTION_POSITION(_location);
 "bytealigned" return parser_t::make_FUNCTION_BYTEALIGNED(_location);
 "==" return parser_t::make_EQUAL(_location);

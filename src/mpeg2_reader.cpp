@@ -128,7 +128,7 @@ namespace {
             auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
             symbols[node.name] = node_value;
 
-            handler.on(value);
+            handler.on(node, field, node_value->position, node_value->length);
             return node_value;
         };
 
@@ -139,7 +139,7 @@ namespace {
 
             auto node_value = std::make_shared<value_t>(value_t{value, position, bitreader.position() - position});
             symbols[node.name] = node_value;
-            handler.on(value);
+            handler.on(node, field, node_value->position, node_value->length);
 
             return node_value;
         };
