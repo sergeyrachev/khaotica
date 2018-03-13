@@ -24,23 +24,23 @@ namespace khaotica::syntax::mpeg2 {
         }
 
         std::shared_ptr<node_t> add(const bslbf_t &node) {
-            return add_symbol(node.name, node);
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const uimsbf_t &node) {
-            return add_symbol(node.name, node);
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const simsbf_t &node) {
-            return add_symbol(node.name, node);
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const vlclbf_t &node) {
-            return add_symbol(node.name, node);
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const tcimsbf_t &node) {
-            return add_symbol(node.name, node);
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const collection_t &node) {
@@ -48,6 +48,10 @@ namespace khaotica::syntax::mpeg2 {
         }
 
         std::shared_ptr<node_t> add(const slot_t &node) {
+            return std::visit([this, node](const auto &entry) { return this->add_symbol(entry.name, node); }, node.entry);
+        }
+
+        std::shared_ptr<node_t> add(const sparsed_t &node) {
             return std::visit([this, node](const auto &entry) { return this->add_symbol(entry.name, node); }, node.entry);
         }
 

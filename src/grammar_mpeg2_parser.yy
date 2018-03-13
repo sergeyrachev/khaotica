@@ -551,8 +551,8 @@ IDENTIFIER[name] "=" expression {
 expression
 : logical_or {
     $$ = $1;
-}| assignment_expression {
-    $$ = std::make_shared<node_t>(node_t{$assignment_expression});
+}| assignment_expression[payload] {
+    $$ = impl->add($payload);
 }
 
 bslbf_mnemonic:

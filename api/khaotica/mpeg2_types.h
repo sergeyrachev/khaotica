@@ -132,7 +132,6 @@ namespace khaotica::syntax::mpeg2 {
     struct value_t;
 
     typedef std::list<std::shared_ptr<node_t>> sequence_t;
-    typedef std::map<std::string, std::shared_ptr<node_t>> definitions_t;
 
     struct reference_t {
         std::string name;
@@ -227,7 +226,7 @@ namespace khaotica::syntax::mpeg2 {
         bool
     > expression_v;
 
-    typedef scope_t<definitions_t> scope_t;
+    typedef scope_tt<std::string, std::shared_ptr<node_t>> scope_t;
 
     struct document_t {
         sequence_t sequence;
@@ -271,16 +270,8 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct value_t {
-        std::variant<
-            std::pair<bslbf_t, bitstring_v>,
-            std::pair<uimsbf_t, uimsbf_v>,
-            std::pair<simsbf_t, simsbf_v>,
-            std::pair<vlclbf_t, vlclbf_v>,
-            std::pair<collection_t, collection_v>,
-            std::pair<slot_t, std::pair<entry_v, slot_v>>,
-            std::pair<sparsed_t, std::pair<bitstring_v, sparsed_v>>,
-            std::pair<expression_t, expression_v>
-        > payload;
+        expression_t origin;
+        expression_v payload;
         uint64_t position;
         uint64_t length;
     };

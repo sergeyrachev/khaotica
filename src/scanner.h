@@ -14,9 +14,9 @@ namespace khaotica {
     class scanner_t : public sax_t{
         static const int32_t P = 10;
         static const int32_t S = 6;
-        static const int32_t T = 40;
-        static const int32_t V = 10;
-        static const int32_t N = 20;
+        static const int32_t T = 50;
+        static const int32_t V = 70;
+        static const int32_t N = 30;
     public:
 
         scanner_t(){

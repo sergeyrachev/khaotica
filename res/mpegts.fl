@@ -1,7 +1,7 @@
 MPEG_transport_stream() {
     do {
         transport_packet()
-    } while (nextbits() == sync_byte)
+    } while (nextbits() == 0x47)
 }
 
 transport_packet(){           
@@ -17,9 +17,9 @@ transport_packet(){
         adaptation_field()
     }
     if(adaptation_field_control=='01' || adaptation_field_control=='11') {
-        for (i=0;i<N;i++){
+        for (i = __position()/8; i < __position(sync_byte) / 8 + 188; i = i + 1){
              data_byte                                       8 bslbf
-        }           
+        }
     }           
 }           
 
@@ -76,17 +76,12 @@ adaptation_field() {
                  DTS_next_AU[14..0]                         15 bslbf
                  marker_bit                                  1 bslbf
             }                                               
-            for ( i = __position(); i < __position(adaptation_field_length) + adaptation_field_length; i++) {
+            for ( i = __position()/8; i < __position(adaptation_field_length)/8 + adaptation_field_length; i++) {
                  reserved                                    8 bslbf
             }                                               
         }                                               
-        for (i = __position(); i < __position(adaptation_field_length) + adaptation_field_length; i++){
+        for (i = __position()/8; i < __position(adaptation_field_length)/8 + adaptation_field_length; i++){
              stuffing_byte                                   8 bslbf
         }                                               
     }                                               
 }
-
-sync_byte = 0x47
-N = 184 - adaptation_field_length - (adaptation_field_length > 0)
-
-
