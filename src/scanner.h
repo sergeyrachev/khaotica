@@ -101,7 +101,7 @@ namespace khaotica {
             out << std::endl;
         }
 
-        virtual void on(const simsbf_t& node, const simsbf_v& field, const uint64_t position, const uint64_t length){
+        virtual void on(const simsbf_t& node, const simsbf_v& field, const uint64_t position, const uint64_t length) final{
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << node.name;
@@ -110,7 +110,7 @@ namespace khaotica {
             out << std::endl;
         }
 
-        virtual void on(const tcimsbf_t& node, const tcimsbf_v& field, const uint64_t position, const uint64_t length){
+        virtual void on(const tcimsbf_t& node, const tcimsbf_v& field, const uint64_t position, const uint64_t length) final{
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << node.name;
@@ -119,13 +119,47 @@ namespace khaotica {
             out << std::endl;
         }
 
-        virtual void on(const collection_t&, const collection_v& node, const uint64_t position, const uint64_t length) final {
+        virtual void on(const vlclbf_t& node, const vlclbf_v& field, const uint64_t position, const uint64_t length) final {
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << node.name;
+            out << std::setw(V) << std::right << khaotica::algorithm::to_string(field.value);
+            out << std::setw(N) << std::right << "0x"+khaotica::algorithm::to_hex(field.value);
+            out << std::endl;
+        }
+
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, bslbf_tag){
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << "<collection>";
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, bslbf_tag) final {
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uimsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << "<collection>";
+            out << std::endl;
+        }
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, simsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << "<collection>";
+            out << std::endl;
+        }
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, vlclbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << "<collection>";
+            out << std::endl;
+        }
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << "<collection>";
+            out << std::endl;
+        }
+
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, bslbf_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
@@ -133,7 +167,7 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, uimsbf_tag) final {
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, uimsbf_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
@@ -141,7 +175,7 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, simsbf_tag) final {
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, simsbf_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
@@ -149,7 +183,15 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, vlclbf_tag) final {
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, vlclbf_tag) final {
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
@@ -158,9 +200,48 @@ namespace khaotica {
             out << std::endl;
         }
 
-        virtual void on(const expression_t&, const expression_v&node, const uint64_t position, const uint64_t length) final {
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, bslbf_tag){
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<slot>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, uimsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<slot>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, simsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<slot>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, vlclbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<slot>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag){
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<slot>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+
+        virtual void on(const expression_t&, const expression_v&node) final {
             out << "<expr>";
             out << std::endl;
         }

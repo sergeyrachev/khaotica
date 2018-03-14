@@ -77,19 +77,21 @@ namespace khaotica::syntax::mpeg2 {
         int64_t value;
     };
 
+
     template<typename T>
     struct tag_tt{};
-
     using bslbf_tag = tag_tt<bslbf_t>;
     using uimsbf_tag = tag_tt<uimsbf_t>;
     using simsbf_tag = tag_tt<simsbf_t>;
     using vlclbf_tag = tag_tt<vlclbf_t>;
+    using tcimsbf_tag = tag_tt<tcimsbf_t>;
 
     typedef std::variant<
         bslbf_tag,
         uimsbf_tag,
         simsbf_tag,
-        vlclbf_tag
+        vlclbf_tag,
+        tcimsbf_tag
     > tag_t;
 
     struct collection_t {
@@ -100,7 +102,7 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct collection_v {
-
+        std::vector<std::vector<bool>> value;
     };
 
     typedef std::variant<
@@ -116,7 +118,7 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct slot_v {
-
+        std::vector<bool> field;
     };
 
     struct range_t {
@@ -132,6 +134,7 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct sparsed_v {
+        std::vector<bool> field;
         std::vector<bool> value;
         std::vector<bool> mask;
     };
@@ -231,7 +234,6 @@ namespace khaotica::syntax::mpeg2 {
         std::vector<bool>,
         uint64_t,
         int64_t,
-        //sparsed_v,
         bool
     > expression_v;
 

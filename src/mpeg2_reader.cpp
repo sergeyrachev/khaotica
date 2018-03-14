@@ -63,12 +63,11 @@ namespace {
         }
 
         std::vector<bool> read(const length_t &length) {
-            if (length.from == length.to) {
-                return bitreader.read(length.from);
-            } else {
-                assert(false && "Not implemented");
-            }
-            return {};
+            return bitreader.read(length.from);
+        }
+        std::vector<bool> read_vlc(const length_t &length) {
+            assert(false && "Not implemented");
+            return bitreader.read(length.from);
         }
 
         std::shared_ptr<value_t> operator()(const auto &node) {
@@ -154,7 +153,14 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const vlclbf_t &node) {
-            return {};
+            auto position = bitreader.position();
+            vlclbf_v field{read_vlc(node.length)};
+
+            handler.on(node, field, position, bitreader.position() - position);
+
+            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            scope->definitions[node.name] = node_value;
+            return node_value;
         };
 
         std::shared_ptr<value_t> operator()(const collection_t &node) {
@@ -167,13 +173,33 @@ namespace {
 
 
         std::shared_ptr<value_t> operator()(const sparsed_t &node) {
-            std::visit([&node, this](const auto& tag){
+            return std::visit([&node, this](const auto& tag){
                 auto position = bitreader.position();
                 auto field = read(node.length);
-                handler.on(node, std::pair{bitstring_v{}, sparsed_v{}}, position, bitreader.position() - position, tag);
-            }, node.tag);
 
-            return {};
+                auto low_bound = std::min(node.range.front, node.range.back);
+                auto high_bound = std::max(node.range.front, node.range.back);
+
+                auto [value, mask] = update({}, {}, field, node.range.front, node.range.back);
+
+                sparsed_v sparsed_field{field, value, mask};
+
+                if(auto it = scope->definitions.find(node.name); it != scope->definitions.end()){
+                    auto& accumulator = std::get<std::vector<bool>>(it->second->payload);
+
+                    auto [v, m] = update(accumulator, {}, field, low_bound, high_bound);
+                    accumulator = v;
+
+                    sparsed_field.value = v;
+                    sparsed_field.mask = m; // FIXME: ISSUE!
+                }
+
+                handler.on(node, sparsed_field, position, bitreader.position() - position, tag);
+
+                auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{sparsed_field.value}, position, bitreader.position() - position});
+                scope->definitions[node.name] = node_value;
+                return node_value;
+            }, node.tag);
         }
 
         std::shared_ptr<value_t> operator()(const reference_t &node) {
@@ -320,29 +346,31 @@ namespace {
             return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
         };
 
-        //
-//        std::tuple<std::vector<bool>, std::vector<bool>>
-//        update(const std::vector<bool> &initial_value, const std::vector<bool> &initial_mask, const std::vector<bool> &slice_value,
-//               const std::pair<uint64_t, uint64_t> &range) {
-//
-//            auto right = std::min(range.first, range.second);
-//            auto left = std::max(range.first, range.second) + 1;
-//
-//            auto upper_bound = std::max(initial_mask.size(), left);
-//            std::vector<bool> mask = initial_mask;
-//            mask.resize(upper_bound);
-//            std::fill(mask.begin() + right, mask.begin() + left, true);
-//
-//            std::vector<bool> value = initial_value;
-//            value.resize(upper_bound);
-//
-//            auto it = value.begin();
-//            std::advance(it, right);
-//            std::copy(slice_value.begin(), slice_value.end(), it);
-//
-//            return {value, mask};
-//        }
-//
+
+        std::tuple<std::vector<bool>, std::vector<bool>>
+        update(const std::vector<bool> &initial_value,
+               const std::vector<bool> &initial_mask,
+               const std::vector<bool> &slice_value,
+               const uint64_t low, const uint64_t high) {
+
+            auto right = std::min(low, high);
+            auto left = std::max(low, high) + 1;
+
+            auto upper_bound = std::max(initial_mask.size(), left);
+            std::vector<bool> mask = initial_mask;
+            mask.resize(upper_bound);
+            std::fill(mask.begin() + right, mask.begin() + left, true);
+
+            std::vector<bool> value = initial_value;
+            value.resize(upper_bound);
+
+            auto it = value.begin();
+            std::advance(it, right);
+            std::copy(slice_value.begin(), slice_value.end(), it);
+
+            return {value, mask};
+        }
+
     private:
         bitreader_t &bitreader;
         const document_t &doc;
@@ -358,3 +386,4 @@ void reader_t::parse(bitreader_t& in, const document_t& doc, sax_t& handler) {
     parse_t parse(in, doc, handler);
     parse.parse();
 }
+
