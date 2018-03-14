@@ -110,7 +110,14 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const tcimsbf_t &node) {
-            return {};
+            auto position = bitreader.position();
+            tcimsbf_v field{khaotica::algorithm::to_integer_msbf<int64_t>(read(node.length))};
+
+            handler.on(node, field, position, bitreader.position() - position);
+
+            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            scope->definitions[node.name] = node_value;
+            return node_value;
         };
 
         std::shared_ptr<value_t> operator()(const bslbf_t &node) {
@@ -126,7 +133,7 @@ namespace {
 
         std::shared_ptr<value_t> operator()(const uimsbf_t &node) {
             auto position = bitreader.position();
-            uimsbf_v field{khaotica::algorithm::to_ull_msbf(read(node.length))};
+            uimsbf_v field{khaotica::algorithm::to_integer_msbf<uint64_t>(read(node.length))};
 
             handler.on(node, field, position, bitreader.position() - position);
 
@@ -136,7 +143,14 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const simsbf_t &node) {
-            return {};
+            auto position = bitreader.position();
+            simsbf_v field{khaotica::algorithm::to_integer_msbf<int64_t>(read(node.length))};
+
+            handler.on(node, field, position, bitreader.position() - position);
+
+            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            scope->definitions[node.name] = node_value;
+            return node_value;
         };
 
         std::shared_ptr<value_t> operator()(const vlclbf_t &node) {
@@ -151,24 +165,12 @@ namespace {
             return {};
         };
 
-        std::shared_ptr<value_t> operator()(const sparsed_t &node) {
 
-//            auto value = bitreader.read(node.bits.length);
-//            auto it = symbols.find(node.bits.name);
-//            if (it == symbols.end()) {
-//                auto[bits, mask] = update({}, {}, value, node.range);
-//
-//                auto v = std::make_shared<value_t>(value_t{std::make_pair(node, std::make_pair(bslbf_v{value, position}, bslbf_ranged_v{bits, mask}))});
-//                symbols[node.bits.name] = v;
-//                return v;
-//            } else {
-//                auto previous = std::get<std::pair<bslbf_ranged_t, std::pair<bslbf_v, bslbf_ranged_v>>>(it->second->payload);
-//                auto previous_value = previous.second.second;
-//                auto[bits, mask] = update(previous_value.value, previous_value.mask, value, node.range);
-//
-//                auto v = std::make_shared<value_t>(value_t{std::make_pair(node, std::make_pair(bslbf_v{value, position}, bslbf_ranged_v{bits, mask}))});
-//                symbols[node.bits.name] = v;
-//            }
+        std::shared_ptr<value_t> operator()(const sparsed_t &node) {
+            auto position = bitreader.position();
+            auto field = read(node.length);
+            handler.on(node, std::pair{bitstring_v{}, sparsed_v{}}, position, bitreader.position() - position);
+
             return {};
         }
 
@@ -312,7 +314,8 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const bytealigned_t &node) {
-            return nullptr;
+            bool value = (bitreader.position() % 8) == 0;
+            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
         };
 
         //

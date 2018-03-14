@@ -24,6 +24,8 @@ namespace khaotica::syntax::mpeg2 {
 
         virtual void on(const bslbf_t&, const bitstring_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const uimsbf_t&, const uimsbf_v&node, const uint64_t position, const uint64_t length) = 0;
+        virtual void on(const simsbf_t&, const simsbf_v&node, const uint64_t position, const uint64_t length) = 0;
+        virtual void on(const tcimsbf_t&, const tcimsbf_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const collection_t&, const collection_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const sparsed_t&, const std::pair<bitstring_v, sparsed_v>&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const expression_t&, const expression_v&node, const uint64_t position, const uint64_t length) = 0;

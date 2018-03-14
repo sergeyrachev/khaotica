@@ -131,7 +131,7 @@ namespace khaotica {
 
             size_t indent{0};
             std::swap(indent, indentation);
-            out << std::visit(*this, node.entry);
+            out << " ";
             std::swap(indent, indentation);
 
             return out.str();
@@ -147,7 +147,7 @@ namespace khaotica {
 
             size_t indent{0};
             std::swap(indent, indentation);
-            out << std::visit(*this, node.entry);
+            out << " ";
             std::swap(indent, indentation);
 
             return out.str();
@@ -159,7 +159,7 @@ namespace khaotica {
 
             size_t indent{0};
             std::swap(indent, indentation);
-            out << std::visit(*this, node.entry);
+            out << "<sparsed>";
             std::swap(indent, indentation);
             return out.str();
         };

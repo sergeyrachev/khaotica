@@ -27,15 +27,17 @@ namespace khaotica {
         inline std::vector<bool> unpack(const std::string& v) {
             std::vector<bool> ret;
             for (auto &&entry : v) {
-                assert(entry == '0' || entry == '1');
-                bool bit = entry == '1';
-                ret.push_back(bit);
+                if(entry == '0' || entry == '1'){
+                    bool bit = entry == '1';
+                    ret.push_back(bit);
+                }
             }
             return ret;
         }
 
-        inline uint64_t to_ull_msbf(const std::vector<bool> &v) {
-            uint64_t u(0);
+        template<typename T>
+        inline T to_integer_msbf(const std::vector<bool> &v) {
+            T u(0);
             for (auto it = v.begin(); it != v.end(); ++it) {
                 u <<= 1;
                 u |= *it;
@@ -44,8 +46,9 @@ namespace khaotica {
             return u;
         }
 
-        inline uint64_t to_ull_lsbf(const std::vector<bool> &v) {
-            uint64_t u(0);
+        template<typename T>
+        inline T to_integer_lsbf(const std::vector<bool> &v) {
+            T u(0);
             for (auto it = v.rbegin(); it != v.rend(); ++it) {
                 u <<= 1;
                 u |= *it;

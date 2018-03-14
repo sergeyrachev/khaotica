@@ -73,27 +73,31 @@ namespace khaotica::syntax::mpeg2 {
         length_t length;
     };
 
-    typedef std::variant<
-        bslbf_t,
-        uimsbf_t,
-        simsbf_t,
-        vlclbf_t
-    > entry_t;
+    struct tcimsbf_v {
+        int64_t value;
+    };
+
+    using bslbf_tag = struct {};
+    using uimsbf_tag = struct {};
+    using simsbf_tag = struct {};
+    using vlclbf_tag = struct {};
 
     typedef std::variant<
-        bitstring_v,
-        uimsbf_v,
-        simsbf_v,
-        vlclbf_v
-    > entry_v;
+        bslbf_tag,
+        uimsbf_tag,
+        simsbf_tag,
+        vlclbf_tag
+    > tag_t;
 
     struct collection_t {
-        entry_t entry;
+        std::string name;
+        length_t length;
         size_t size;
+        tag_t tag;
     };
 
     struct collection_v {
-        std::vector<entry_v> value;
+
     };
 
     typedef std::variant<
@@ -102,15 +106,14 @@ namespace khaotica::syntax::mpeg2 {
     > dimension_t;
 
     struct slot_t {
-        entry_t entry;
+        std::string name;
+        length_t length;
         std::vector<dimension_t> indices;
+        tag_t tag;
     };
 
     struct slot_v {
-        std::map<
-            std::vector<size_t>,
-            entry_v
-        > value;
+
     };
 
     struct range_t {
@@ -119,8 +122,10 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct sparsed_t {
-        entry_t entry;
+        std::string name;
+        length_t length;
         range_t range;
+        tag_t tag;
     };
 
     struct sparsed_v {
@@ -215,7 +220,8 @@ namespace khaotica::syntax::mpeg2 {
         preincrement_t,
         assignment_t,
         position_t,
-        nextbits_t
+        nextbits_t,
+        bytealigned_t
     > expression_t;
 
     typedef std::variant<

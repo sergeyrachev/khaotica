@@ -17,6 +17,7 @@ transport_packet(){
         adaptation_field()
     }
     if(adaptation_field_control=='01' || adaptation_field_control=='11') {
+        PES_packet_header()
         for (i = __position()/8; i < __position(sync_byte) / 8 + 188; i = i + 1){
              data_byte                                       8 bslbf
         }
@@ -79,9 +80,63 @@ adaptation_field() {
             for ( i = __position()/8; i < __position(adaptation_field_length)/8 + adaptation_field_length; i++) {
                  reserved                                    8 bslbf
             }                                               
-        }                                               
+        }
         for (i = __position()/8; i < __position(adaptation_field_length)/8 + adaptation_field_length; i++){
              stuffing_byte                                   8 bslbf
         }                                               
     }                                               
+}
+
+PES_packet_header() {
+    packet_start_code_prefix                                  24 bslbf
+    stream_id                                                  8 uimsbf
+    PES_packet_length                                         16 uimsbf
+    if (stream_id != 0b10111100
+        && stream_id != 0b10111110
+        && stream_id != 0b10111111
+        && stream_id != 0b11110000
+        && stream_id != 0b11110001
+        && stream_id != 0b11111111
+        && stream_id != 0b11110010
+        && stream_id != 0b11111000 ) {
+        _10                                                    2  "10"
+        PES_scrambling_control                                 2  bslbf
+        PES_priority                                           1  bslbf
+        data_alignment_indicator                               1  bslbf
+        copyright                                              1  bslbf
+        original_or_copy                                       1  bslbf
+        PTS_DTS_flags                                          2  bslbf
+        ESCR_flag                                              1  bslbf
+        ES_rate_flag                                           1  bslbf
+        DSM_trick_mode_fla                                     1  bslbf
+        additional_copy_info_flag                              1  bslbf
+        PES_CRC_flag                                           1  bslbf
+        PES_extension_flag                                     1  bslbf
+        PES_header_data_length                                 8 uimsbf
+        if (PTS_DTS_flags == '10' ) {
+            _0010                                              4 "0010"
+            PTS [32..30]                                       3 bslbf
+            marker_bit                                         1 bslbf
+            PTS [29..15]                                      15 bslbf
+            marker_bit                                         1 bslbf
+            PTS [14..0]                                       15 bslbf
+            marker_bit                                         1 bslbf
+        }
+        if (PTS_DTS_flags == '11' ) {
+            _0011                                             4  "0011"
+            PTS [32..30]                                       3 bslbf
+            marker_bit                                         1 bslbf
+            PTS [29..15]                                      15 bslbf
+            marker_bit                                         1 bslbf
+            PTS [14..0]                                       15 bslbf
+            marker_bit                                         1 bslbf
+            _0001                                             4  "0001"
+            DTS [32..30]                                       3 bslbf
+            marker_bit                                         1 bslbf
+            DTS [29..15]                                      15 bslbf
+            marker_bit                                         1 bslbf
+            DTS [14..0]                                       15 bslbf
+            marker_bit                                         1 bslbf
+        }
+    }
 }

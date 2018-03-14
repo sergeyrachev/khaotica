@@ -139,6 +139,7 @@
 %type <std::nullptr_t> bslbf_mnemonic
 %type <length_t> entry_length
 
+%type <tag_t > tag
 %type <bslbf_t> bslbf_field
 %type <uimsbf_t> uimsbf_field
 %type <simsbf_t> simsbf_field
@@ -303,23 +304,20 @@ IDENTIFIER[name] entry_length[length] "tcimsbf" {
 }
 
 collection_field:
-IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] "uimsbf" {
-    uimsbf_t field{$name, $length};
-    $$ = collection_t{field, static_cast<uint64_t>($times)};
-}|
-IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] "bslbf" {
-    bslbf_t field{$name, $length};
-    $$ = collection_t{field, static_cast<uint64_t>($times)};
+IDENTIFIER[name] dimensions entry_length[length] "*" INTEGER[times] tag {
+    $$ = collection_t{$name, $length, static_cast<uint64_t>($times), $tag};
 }
 
 slot_field:
-IDENTIFIER[name] dimensions entry_length[length] "uimsbf" {
-    uimsbf_t field{$name, $length};
-    $$ = slot_t{field, $dimensions};
-}|
-IDENTIFIER[name] dimensions entry_length[length] "vlclbf" {
-   vlclbf_t field{$name, $length};
-   $$ = slot_t{field, $dimensions};
+IDENTIFIER[name] dimensions entry_length[length] tag {
+    $$ = slot_t{$name, $length, $dimensions, $tag};
+}
+
+tag
+: "bslbf" {
+    $$ = bslbf_tag{};
+}| "uimsbf" {
+    $$ = uimsbf_tag{};
 }
 
 dimensions:
@@ -351,8 +349,7 @@ dimension_integer:
 
 sparsed_field:
 IDENTIFIER[name] ranged entry_length[length] "bslbf" {
-    bslbf_t field{$name, $length};
-    $$ = sparsed_t{field, $ranged};
+    $$ = sparsed_t{$name, $length, $ranged, bslbf_tag{}};
 }
 
 ranged:

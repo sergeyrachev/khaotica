@@ -4,19 +4,9 @@ MPEG_transport_stream() {
     } while (nextbits() == 0x47)
 }
 
-transport_packet(){
-     sync_byte                                               8 bslbf
-     transport_error_indicator                               1 bslbf
-     payload_unit_start_indicator                            1 bslbf
-     transport_priority                                      1 bslbf
-     PID                                                    13 uimsbf
-     transport_scrambling_control                            2 bslbf
-     adaptation_field_control                                2 bslbf
-     continuity_counter                                      4 uimsbf
+my_packet(){
+     sync_byte                                               128 bslbf
 
-    if(adaptation_field_control=='01' || adaptation_field_control=='11') {
-        payload()
-    }
 }
 
 payload(){
@@ -24,3 +14,4 @@ payload(){
         fakerest  8 uimsbf
     }
 }
+

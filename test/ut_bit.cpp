@@ -15,14 +15,14 @@ TEST(Bit, UnpackLeastSignificantFirst){
     ASSERT_EQ(1, v[7]);
 }
 
-TEST(Bit, to_ull_msbf){
-    auto u = to_ull_msbf({true, false, false, false, false, false, false, false});
+TEST(Bit, to_integer_msbf){
+    auto u = to_integer_msbf({true, false, false, false, false, false, false, false});
 
     ASSERT_EQ(128, u);
 }
 
-TEST(Bit, to_ull_lsbf){
-    auto u = to_ull_lsbf({true, false, false, false, false, false, false, false});
+TEST(Bit, to_integer_lsbf){
+    auto u = to_integer_lsbf({true, false, false, false, false, false, false, false});
 
     ASSERT_EQ(1, u);
 }
