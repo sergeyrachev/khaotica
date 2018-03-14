@@ -167,9 +167,11 @@ namespace {
 
 
         std::shared_ptr<value_t> operator()(const sparsed_t &node) {
-            auto position = bitreader.position();
-            auto field = read(node.length);
-            handler.on(node, std::pair{bitstring_v{}, sparsed_v{}}, position, bitreader.position() - position);
+            std::visit([&node, this](const auto& tag){
+                auto position = bitreader.position();
+                auto field = read(node.length);
+                handler.on(node, std::pair{bitstring_v{}, sparsed_v{}}, position, bitreader.position() - position, tag);
+            }, node.tag);
 
             return {};
         }

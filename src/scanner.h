@@ -125,7 +125,7 @@ namespace khaotica {
             out << "<collection>";
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length) final {
+        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, bslbf_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
@@ -133,6 +133,31 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
+        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, uimsbf_tag) final {
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, simsbf_tag) final {
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+        virtual void on(const sparsed_t& node, const std::pair<bitstring_v, sparsed_v>& field, const uint64_t position, const uint64_t length, vlclbf_tag) final {
+            out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
+            out << std::setw(S) << length;
+            out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << "<sparsed>";
+            out << std::setw(V) << std::right << " ";
+            out << std::setw(N) << std::right << " ";
+            out << std::endl;
+        }
+
         virtual void on(const expression_t&, const expression_v&node, const uint64_t position, const uint64_t length) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
