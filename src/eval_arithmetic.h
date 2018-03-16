@@ -82,6 +82,10 @@ namespace khaotica {
                 assert(false && "WAT?!");
                 return false;
             }
+            expression_v operator()(const auto &left, const auto &right) {
+                assert(false && "WAT?!");
+                return false;
+            }
         };
 
         typedef arithmetical_t<std::minus<>> minus_t;

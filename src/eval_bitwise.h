@@ -28,6 +28,11 @@ namespace khaotica {
                 ret.flip();
                 return bitstring_v{ret, operand.mask};
             }
+
+            expression_v operator()(const auto &operand) {
+                assert(false && "WAT????");
+                return {false};
+            }
         };
     }
 }

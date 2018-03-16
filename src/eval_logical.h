@@ -83,6 +83,11 @@ namespace khaotica {
                 assert(false && "WAT?!");
                 return {false};
             }
+
+            bool operator()(const auto &left, const auto &right) {
+                assert(false && "WAT?!");
+                return {false};
+            }
         };
 
         struct logical_not_t {
@@ -98,9 +103,9 @@ namespace khaotica {
                 return !operand;
             }
 
-            bool operator()(const bitstring_v &operand) {
+            bool operator()(const auto& operand){
                 assert(false && "WAT?!");
-                return operand.value.empty();
+                return false;
             }
         };
 

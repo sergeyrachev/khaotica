@@ -1,14 +1,33 @@
 #include "bitreader.h"
 
+#include <cstddef>
+
 using namespace khaotica::bitstream::mpeg2;
 
 bitreader_t::bitreader_t(std::istream &in) : in(in) {
 
 }
 
-std::vector<bool> bitreader_t::peek() {
+std::vector<bool> bitreader_t::peek(uint64_t n) {
     using khaotica::algorithm::unpack;
-    return unpack(in.peek());
+    auto bytes = (n / 8) + 1;
+    std::vector<int> buffer;
+    for (int i = 0; i < bytes; ++i) {
+        buffer.push_back(in.get());
+    }
+
+    std::for_each(buffer.rbegin(), buffer.rend(), [this](const auto& v){
+        in.putback(v);
+    });
+
+    std::vector<bool> bits(_cache);
+    for (auto &&item : buffer) {
+        auto entry = unpack(item);
+        std::copy(entry.rbegin(), entry.rend(), std::back_inserter(bits));
+    }
+
+    bits.resize(n);
+    return bits;
 }
 
 std::vector<bool> bitreader_t::read(uint64_t n) {

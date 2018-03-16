@@ -12,7 +12,7 @@ namespace khaotica::bitstream::mpeg2 {
     public:
         explicit bitreader_t(std::istream &in);
 
-        std::vector<bool> peek();
+        std::vector<bool> peek(uint64_t n);
         std::vector<bool> read(uint64_t n);
         uint64_t position();
 

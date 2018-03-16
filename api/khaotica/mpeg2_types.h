@@ -39,7 +39,7 @@ namespace khaotica::syntax::mpeg2 {
 
     struct bitstring_v {
         std::vector<bool> value;
-        std::optional<std::vector<bool>> mask;
+        std::optional<std::vector<bool>> mask; // TODO: Use properly on grammar parsing
     };
 
     struct uimsbf_t {
@@ -144,16 +144,16 @@ namespace khaotica::syntax::mpeg2 {
     struct node_t;
     struct value_t;
 
-    typedef std::list<std::shared_ptr<node_t>> sequence_t;
+    typedef std::vector<std::shared_ptr<node_t>> sequence_t;
 
     struct reference_t {
         std::string name;
-        std::list<std::shared_ptr<node_t>> args;
+        std::vector<std::shared_ptr<node_t>> args;
     };
 
     struct compound_t {
         std::string name;
-        std::list<std::string> args;
+        std::vector<std::string> args;
         std::shared_ptr<node_t> body;
     };
 
@@ -211,11 +211,15 @@ namespace khaotica::syntax::mpeg2 {
     };
 
     struct nextbits_t {
-        std::optional<uint64_t> length;
+
     };
 
     struct bytealigned_t {
 
+    };
+
+    struct nextbits_v{
+        virtual std::vector<bool> get(size_t n) = 0;
     };
 
     typedef std::variant<
@@ -233,6 +237,7 @@ namespace khaotica::syntax::mpeg2 {
     > expression_t;
 
     typedef std::variant<
+        std::shared_ptr<nextbits_v>,
         bitstring_v,
         uint64_t,
         int64_t,

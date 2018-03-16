@@ -24,8 +24,14 @@ namespace khaotica{
             }
 
             bool operator()(const bitstring_v &operand) {
+                return std::any_of(operand.value.begin(), operand.value.end(), [](const auto& b){
+                    return b;
+                });
+            }
+
+            bool operator()(const auto &operand) {
                 assert(false && "WAT?!");
-                return operand.value.empty();
+                return false;
             }
         };
     }

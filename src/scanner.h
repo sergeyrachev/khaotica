@@ -71,17 +71,29 @@ namespace khaotica {
         }
 
         virtual void open(const while_t &node) final {
+            out << std::setw(P) << std::right << "-";
+            out << std::setw(S) << std::right << "-";
+            out << std::string(indent, ' ') << "while" << "(" << "){" << std::endl;
             indent++;
         }
         virtual void close(const while_t &node) final {
             indent--;
+            out << std::setw(P) << std::right << "-";
+            out << std::setw(S) << std::right << "-";
+            out << std::string(indent, ' ') << "}" << std::endl;
         }
 
         virtual void open(const do_t &node) final {
+            out << std::setw(P) << std::right << "-";
+            out << std::setw(S) << std::right << "-";
+            out << std::string(indent, ' ') << "do" << "{" << std::endl;
             indent++;
         }
         virtual void close(const do_t &node) final {
             indent--;
+            out << std::setw(P) << std::right << "-";
+            out << std::setw(S) << std::right << "-";
+            out << std::string(indent, ' ') << "} while()" << std::endl;
         }
 
         virtual void on(const bslbf_t& node, const bitstring_v& field, const uint64_t position, const uint64_t length) final {

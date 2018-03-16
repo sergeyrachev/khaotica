@@ -1,12 +1,12 @@
 video_sequence() {
     next_start_code()
     sequence_header()
-    if ( nextbits() == 0xB5 ) {
+    if ( nextbits() == '0000 0000  0000 0000  0000 0001  1011 0101' ) {
         sequence_extension()
         do {
             extension_and_user_data( 0 )
             do {
-                if (nextbits() == 0xB8) {
+                if (nextbits() == '0000 0000  0000 0000  0000 0001  1011 1000') {
                     group_of_pictures_header()
                     extension_and_user_data( 1 )
                 }
@@ -14,12 +14,12 @@ video_sequence() {
                 picture_coding_extension()
                 extension_and_user_data( 2 )
                 picture_data()
-            } while ( (nextbits() == picture_start_code) || (nextbits() == group_start_code) )
-            if ( nextbits() != sequence_end_code ) {
+            } while ( (nextbits() == 0x00000100) || (nextbits() == '0000 0000  0000 0000  0000 0001  1011 1000') )
+            if ( nextbits() != '0000 0000  0000 0000  0000 0001  1011 0111' ) {
                 sequence_header()
                 sequence_extension()
             }
-        } while ( nextbits() != sequence_end_code )
+        } while ( nextbits() != '0000 0000  0000 0000  0000 0001  1011 0111' )
     } else {
     /* ISO/IEC 11172-2 */
     }
@@ -46,7 +46,7 @@ sequence_header() {
 }
 
 extension_and_user_data( i ) {
-    while ( ( nextbits()== extension_start_code ) || ( nextbits()== user_data_start_code ) ) {
+    while ( ( nextbits()== '0000 0000 0000 0000 0000 0001 1011 0101' ) || ( nextbits()== '0000 0000 0000 0000 0000 0001 1011 0010' ) ) {
         if ( i != 1 )
             if ( nextbits()== extension_start_code )
                 extension_data( i )
@@ -125,7 +125,7 @@ sequence_scalable_extension() {
     extension_start_code_identifier 4 uimsbf
     scalable_mode 2 uimsbf
     layer_id 4 uimsbf
-    if (scalable_mode == '01') {
+    if (scalable_mode == 1) {
         lower_layer_prediction_horizontal_size 14 uimsbf
         marker_bit 1 bslbf
         lower_layer_prediction_vertical_size 14 uimsbf
@@ -134,7 +134,7 @@ sequence_scalable_extension() {
         vertical_subsampling_factor_m 5 uimsbf
         vertical_subsampling_factor_n 5 uimsbf
     }
-    if ( scalable_mode == '11' ) {
+    if ( scalable_mode == 3 ) {
         picture_mux_enable 1 uimsbf
         if ( picture_mux_enable )
             mux_to_progressive_sequence 1 uimsbf
@@ -276,7 +276,7 @@ picture_data() {
 
 slice() {
     slice_start_code 32 bslbf
-    if (vertical_size > 2800)
+    if (vertical_size_value > 2800)
     slice_vertical_position_extension 3 uimsbf
     if ( __position(sequence_scalable_extension) )
         if (scalable_mode == '00' )

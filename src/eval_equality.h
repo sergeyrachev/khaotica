@@ -7,10 +7,12 @@
 #include <cassert>
 #include <vector>
 #include <functional>
+#include <memory>
 
 namespace khaotica {
     namespace eval{
         using khaotica::syntax::mpeg2::bitstring_v;
+        using khaotica::syntax::mpeg2::nextbits_v;
 
         template<typename F>
         struct equality_t {
@@ -81,6 +83,16 @@ namespace khaotica {
 
             bool operator()(const bitstring_v &left, const uint64_t &right) {
                 return F()(left.value, khaotica::algorithm::unpack(right)) && F()(left.mask, std::vector<bool>(left.value.size(), true));
+            }
+
+            bool operator()(const std::shared_ptr<nextbits_v> &left, const bitstring_v &right) {
+                auto nextbits = left->get(right.value.size());
+                return F()(nextbits, right.value);
+            }
+
+            bool operator()(const auto &left, const auto &right) {
+                assert(false && "WAT?!");
+                return {false};
             }
         };
 

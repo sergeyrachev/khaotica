@@ -88,6 +88,11 @@ namespace khaotica {
                 assert(false && "WAT?!");
                 return {false};
             }
+
+            bool operator()(const auto &left, const auto &right) {
+                assert(false && "WAT?!");
+                return {false};
+            }
         };
 
         typedef comparison_t<std::less<>> less_t;

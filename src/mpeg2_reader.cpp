@@ -52,6 +52,37 @@ namespace {
         return functors.at(op);
     }
 
+    struct indexation_t {
+
+        template<typename T, typename = std::enable_if<std::is_arithmetic_v<T>>>
+        uint64_t operator()(const T& v){
+            return static_cast<uint64_t>(v);
+        }
+
+        uint64_t operator()(const bitstring_v& v){
+            return khaotica::algorithm::to_integer_msbf<uint64_t>(v.value);
+        }
+
+        uint64_t operator()(const std::shared_ptr<nextbits_v>& v){
+            assert(false && "WAT??????");
+            return 0;
+        }
+    };
+
+    class nextbits_impl : public nextbits_v {
+    public:
+        nextbits_impl(bitreader_t& bitreader):bitreader(bitreader){
+
+        }
+
+        virtual std::vector<bool> get(size_t n) final {
+            return bitreader.peek(n);
+        }
+
+    private:
+        bitreader_t &bitreader;
+    };
+
     class parse_t {
     public:
         explicit parse_t(bitreader_t &bitreader, const document_t &doc, sax_t& handler)
@@ -66,7 +97,7 @@ namespace {
             return bitreader.read(length.from);
         }
         std::vector<bool> read_vlc(const length_t &length) {
-            assert(false && "Not implemented");
+            //assert(false && "Not implemented");
             return bitreader.read(length.from);
         }
 
@@ -213,6 +244,8 @@ namespace {
             }, node.tag);
         };
 
+
+
         std::shared_ptr<value_t> operator()(const slot_t &node) {
             return std::visit([&node, this](const auto& tag){
                 auto position = bitreader.position();
@@ -223,14 +256,7 @@ namespace {
 
                 for(auto&& dim : node.indices){
                     auto idx_value = std::visit(*this, dim);
-
-                    uint64_t idx = std::visit([](const auto& v)->uint64_t{
-                        if constexpr (std::is_arithmetic_v<std::decay_t<decltype(v)>>){
-                            return static_cast<uint64_t>(v);
-                        } else {
-                            return khaotica::algorithm::to_integer_msbf<uint64_t>(v.value);
-                        }
-                        }, idx_value->payload);
+                    uint64_t idx = std::visit(indexation_t(), idx_value->payload);
                     slot_value.indices.push_back(idx);
                 }
 
@@ -292,8 +318,21 @@ namespace {
 
         std::shared_ptr<value_t> operator()(const reference_t &node) {
             auto it = doc.global->definitions.find(node.name);
-            assert(it != doc.global->definitions.end());
-            return std::visit(*this, it->second->payload);
+
+            scope = scope->open(scope);
+
+            auto& compound = std::get<compound_t>(it->second->payload);
+            assert(compound.args.size() == node.args.size());
+            handler.open(compound);
+            for (int i = 0; i < node.args.size(); ++i) {
+                scope->definitions[compound.args[i]] = std::visit(*this, node.args[i]->payload);
+            }
+
+            std::visit(*this, it->second->payload);
+
+            handler.close(compound);
+            scope = scope->close();
+            return {};
         };
 
         std::shared_ptr<value_t> operator()(const if_t &node) {
@@ -372,13 +411,9 @@ namespace {
         }
 
         std::shared_ptr<value_t> operator()(const compound_t &node) {
-            scope = scope->open(scope);
-            handler.open(node);
 
             std::visit(*this, node.body->payload);
 
-            handler.close(node);
-            scope = scope->close();
             return {};
         };
 
@@ -436,8 +471,7 @@ namespace {
         };
 
         std::shared_ptr<value_t> operator()(const nextbits_t &node) {
-            auto value = bitreader.peek();
-            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{bitstring_v{value, std::vector<bool>(value.size(), true)}}});
+            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{std::make_shared<nextbits_impl>(bitreader)}});
         };
 
         std::shared_ptr<value_t> operator()(const bytealigned_t &node) {

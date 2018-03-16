@@ -119,7 +119,7 @@
 %type <compound_t> compound
 
 %type <sequence_t> parameters
-%type <std::list<std::string>> arguments
+%type <std::vector<std::string>> arguments
 
 %type <std::shared_ptr<node_t>> expression
 %type <std::shared_ptr<node_t>> primary_expression
@@ -203,10 +203,10 @@ IDENTIFIER[name]{
 parameters:
 parameters[list] "," expression {
     $$ = $list;
-    $$.push_front($expression);
+    $$.push_back($expression);
 }|
 expression {
-    $$.push_front($expression);
+    $$.push_back($expression);
 }|
 %empty{
 
