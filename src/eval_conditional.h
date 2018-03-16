@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <cassert>
 #include <vector>
+#include <algorithm>
 
 namespace khaotica{
     namespace eval{
@@ -29,7 +30,8 @@ namespace khaotica{
                 });
             }
 
-            bool operator()(const auto &operand) {
+            template<typename T>
+            bool operator()(const T &operand) {
                 assert(false && "WAT?!");
                 return false;
             }

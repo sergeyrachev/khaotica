@@ -82,7 +82,9 @@ namespace khaotica {
                 assert(false && "WAT?!");
                 return false;
             }
-            expression_v operator()(const auto &left, const auto &right) {
+
+            template<typename T, typename U>
+            expression_v operator()(const T &left, const U &right) {
                 assert(false && "WAT?!");
                 return false;
             }
