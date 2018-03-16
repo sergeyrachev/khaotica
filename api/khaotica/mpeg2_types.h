@@ -12,6 +12,7 @@
 #include <list>
 #include <memory>
 #include <cstddef>
+#include <optional>
 
 namespace khaotica::syntax::mpeg2 {
 
