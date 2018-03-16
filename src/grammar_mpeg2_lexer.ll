@@ -109,7 +109,7 @@ line [[:print:][:blank:]]
 }
 
 {uinteger_bin} {
-    auto number = std::stoll(yytext, 0, 2);
+    auto number = std::stoll(yytext + 2, 0, 2);
     return parser_t::make_INTEGER( {number}, _location);
 }
 

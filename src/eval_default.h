@@ -14,11 +14,11 @@ namespace khaotica{
             }
 
             expression_v operator()(const khaotica::syntax::mpeg2::bslbf_t &node) {
-                return std::vector<bool>{};
+                return khaotica::syntax::mpeg2::bitstring_v{};
             }
 
             expression_v operator()(const khaotica::syntax::mpeg2::sparsed_t &node) {
-                return std::vector<bool>{};
+                return khaotica::syntax::mpeg2::bitstring_v{{}, {}};
             }
 
             expression_v operator()(const khaotica::syntax::mpeg2::uimsbf_t &node) {
@@ -33,7 +33,7 @@ namespace khaotica{
 
             expression_v operator()(const khaotica::syntax::mpeg2::bitstring_t &node) {
                 assert(false && "Must never be there");
-                return std::vector<bool>{};
+                return khaotica::syntax::mpeg2::bitstring_v{};
             }
 
             expression_v operator()(const khaotica::syntax::mpeg2::integer_t &node) {

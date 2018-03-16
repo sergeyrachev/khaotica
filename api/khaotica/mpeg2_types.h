@@ -39,6 +39,7 @@ namespace khaotica::syntax::mpeg2 {
 
     struct bitstring_v {
         std::vector<bool> value;
+        std::optional<std::vector<bool>> mask;
     };
 
     struct uimsbf_t {
@@ -119,6 +120,7 @@ namespace khaotica::syntax::mpeg2 {
 
     struct slot_v {
         std::vector<bool> field;
+        std::vector<uint64_t> indices;
     };
 
     struct range_t {
@@ -231,7 +233,7 @@ namespace khaotica::syntax::mpeg2 {
     > expression_t;
 
     typedef std::variant<
-        std::vector<bool>,
+        bitstring_v,
         uint64_t,
         int64_t,
         bool

@@ -44,11 +44,11 @@ namespace khaotica::syntax::mpeg2 {
         }
 
         std::shared_ptr<node_t> add(const collection_t &node) {
-            return {};
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const slot_t &node) {
-            return {};
+            return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
         std::shared_ptr<node_t> add(const sparsed_t &node) {

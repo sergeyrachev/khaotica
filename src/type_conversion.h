@@ -11,6 +11,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cassert>
+#include <algorithm>
 
 namespace khaotica {
     namespace algorithm {
@@ -92,6 +93,16 @@ namespace khaotica {
             }
 
             return ss.str();
+        }
+
+        inline std::string to_string(const std::vector<bool> &v, const std::vector<bool> &m){
+            std::stringstream ss;
+            for (auto i = 0; i < v.size(); ++i) {
+                ss << (m[i] ? std::to_string(v[i]) : "x");
+            }
+            auto out = ss.str();
+            std::reverse(out.begin(), out.end());
+            return out;
         }
     }
 }

@@ -70,10 +70,6 @@ namespace {
             return bitreader.read(length.from);
         }
 
-        std::shared_ptr<value_t> operator()(const auto &node) {
-            return {};
-        }
-
         std::shared_ptr<value_t> operator()(const sequence_t &node) {
             std::shared_ptr<value_t> value;
             for (auto &&item : node) {
@@ -105,7 +101,7 @@ namespace {
 
         std::shared_ptr<value_t> operator()(const bitstring_t &node) {
             auto value = khaotica::algorithm::unpack(node.value);
-            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
+            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{ bitstring_v{value, std::vector<bool>(value.size(), true)}}});
         };
 
         std::shared_ptr<value_t> operator()(const tcimsbf_t &node) {
@@ -125,7 +121,21 @@ namespace {
 
             handler.on(node, field, position, bitreader.position() - position);
 
-            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            auto node_value = std::make_shared<value_t>(value_t{
+                expression_t{
+                    identifier_t{
+                        node.name
+                    }
+                },
+                expression_v{
+                    bitstring_v{
+                        field.value,
+                        std::vector<bool>(field.value.size(), true)
+                    }
+                },
+                position,
+                bitreader.position() - position
+            });
             scope->definitions[node.name] = node_value;
             return node_value;
         };
@@ -158,17 +168,86 @@ namespace {
 
             handler.on(node, field, position, bitreader.position() - position);
 
-            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            auto node_value = std::make_shared<value_t>(value_t{
+                expression_t{
+                    identifier_t{
+                        node.name
+                    }
+                },
+                expression_v{
+                    bitstring_v{
+                        field.value,
+                        std::vector<bool>(field.value.size(), true)
+                    }
+                },
+                position,
+                bitreader.position() - position
+            });
             scope->definitions[node.name] = node_value;
             return node_value;
         };
 
         std::shared_ptr<value_t> operator()(const collection_t &node) {
-            return {};
+            return std::visit([&node, this](const auto& tag){
+                auto position = bitreader.position();
+
+                collection_v collection_value;
+                for (auto i = 0; i < node.size; ++i) {
+                    auto field = read(node.length);
+                    collection_value.value.push_back(field);
+                }
+
+                handler.on(node, collection_value, position, bitreader.position() - position, tag);
+
+                auto node_value = std::make_shared<value_t>(value_t{
+                    expression_t{
+                        identifier_t{
+                            node.name
+                        }
+                    },
+                    expression_v{
+                        true
+                    }, position, bitreader.position() - position});
+                scope->definitions[node.name] = node_value;
+                return node_value;
+            }, node.tag);
         };
 
         std::shared_ptr<value_t> operator()(const slot_t &node) {
-            return {};
+            return std::visit([&node, this](const auto& tag){
+                auto position = bitreader.position();
+
+                auto field = read(node.length);
+
+                slot_v slot_value{field, {}};
+
+                for(auto&& dim : node.indices){
+                    auto idx_value = std::visit(*this, dim);
+
+                    uint64_t idx = std::visit([](const auto& v)->uint64_t{
+                        if constexpr (std::is_arithmetic_v<std::decay_t<decltype(v)>>){
+                            return static_cast<uint64_t>(v);
+                        } else {
+                            return khaotica::algorithm::to_integer_msbf<uint64_t>(v.value);
+                        }
+                        }, idx_value->payload);
+                    slot_value.indices.push_back(idx);
+                }
+
+                handler.on(node, slot_value, position, bitreader.position() - position, tag);
+
+                auto node_value = std::make_shared<value_t>(value_t{
+                    expression_t{
+                        identifier_t{
+                            node.name
+                        }
+                    },
+                    expression_v{
+                        true
+                    }, position, bitreader.position() - position});
+                scope->definitions[node.name] = node_value;
+                return node_value;
+            }, node.tag);
         };
 
 
@@ -177,26 +256,35 @@ namespace {
                 auto position = bitreader.position();
                 auto field = read(node.length);
 
-                auto low_bound = std::min(node.range.front, node.range.back);
-                auto high_bound = std::max(node.range.front, node.range.back);
-
                 auto [value, mask] = update({}, {}, field, node.range.front, node.range.back);
 
-                sparsed_v sparsed_field{field, value, mask};
+                sparsed_v sparsed_value{field, value, mask};
 
                 if(auto it = scope->definitions.find(node.name); it != scope->definitions.end()){
-                    auto& accumulator = std::get<std::vector<bool>>(it->second->payload);
+                    auto accumulator = std::get<bitstring_v>(it->second->payload);
 
-                    auto [v, m] = update(accumulator, {}, field, low_bound, high_bound);
-                    accumulator = v;
+                    auto [value, mask] = update(accumulator.value, *accumulator.mask, field, node.range.front, node.range.back);
+                    accumulator.value = value;
+                    *accumulator.mask = mask;
 
-                    sparsed_field.value = v;
-                    sparsed_field.mask = m; // FIXME: ISSUE!
+                    sparsed_value.value = value;
+                    sparsed_value.mask = mask;
                 }
 
-                handler.on(node, sparsed_field, position, bitreader.position() - position, tag);
+                handler.on(node, sparsed_value, position, bitreader.position() - position, tag);
 
-                auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{sparsed_field.value}, position, bitreader.position() - position});
+                auto node_value = std::make_shared<value_t>(value_t{
+                    expression_t{
+                        identifier_t{
+                            node.name
+                        }
+                    },
+                    expression_v{
+                        bitstring_v{
+                            sparsed_value.value,
+                            sparsed_value.mask
+                        }
+                    }, position, bitreader.position() - position});
                 scope->definitions[node.name] = node_value;
                 return node_value;
             }, node.tag);
@@ -266,9 +354,20 @@ namespace {
         }
 
         std::shared_ptr<value_t> operator()(const while_t &node) {
+            scope = scope->open(scope);
             handler.open(node);
 
+            auto conditional_expression = std::visit(*this, node.condition->payload);
+            bool conditional_expression_value = std::visit(conditional_t(), conditional_expression->payload);
+            while(conditional_expression_value) {
+                std::visit(*this, node.body->payload);
+
+                conditional_expression = std::visit(*this, node.condition->payload);
+                conditional_expression_value = std::visit(conditional_t(), conditional_expression->payload);
+            }
+
             handler.close(node);
+            scope = scope->close();
             return {};
         }
 
@@ -338,7 +437,7 @@ namespace {
 
         std::shared_ptr<value_t> operator()(const nextbits_t &node) {
             auto value = bitreader.peek();
-            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
+            return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{bitstring_v{value, std::vector<bool>(value.size(), true)}}});
         };
 
         std::shared_ptr<value_t> operator()(const bytealigned_t &node) {
@@ -346,13 +445,13 @@ namespace {
             return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
         };
 
-
         std::tuple<std::vector<bool>, std::vector<bool>>
         update(const std::vector<bool> &initial_value,
                const std::vector<bool> &initial_mask,
                const std::vector<bool> &slice_value,
                const uint64_t low, const uint64_t high) {
 
+            // TODO: Bidirectional ranges: 30..32 != 32..30
             auto right = std::min(low, high);
             auto left = std::max(low, high) + 1;
 
@@ -366,7 +465,7 @@ namespace {
 
             auto it = value.begin();
             std::advance(it, right);
-            std::copy(slice_value.begin(), slice_value.end(), it);
+            std::copy(slice_value.rbegin(), slice_value.rend(), it);
 
             return {value, mask};
         }

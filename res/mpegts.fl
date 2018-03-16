@@ -115,7 +115,7 @@ PES_packet_header() {
         PES_header_data_length                                 8 uimsbf
         if (PTS_DTS_flags == '10' ) {
             _0010                                              4 "0010"
-            PTS [32..30]                                       3 bslbf
+            PTS[32..30]                                        3 bslbf
             marker_bit                                         1 bslbf
             PTS [29..15]                                      15 bslbf
             marker_bit                                         1 bslbf

@@ -318,6 +318,12 @@ tag
     $$ = bslbf_tag{};
 }| "uimsbf" {
     $$ = uimsbf_tag{};
+}| "vlclbf" {
+    $$ = vlclbf_tag{};
+}| "simsbf" {
+    $$ = simsbf_tag{};
+}| "tcimsbf" {
+    $$ = tcimsbf_tag{};
 }
 
 dimensions:

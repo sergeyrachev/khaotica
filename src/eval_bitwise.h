@@ -7,6 +7,7 @@
 namespace khaotica {
     namespace eval {
         using khaotica::syntax::mpeg2::expression_v;
+        using khaotica::syntax::mpeg2::bitstring_v;
         
         struct bitwise_not_t {
             expression_v operator()(const int64_t &operand) {
@@ -22,10 +23,10 @@ namespace khaotica {
                 return static_cast<int64_t>(~operand);
             }
 
-            expression_v operator()(const std::vector<bool> &operand) {
-                auto ret = operand;
+            expression_v operator()(const bitstring_v &operand) {
+                auto ret = operand.value;
                 ret.flip();
-                return ret;
+                return bitstring_v{ret, operand.mask};
             }
         };
     }
