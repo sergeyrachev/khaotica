@@ -8,7 +8,8 @@ namespace khaotica{
     namespace eval {
         using khaotica::syntax::mpeg2::expression_v;
         struct default_t {
-            expression_v operator()(const auto &node) {
+            template<typename T>
+            expression_v operator()(const T &node) {
                 assert(false && "Must never be there");
                 return uint64_t{0};
             }

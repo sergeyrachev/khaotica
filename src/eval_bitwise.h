@@ -29,7 +29,8 @@ namespace khaotica {
                 return bitstring_v{ret, operand.mask};
             }
 
-            expression_v operator()(const auto &operand) {
+            template<typename T>
+            expression_v operator()(const T &operand) {
                 assert(false && "WAT????");
                 return {false};
             }

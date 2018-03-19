@@ -90,7 +90,8 @@ namespace khaotica {
                 return F()(nextbits, right.value);
             }
 
-            bool operator()(const auto &left, const auto &right) {
+            template<typename T, typename U>
+            bool operator()(const T &left, const U &right) {
                 assert(false && "WAT?!");
                 return {false};
             }

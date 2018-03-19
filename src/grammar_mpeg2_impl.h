@@ -55,7 +55,8 @@ namespace khaotica::syntax::mpeg2 {
             return document.global->definitions[node.name] = add_symbol(node.name, node);
         }
 
-        std::shared_ptr<node_t> add(const auto &node) {
+        template<typename T>
+        std::shared_ptr<node_t> add(const T&node) {
             return std::make_shared<node_t>(node_t{node});
         }
 

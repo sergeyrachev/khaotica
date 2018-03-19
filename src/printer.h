@@ -26,7 +26,8 @@ namespace khaotica {
             return out.str();
         }
 
-        std::string operator()(const auto& node) {
+        template<typename T>
+        std::string operator()(const T& node) {
             std::ostringstream out;
             return out.str();
         }

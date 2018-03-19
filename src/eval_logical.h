@@ -84,7 +84,8 @@ namespace khaotica {
                 return {false};
             }
 
-            bool operator()(const auto &left, const auto &right) {
+            template<typename T, typename U>
+            bool operator()(const T &left, const U &right) {
                 assert(false && "WAT?!");
                 return {false};
             }
@@ -103,7 +104,8 @@ namespace khaotica {
                 return !operand;
             }
 
-            bool operator()(const auto& operand){
+            template<typename T>
+            bool operator()(const T& operand){
                 assert(false && "WAT?!");
                 return false;
             }
