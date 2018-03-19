@@ -175,7 +175,7 @@ namespace khaotica {
 
             assert( node.args.size() == compound.args.size() );
 
-            for (auto [arg, param] = std::pair{node.args.begin(), compound.args.begin()}; arg != node.args.end() || param != compound.args.end(); ++arg, ++param) {
+            for (auto [arg, param] = std::make_pair(node.args.begin(), compound.args.begin()); arg != node.args.end() || param != compound.args.end(); ++arg, ++param) {
                 out << *param << " = " << std::visit(*this, (*arg)->payload) << ", ";
             }
             out << "){" << std::endl;
