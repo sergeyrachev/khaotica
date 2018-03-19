@@ -81,6 +81,11 @@ target_include_directories(core
     PRIVATE src/
     PRIVATE flex/
     PRIVATE ${GRAMMAR_DIR})
+target_link_libraries(core ${boost_LIBRARIES})
+target_include_directories(core
+    PRIVATE src/
+    PRIVATE ${boost_INCLUDE_DIRECTORIES})
+target_compile_definitions(core PRIVATE ${boost_COMPILE_DEFINITIONS})
 
 add_executable(khaotica
     src/khaotica.cpp
