@@ -1,20 +1,27 @@
 MPEG2_program_stream() {
     do {
         pack()
-    } while (nextbits() == pack_start_code)
+    } while (nextbits() == '0000 0000 0000 0000 0000 0001 1011 1010')
     MPEG_program_end_code                    32             bslbf
 }
 
 pack() {
     pack_header()
-    while (nextbits() == packet_start_code_prefix) {
+    while (nextbits() == '0000 0000 0000 0000 0000 0001 1011 1100'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 1011 1101'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 1011 1110'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 1011 1111'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 110'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 1110'
+    || nextbits() == '0000 0000 0000 0000 0000 0001 1111'
+    ) {
         PES_packet()
     }
 }
 
 pack_header() {
     pack_start_code 32 bslbf
-    '01' 2 bslbf
+    zero_one 2 bslbf
     system_clock_reference_base [32..30] 3 bslbf
     marker_bit 1 bslbf
     system_clock_reference_base [29..15] 15 bslbf
@@ -31,7 +38,7 @@ pack_header() {
     for (i = 0; i < pack_stuffing_length; i++) {
         stuffing_byte 8 bslbf
     }
-    if (nextbits() = = system_header_start_code) {
+    if (nextbits() == '0000 0000 0000 0000 0000 0001 1011 1011') {
         system_header ()
     }
 }
@@ -51,18 +58,18 @@ system_header () {
     video_bound 5 uimsbf
     packet_rate_restriction_flag 1 bslbf
     reserved_bits 7 bslbf
-    while (nextbits () =='1') {
-        stream_id 8 uimsbf
+    while (nextbits () == '1') {
+        stream_id 8 bslbf
         if (stream_id == '1011 0111') {
-            '11' 2 bslbf
-            '000 0000' 7 bslbf
+            one_one 2 bslbf
+            seven_zeros 7 bslbf
             stream_id_extension 7 uimsbf
-            '1011 0110' 8 bslbf
-            '11' 2 bslbf
+            some_bits 8 bslbf
+            another_one_one 2 bslbf
             P-STD_buffer_bound_scale 1 bslbf
             P-STD_buffer_size_bound 13 uimsbf
         } else {
-            '11' 2 bslbf
+            one_one_again 2 bslbf
             P-STD_buffer_bound_scale 1 bslbf
             P-STD_buffer_size_bound 13 uimsbf
         }
@@ -73,7 +80,7 @@ PES_packet() {
     packet_start_code_prefix 24 bslbf
     stream_id 8 uimsbf
     PES_packet_length 16 uimsbf
-    for (i < 0; i < PES_packet_length; i++) {
+    for (i = 0; i < PES_packet_length; i++) {
         payload 8 bslbf
     }
 }
