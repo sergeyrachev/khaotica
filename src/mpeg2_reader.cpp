@@ -479,6 +479,11 @@ namespace {
             return std::make_shared<value_t>(value_t{expression_t{node}, expression_v{value}});
         };
 
+        std::shared_ptr<value_t> operator()(const skip_t &node) {
+            bitreader.read(node.amount);
+            return {};
+        };
+
         std::tuple<std::vector<bool>, std::vector<bool>>
         update(const std::vector<bool> &initial_value,
                const std::vector<bool> &initial_mask,

@@ -81,6 +81,6 @@ PES_packet() {
     stream_id 8 uimsbf
     PES_packet_length 16 uimsbf
     for (i = 0; i < PES_packet_length; i++) {
-        payload 8 bslbf
+        __skip(8)
     }
 }

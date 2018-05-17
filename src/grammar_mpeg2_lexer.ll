@@ -46,6 +46,7 @@ line [[:print:][:blank:]]
 "else" return parser_t::make_ELSE(_location);
 "nextbits" return parser_t::make_FUNCTION_NEXTBITS(_location);
 "__position" return parser_t::make_FUNCTION_POSITION(_location);
+"__skip" return parser_t::make_FUNCTION_SKIP(_location);
 "bytealigned" return parser_t::make_FUNCTION_BYTEALIGNED(_location);
 "==" return parser_t::make_EQUAL(_location);
 "!=" return parser_t::make_NOTEQUAL(_location);

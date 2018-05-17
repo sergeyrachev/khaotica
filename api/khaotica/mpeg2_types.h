@@ -219,6 +219,10 @@ namespace khaotica::syntax::mpeg2 {
 
     };
 
+    struct skip_t {
+        uint64_t amount;
+    };
+
     struct nextbits_v{
         virtual std::vector<bool> get(size_t n) = 0;
     };
@@ -284,7 +288,8 @@ namespace khaotica::syntax::mpeg2 {
             assignment_t,
             position_t,
             nextbits_t,
-            bytealigned_t
+            bytealigned_t,
+            skip_t
         > payload;
     };
 

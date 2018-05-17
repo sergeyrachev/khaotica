@@ -73,6 +73,7 @@
 %token ELSE "else"
 %token FUNCTION_NEXTBITS "nextbits"
 %token FUNCTION_POSITION "__position"
+%token FUNCTION_SKIP "__skip"
 %token FUNCTION_BYTEALIGNED "bytealigned"
 
 //0b1000000 -> 0 0 0 0 0 0 0 1
@@ -273,9 +274,10 @@ reference_field[payload] {
 }|
 do_statement[payload] {
     $$ = std::make_shared<node_t>(node_t{$payload});
-}|
-block[payload] {
+}| block[payload] {
     $$ = $payload;
+}| FUNCTION_SKIP "(" INTEGER[amount] ")" {
+    $$ = std::make_shared<node_t>(node_t{skip_t{$amount}});
 }
 
 bslbf_field:
