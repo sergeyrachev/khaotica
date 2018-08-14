@@ -11,6 +11,7 @@
 #include "eval_comparison.h"
 #include "eval_equality.h"
 #include "eval_default.h"
+#include "eval_numeric.h"
 
 #include "scope.h"
 
