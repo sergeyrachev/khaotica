@@ -48,6 +48,11 @@ namespace khaotica::syntax::mpeg2 {
         length_t length;
     };
 
+    struct uilsbf_t {
+        std::string name;
+        length_t length;
+    };
+
     struct uimsbf_v {
         uint64_t value;
     };
@@ -84,6 +89,7 @@ namespace khaotica::syntax::mpeg2 {
     struct tag_tt{};
     using bslbf_tag = tag_tt<bslbf_t>;
     using uimsbf_tag = tag_tt<uimsbf_t>;
+    using uilsbf_tag = tag_tt<uilsbf_t>;
     using simsbf_tag = tag_tt<simsbf_t>;
     using vlclbf_tag = tag_tt<vlclbf_t>;
     using tcimsbf_tag = tag_tt<tcimsbf_t>;
@@ -91,6 +97,7 @@ namespace khaotica::syntax::mpeg2 {
     typedef std::variant<
         bslbf_tag,
         uimsbf_tag,
+        uilsbf_tag,
         simsbf_tag,
         vlclbf_tag,
         tcimsbf_tag
@@ -260,6 +267,7 @@ namespace khaotica::syntax::mpeg2 {
         std::variant<
             bslbf_t,
             uimsbf_t,
+            uilsbf_t,
             simsbf_t,
             vlclbf_t,
             tcimsbf_t,

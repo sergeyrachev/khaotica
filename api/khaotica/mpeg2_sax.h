@@ -23,6 +23,7 @@ namespace khaotica::syntax::mpeg2 {
         virtual void close(const do_t &node) = 0;
 
         virtual void on(const bslbf_t&, const bitstring_v&node, const uint64_t position, const uint64_t length) = 0;
+        virtual void on(const uilsbf_t&, const uimsbf_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const uimsbf_t&, const uimsbf_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const simsbf_t&, const simsbf_v&node, const uint64_t position, const uint64_t length) = 0;
         virtual void on(const tcimsbf_t&, const tcimsbf_v&node, const uint64_t position, const uint64_t length) = 0;
@@ -30,18 +31,21 @@ namespace khaotica::syntax::mpeg2 {
 
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, bslbf_tag) = 0;
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uimsbf_tag) = 0;
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uilsbf_tag) = 0;
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, simsbf_tag) = 0;
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, vlclbf_tag) = 0;
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag) = 0;
 
         virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, bslbf_tag) = 0;
         virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, uimsbf_tag) = 0;
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, uilsbf_tag) = 0;
         virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, simsbf_tag) = 0;
         virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, vlclbf_tag) = 0;
         virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag) = 0;
 
         virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, bslbf_tag) = 0;
         virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, uimsbf_tag) = 0;
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, uilsbf_tag) = 0;
         virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, simsbf_tag) = 0;
         virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, vlclbf_tag) = 0;
         virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, tcimsbf_tag) = 0;

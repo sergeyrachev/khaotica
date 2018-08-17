@@ -166,6 +166,17 @@ namespace {
             return node_value;
         };
 
+        std::shared_ptr<value_t> operator()(const uilsbf_t &node) {
+            auto position = bitreader.position();
+            uimsbf_v field{khaotica::algorithm::to_integer_lsbf<uint64_t>(read(node.length))};
+
+            handler.on(node, field, position, bitreader.position() - position);
+
+            auto node_value = std::make_shared<value_t>(value_t{expression_t{identifier_t{node.name}}, expression_v{field.value}, position, bitreader.position() - position});
+            scope->definitions[node.name] = node_value;
+            return node_value;
+        };
+
         std::shared_ptr<value_t> operator()(const simsbf_t &node) {
             auto position = bitreader.position();
             simsbf_v field{khaotica::algorithm::to_integer_msbf<int64_t>(read(node.length))};
