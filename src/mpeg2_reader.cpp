@@ -166,9 +166,17 @@ namespace {
             return node_value;
         };
 
-        std::shared_ptr<value_t> operator()(const uilsbf_t &node) {
+        std::shared_ptr<value_t> operator()(const uimsbfL_t &node) {
             auto position = bitreader.position();
-            uimsbf_v field{khaotica::algorithm::to_integer_lsbf<uint64_t>(read(node.length))};
+            auto tmp_value = khaotica::algorithm::to_integer_msbf<uint64_t>(read(node.length));
+            uimsbf_v field{};
+            if(node.length.from == 32){
+                field.value = __builtin_bswap32(tmp_value);
+            }else if(node.length.from == 64){
+                field.value = __builtin_bswap64(tmp_value);
+            } else if(node.length.from == 8){
+                field.value = tmp_value;
+            }
 
             handler.on(node, field, position, bitreader.position() - position);
 

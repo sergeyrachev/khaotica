@@ -87,6 +87,19 @@ namespace khaotica {
             return out.str();
         };
 
+        std::string operator()(const uimsbfL_t &node) {
+            std::ostringstream out;
+            out << std::string(indentation, ' ')
+                << node.name
+                << " "
+                << (*this)(node.length)
+                << " "
+                << "uimsbfL";
+
+            out << std::endl;
+            return out.str();
+        };
+
         std::string operator()(const uimsbf_t &node) {
             std::ostringstream out;
             out << std::string(indentation, ' ')

@@ -80,7 +80,7 @@
 %token BSLBF "bslbf"
 //0b1000000 -> 1 0 0 0 0 0 0 0
 %token UIMSBF "uimsbf"
-%token UILSBF "uilsbf"
+%token UIMSBFL "uimsbfL"
 %token SIMSBF "simsbf"
 %token VLCLBF "vlclbf"
 
@@ -144,7 +144,7 @@
 %type <tag_t > tag
 %type <bslbf_t> bslbf_field
 %type <uimsbf_t> uimsbf_field
-%type <uilsbf_t> uilsbf_field
+%type <uimsbfL_t> uimsbfL_field
 %type <simsbf_t> simsbf_field
 %type <vlclbf_t> vlclbf_field
 %type <tcimsbf_t> tcimsbf_field
@@ -253,7 +253,7 @@ bslbf_field[payload] {
 uimsbf_field[payload] {
     $$ = impl->add($payload);
 }|
-uilsbf_field[payload] {
+uimsbfL_field[payload] {
     $$ = impl->add($payload);
 }|
 simsbf_field[payload] {
@@ -295,9 +295,9 @@ IDENTIFIER[name] entry_length[length] "uimsbf" {
     $$ = uimsbf_t{$name, $length};
 }
 
-uilsbf_field:
-IDENTIFIER[name] entry_length[length] "uilsbf" {
-    $$ = uilsbf_t{$name, $length};
+uimsbfL_field:
+IDENTIFIER[name] entry_length[length] "uimsbfL" {
+    $$ = uimsbfL_t{$name, $length};
 }
 
 simsbf_field:
@@ -330,8 +330,8 @@ tag
     $$ = bslbf_tag{};
 }| "uimsbf" {
     $$ = uimsbf_tag{};
-}| "uilsbf" {
-        $$ = uilsbf_tag{};
+}| "uimsbfL" {
+        $$ = uimsbfL_tag{};
 }| "vlclbf" {
     $$ = vlclbf_tag{};
 }| "simsbf" {

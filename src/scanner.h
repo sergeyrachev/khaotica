@@ -115,7 +115,7 @@ namespace khaotica {
             out << std::endl;
         }
 
-        virtual void on(const uilsbf_t& node, const uimsbf_v& field, const uint64_t position, const uint64_t length) final {
+        virtual void on(const uimsbfL_t& node, const uimsbf_v& field, const uint64_t position, const uint64_t length) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << node.name;
@@ -168,7 +168,7 @@ namespace khaotica {
         virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uimsbf_tag){
             std::stringstream ss;
             std::for_each( field.value.cbegin(), field.value.cend(), [&ss](const auto& entry){
-                ss << khaotica::algorithm::to_string(entry) << ";";
+                ss << khaotica::algorithm::to_hex(entry) << ";";
             });
 
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
@@ -178,10 +178,10 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
-        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uilsbf_tag){
+        virtual void on(const collection_t& node, const collection_v& field, const uint64_t position, const uint64_t length, uimsbfL_tag){
             std::stringstream ss;
             std::for_each( field.value.cbegin(), field.value.cend(), [&ss](const auto& entry){
-                ss << khaotica::algorithm::to_string(entry) << ";";
+                ss << khaotica::algorithm::to_hex(entry) << ";";
             });
 
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
@@ -247,7 +247,7 @@ namespace khaotica {
             out << std::setw(N) << std::right << khaotica::algorithm::to_string(field.value, field.mask);
             out << std::endl;
         }
-        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, uilsbf_tag) final {
+        virtual void on(const sparsed_t& node, const sparsed_v& field, const uint64_t position, const uint64_t length, uimsbfL_tag) final {
             out << std::setw(P) << std::to_string(position / 8) + ":" + std::to_string(position % 8);
             out << std::setw(S) << length;
             out << std::string(indent, ' ') << std::setfill(' ') << std::left << std::setw(T - indent) << node.name + "[" + std::to_string(node.range.front) + ".." + std::to_string(node.range.back) + "]";
@@ -307,7 +307,7 @@ namespace khaotica {
             out << std::setw(N) << std::right << " ";
             out << std::endl;
         }
-        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, uilsbf_tag) final{
+        virtual void on(const slot_t& node, const slot_v& field, const uint64_t position, const uint64_t length, uimsbfL_tag) final{
             std::ostringstream ss;
             std::for_each(field.indices.begin(), field.indices.end(), [&ss](const auto & entry){
                 ss << "[" << entry << "]";

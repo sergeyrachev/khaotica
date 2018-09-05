@@ -52,7 +52,7 @@ line [[:print:][:blank:]]
 "!=" return parser_t::make_NOTEQUAL(_location);
 "bslbf" return parser_t::make_BSLBF(_location);
 "uimsbf" return parser_t::make_UIMSBF(_location);
-"uilsbf" return parser_t::make_UILSBF(_location);
+"uimsbfL" return parser_t::make_UIMSBFL(_location);
 "tcimsbf" return parser_t::make_TCIMSBF(_location);
 "simsbf" return parser_t::make_SIMSBF(_location);
 "vlclbf" return parser_t::make_VLCLBF(_location);
