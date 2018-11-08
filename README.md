@@ -11,7 +11,7 @@ http://flavor.sourceforge.net/
 
 ### Preparation:
 
-* CMake >= 3.10
+* CMake >= 3.6
 * Boost >= 1.63
 * Bison >= 3.0
 * Flex >= 2.6.4
