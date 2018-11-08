@@ -16,13 +16,13 @@ TEST(Bit, UnpackLeastSignificantFirst){
 }
 
 TEST(Bit, to_integer_msbf){
-    auto u = to_integer_msbf({true, false, false, false, false, false, false, false});
+    auto u = to_integer_msbf<uint8_t>({true, false, false, false, false, false, false, false});
 
     ASSERT_EQ(128, u);
 }
 
 TEST(Bit, to_integer_lsbf){
-    auto u = to_integer_lsbf({true, false, false, false, false, false, false, false});
+    auto u = to_integer_lsbf<uint8_t>({true, false, false, false, false, false, false, false});
 
     ASSERT_EQ(1, u);
 }
