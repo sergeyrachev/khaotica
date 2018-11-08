@@ -14,7 +14,7 @@ video_sequence() {
                 picture_coding_extension()
                 extension_and_user_data( 2 )
                 picture_data()
-            } while ( (nextbits() == 0x00000100) || (nextbits() == '0000 0000  0000 0000  0000 0001  1011 1000') )
+            } while ( (nextbits() == '0000 0000  0000 0000 0000 0001 0000 0000' ) || (nextbits() == '0000 0000  0000 0000  0000 0001  1011 1000') )
             if ( nextbits() != '0000 0000  0000 0000  0000 0001  1011 0111' ) {
                 sequence_header()
                 sequence_extension()
@@ -146,7 +146,12 @@ sequence_scalable_extension() {
 
 group_of_pictures_header() {
     group_start_code 32 bslbf
-    time_code 25 bslbf
+    drop_frame_flag 1 uimsbf
+    time_code_hours 5 uimsbf
+    time_code_minutes 6 uimsbf
+    marker_bit 1 bslbf
+    time_code_seconds 6 uimsbf
+    time_code_pictures 6 uimsbf
     closed_gop 1 uimsbf
     broken_link 1 uimsbf
     next_start_code()
@@ -270,7 +275,7 @@ copyright_extension() {
 picture_data() {
     do {
         slice()
-    } while ( nextbits() == slice_start_code )
+    } while ( nextbits() >= '0000 0000 0000 0000 0000 0001 0000 0001' && nextbits() <= '0000 0000 0000 0000 0000 0001 1010 1111')
     next_start_code()
 }
 

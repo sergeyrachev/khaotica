@@ -10,7 +10,8 @@
 namespace khaotica {
     namespace eval{
         using khaotica::syntax::mpeg2::bitstring_v;
-
+        using khaotica::syntax::mpeg2::nextbits_v;
+        
         template<typename F>
         struct comparison_t {
             bool operator()(const int64_t &left, const int64_t &right) {
@@ -87,6 +88,11 @@ namespace khaotica {
             bool operator()(const bitstring_v &left, const bitstring_v &right) {
                 assert(false && "WAT?!");
                 return {false};
+            }
+    
+            bool operator()(const std::shared_ptr<nextbits_v> &left, const bitstring_v &right) {
+                auto nextbits = left->get(right.value.size());
+                return F()(nextbits, right.value);
             }
 
             template<typename T, typename U>
