@@ -1,0 +1,18 @@
+example_bitstream() {
+    do {
+        bit 1 bslbf
+        if( bit == '0' ){
+            uint 7 uimsbf
+        } else {
+            compound()
+        }
+    }
+    while(nextbits() != '0000 0001')
+}
+
+compound(){
+    while(nextbits() != '0000 0000'){
+        __skip(1)
+    }
+}
+
